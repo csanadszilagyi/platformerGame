@@ -40,11 +40,6 @@ namespace platformerGame
 
         }
 
-        public virtual bool isAlive()
-        {
-            return true;
-        }
-
         protected virtual void initSprites()
         {
             spriteControl.Clear();
@@ -81,7 +76,7 @@ namespace platformerGame
 
             set
             {
-                base.Bounds = value;
+                this.Bounds = value;
             }
         }
    
@@ -187,7 +182,7 @@ namespace platformerGame
                     isOnGround = true;
                     velocity.Y = 0.0f;
 
-                    //pattogás
+                    // bouncing
                     //velocity.Y = Math.Abs(velocity.Y) <= 65.0f ? 0.0f : -(velocity.Y * 0.8f);
                 }
                 else
@@ -528,10 +523,9 @@ namespace platformerGame
             return false;
         }
 
-        public void Hit(int amount)
+        public virtual void Hit(int amount)
         {
             this.health -= amount;
-            this.spriteControl.ChangeState(new cSpriteState(MotionType.FALL, this.spriteControl.getCurrentState().HorizontalFacing));
         }
 
         ~cCharacter()

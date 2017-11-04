@@ -247,5 +247,10 @@ namespace platformerGame
         public abstract void Update(float step_time);
         public virtual void Render(RenderTarget destination)
         { }
+
+        public virtual bool isActive()
+        {
+            return true;
+        }
     }
 }

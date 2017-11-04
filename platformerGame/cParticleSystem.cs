@@ -23,7 +23,7 @@ namespace platformerGame
 
         protected Texture particleTexture = null;
 
-        public cParticleSystem(cGameScene scene, Texture particleTexture)
+        public cParticleSystem(cGameScene scene, Texture particleTexture, int maxParticles)
         {
             this.scene = scene;
             this.particles = new List<Particle>();
@@ -35,6 +35,7 @@ namespace platformerGame
             this.active = true;
             this.repeat = false;
             this.numActive = 0;
+            this.maxParticles = maxParticles;
         }
 
         protected void clearParticles()

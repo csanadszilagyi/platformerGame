@@ -122,7 +122,7 @@ namespace platformerGame
         {
             this.alive = false;
         }
-        public bool isActive()
+        public override bool isActive()
         {
             return this.alive && this.alpha > 1.0f; //&& cCollision.IsPointInsideBox(this.position, this.owner.Scene.World.WorldBounds);
         }

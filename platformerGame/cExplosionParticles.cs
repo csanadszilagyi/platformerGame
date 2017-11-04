@@ -10,9 +10,8 @@ namespace platformerGame
 {
     class cExplosionParticles : cParticleSystem
     {
-        public cExplosionParticles(cGameScene scene, Texture particleTexture) : base(scene, particleTexture)
+        public cExplosionParticles(cGameScene scene, Texture particleTexture, int maxParticles = 20) : base(scene, particleTexture, maxParticles)
         {
-            this.maxParticles = 20;
         }
 
         public override Particle CreateParticle()

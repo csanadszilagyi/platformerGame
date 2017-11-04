@@ -11,6 +11,7 @@ namespace platformerGame
     class cMonster : cCharacter
     {
         bool canThink;
+        bool killed;
         public cMonster(cGameScene scene, Vector2f pos) : base(scene, pos)
         {
             p_followLight = new cLight();
@@ -18,7 +19,6 @@ namespace platformerGame
             p_followLight.LinearizeFactor = 0.9f;
             p_followLight.Color = new Color(240, 219, 164);
             this.Scene.LightMap.AddStaticLight(p_followLight);
-            this.canThink = true;
         }
 
         protected override void initSprites()
@@ -142,12 +142,14 @@ namespace platformerGame
         protected override void init()
         {
             base.init();
+            this.canThink = true;
+            this.killed = false;
             this.health = 5;
         }
 
-        public override bool isAlive()
+        public override bool isActive()
         {
-            return this.health > 0;
+            return !killed;
         }
 
         public void Kill()
@@ -156,21 +158,33 @@ namespace platformerGame
             this.Scene.ParticleManager.AddExplosion(this.Bounds.center);
             this.spriteControl.ChangeState(new cSpriteState(MotionType.LIE, this.spriteControl.getCurrentState().HorizontalFacing));
             this.canThink = false;
+            this.health = 0;
         }
         public override void Update(float step_time)
         {
+
             if (canThink)
             {
-                Vector2f playerCenter = this.Scene.Player.Bounds.center;
+                if (this.health <= 0)
+                {
+                    this.Kill();
+                   
+                }
+                else
+                {
+                    Vector2f playerCenter = this.Scene.Player.Bounds.center;
 
-                if (playerCenter.X > this.Position.X)
-                    this.StartMovingRight();
+                    if (playerCenter.X > this.Position.X)
+                        this.StartMovingRight();
 
-                if (playerCenter.X < this.Position.X)
-                    this.StartMovingLeft();
+                    if (playerCenter.X < this.Position.X)
+                        this.StartMovingLeft();
 
-                this.spriteControl.Update(this.GetSpriteState());
+                    this.spriteControl.Update(this.GetSpriteState());
+                }  
+                
             }
+                
 
             base.updateMovement(step_time);
             //base.Update(step_time);
@@ -183,9 +197,16 @@ namespace platformerGame
             base.Render(destination);
         }
 
-        public bool CanThink
+        public override void Hit(int amount)
         {
-            get { return canThink; }
+            base.Hit(amount);
+            this.spriteControl.ChangeState(new cSpriteState(MotionType.FALL, this.spriteControl.getCurrentState().HorizontalFacing));
+            this.Scene.ParticleManager.AddExplosion(this.Bounds.center, 3);
+        }
+
+        public bool Thinking
+        {
+            get { return this.canThink; }
         }
     }
 }

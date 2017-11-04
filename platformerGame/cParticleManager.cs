@@ -27,9 +27,9 @@ namespace platformerGame
             this.particleSystems.Add(particleEffect);
         }
 
-        public void AddExplosion(Vector2f pos)
+        public void AddExplosion(Vector2f pos, int maxParticles = 20)
         {
-            cExplosionParticles ex = new cExplosionParticles(this.scene, SIMPLE_PARTICLE_TEXTURE);
+            cExplosionParticles ex = new cExplosionParticles(this.scene, SIMPLE_PARTICLE_TEXTURE, maxParticles);
             ex.Emit(pos);
             this.particleSystems.Add(ex);
         }

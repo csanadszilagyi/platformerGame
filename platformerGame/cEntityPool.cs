@@ -58,13 +58,11 @@ namespace platformerGame
             //update monsters
             for (int i = 0; i < monsters.Count; i++)
             {
-                if (monsters[i].isAlive())
+                if (monsters[i].isActive())
                     monsters[i].Update(step_time);
                 else
                 {
-                    if(monsters[i].CanThink)
-                        monsters[i].Kill();
-                    //monsters.RemoveAt(i);
+                    monsters.RemoveAt(i);
                 }
             }
 
@@ -80,8 +78,8 @@ namespace platformerGame
                 Vector2f intersection = new Vector2f(0.0f, 0.0f);
                 while (m < monsters.Count && !collision)
                 {
-                   
-                    collision = cCollision.testBulletVsEntity(bullets[b].Position, bullets[b].LastPosition, monsters[m].Bounds, ref intersection);
+                    if(monsters[m].Thinking)
+                        collision = cCollision.testBulletVsEntity(bullets[b].Position, bullets[b].LastPosition, monsters[m].Bounds, ref intersection);
                     m++;
                 }
 
