@@ -49,7 +49,7 @@ namespace platformerGame
             particle.Dims = new Vector2f(uSize.X * particle.Scale, uSize.Y * particle.Scale);
 
             particle.ScaleSpeed = -cAppMath.GetRandomNumber(10, 50);
-            particle.Color = Utils.GetRandomRedColor();
+            particle.Color = Utils.GetRandomGreenColor();
             particle.Opacity = 255.0f;
             particle.Life = 1.0f;
             particle.Fade = 60; //Math->GetRandomNumber(100, 240);
@@ -128,7 +128,9 @@ namespace platformerGame
                     {
                         p.Heading = cAppMath.Vec2NormalizeReturn(p.Vel);
                     }
-                    */
+
+                    p.Rotation = (float)cAppMath.GetAngleOfVector(p.Heading);
+                   */
 
                 }
 

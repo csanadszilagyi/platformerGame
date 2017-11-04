@@ -50,6 +50,7 @@ namespace platformerGame
             LoadTexture("Resources/textures/bullet_light_green.png");
             LoadTexture("Resources/textures/light1.png");
             LoadTexture("Resources/textures/simple_particle.tga");
+            LoadTexture("Resources/textures/smoke_particle.tga");
         }
 
         public static string GenerateIDFromFilePath(string file_path)
