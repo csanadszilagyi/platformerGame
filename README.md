@@ -1,7 +1,7 @@
 platformerGame
 =========
 
-## 2D sidescrolling platformer experimental project, built with sfml.net.
+## 2D sidescrolling platformer experimental project, built with C# and [SFML.NET](https://www.sfml-dev.org/download/sfml.net/).
 
 This project is under development.
 
