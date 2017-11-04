@@ -197,7 +197,7 @@ namespace platformerGame
         }
         public static bool Vec2IsZero(Vector2f vec)
 	    {
-		    return ((vec.X* vec.X + vec.Y* vec.Y) < MIN_DOUBLE);
+		    return ((vec.X * vec.X + vec.Y * vec.Y) <= 0.0f);
 	    }
 
         public static void Vec2Truncate(ref Vector2f vec, double max)

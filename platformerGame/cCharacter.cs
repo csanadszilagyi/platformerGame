@@ -292,7 +292,7 @@ namespace platformerGame
 
             
 
-            spriteControl.Render(destination, viewPosition);
+            this.spriteControl.Render(destination, viewPosition);
             /*
             shape.Position = viewPosition; // - (viewSize / 2.0f);
             destination.Draw(shape);

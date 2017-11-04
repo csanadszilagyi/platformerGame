@@ -17,12 +17,12 @@ namespace platformerGame
         public const float     MAX_WALK_SPEED               = 150.0f; //200.0f;
         public const float     GROUND_SLOW_DOWN_FACTOR      = 0.6f; //0.745f;
         public const float     AIR_SLOW_DOWN_FACTOR         = 0.95f;
-        public const float     JUMP_SPEED                   = 250.0f; //210 250 
+        public const float     JUMP_SPEED                   = 300.0f; //210 250 
         public const float     MAX_Y_SPEED                  = 400.0f; //290.0f; //400
         public const float     GRAVITY                      = 881.25f; //680  781.25f
         public const float     JUMP_GRAVITY                 = 460; //212.5f; 260
 
-        public const float     BULLET_HIT_FORCE             = 2500;
+        public const float     BULLET_HIT_FORCE             = 1000;
 
         public const float FRICTION = 0.1f; //0.02f;
         public const float RESTITUTION = 0.5f; //0.1f;

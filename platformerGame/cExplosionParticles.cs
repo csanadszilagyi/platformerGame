@@ -10,8 +10,13 @@ namespace platformerGame
 {
     class cExplosionParticles : cParticleSystem
     {
-        public cExplosionParticles(cGameScene scene, Texture particleTexture, int maxParticles = 20) : base(scene, particleTexture, maxParticles)
+        private double minScale;
+        private double maxScale;
+
+        public cExplosionParticles(cGameScene scene, Texture particleTexture, int maxParticles = 20, double minScale = 0.3, double maxScale = 0.6) : base(scene, particleTexture, maxParticles)
         {
+            this.minScale = minScale;
+            this.maxScale = maxScale;
         }
 
         public override Particle CreateParticle()
@@ -40,12 +45,13 @@ namespace platformerGame
 
             Vector2u uSize = particleTexture.Size;
 
-            particle.Scale = (float)cAppMath.GetRandomDoubleInRange(0.3, 0.6);
+            particle.Scale = (float)cAppMath.GetRandomDoubleInRange(this.minScale, this.maxScale);
             particle.Dims = new Vector2f(uSize.X * particle.Scale, uSize.Y * particle.Scale);
 
             particle.ScaleSpeed = -cAppMath.GetRandomNumber(10, 50);
             particle.Color = Utils.GetRandomRedColor();
             particle.Opacity = 255.0f;
+            particle.Life = 1.0f;
             particle.Fade = 60; //Math->GetRandomNumber(100, 240);
 
             return particle;
@@ -82,16 +88,23 @@ namespace platformerGame
             foreach (var p in particles.ToArray())
             {
                
-                if (p.Opacity <= 0.0f)
+                if (p.Life <= 0.0f)
                 {
-                    p.Opacity = 0.0f;
-                    this.particles.Remove(p);
+                    p.Opacity -= p.Fade * step_time;
+
+                    if (p.Opacity <= 0.0f)
+                    {
+                        p.Opacity = 0.0f;
+                        //cRenderFunctions.DrawSprite(this.scene.StaticTexture, p.ViewPos, this.particleTexture, new IntRect(), p.Color, p.Rotation, new Vector2f(p.Scale, p.Scale), BlendMode.Add, null);
+                        this.particles.Remove(p);
+                    }
                 }
                 else
                 {
                     world.collideParticleRayTrace(p, step_time);
 
-                    p.Opacity -= p.Fade * step_time;
+                    
+
                     /*
                             p.Dims.Y += p.ScaleSpeed * step_time; //+=
                             p.Dims.y += p.ScaleSpeed * step_time; //+=
@@ -111,17 +124,19 @@ namespace platformerGame
 
 
                     /*
-                    if (!Math->Vec2IsZero(p.Vel))
-                    {    
-                        p.Heading = Math->Vec2NormalizeReturn(p.Vel);
+                    if (!cAppMath.Vec2IsZero(p.Vel))
+                    {
+                        p.Heading = cAppMath.Vec2NormalizeReturn(p.Vel);
                     }
                     */
 
-                    p.Color.A = (byte)p.Opacity;
                 }
-                
+
+                p.Color.A = (byte)p.Opacity;
+
             }
 
+            
             this.active = this.particles.Count > 0;
         }
 

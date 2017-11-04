@@ -27,12 +27,20 @@ namespace platformerGame
             this.particleSystems.Add(particleEffect);
         }
 
-        public void AddExplosion(Vector2f pos, int maxParticles = 20)
+        public void AddNormalBloodExplosion(Vector2f pos, int maxParticles = 20)
         {
-            cExplosionParticles ex = new cExplosionParticles(this.scene, SIMPLE_PARTICLE_TEXTURE, maxParticles);
+            cExplosionParticles ex = new cExplosionParticles(this.scene, SIMPLE_PARTICLE_TEXTURE, maxParticles, 0.5, 0.8);
             ex.Emit(pos);
             this.particleSystems.Add(ex);
         }
+
+        public void AddLittleBloodExplosion(Vector2f pos, int maxParticles = 3)
+        {
+            cExplosionParticles ex = new cExplosionParticles(this.scene, SIMPLE_PARTICLE_TEXTURE, maxParticles, 0.2, 0.4);
+            ex.Emit(pos);
+            this.particleSystems.Add(ex);
+        }
+
         public void Update(float step_time)
         {
             for(int i = 0; i < this.particleSystems.Count; i++)

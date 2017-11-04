@@ -78,7 +78,7 @@ namespace platformerGame
                 Vector2f intersection = new Vector2f(0.0f, 0.0f);
                 while (m < monsters.Count && !collision)
                 {
-                    if(monsters[m].Thinking)
+                    if(!monsters[m].Disabled)
                         collision = cCollision.testBulletVsEntity(bullets[b].Position, bullets[b].LastPosition, monsters[m].Bounds, ref intersection);
                     m++;
                 }

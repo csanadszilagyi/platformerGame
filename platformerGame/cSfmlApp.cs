@@ -51,7 +51,7 @@ namespace platformerGame
             m_MainWindow =  new RenderWindow(new VideoMode(m_WindowSize.X, m_WindowSize.Y, 32), "Platformer", Styles.Close);
             m_MainWindow.SetVisible(true);
             m_MainWindow.SetVerticalSyncEnabled(true); // false
-            m_MainWindow.SetFramerateLimit(70);
+            m_MainWindow.SetFramerateLimit(0);
             m_MainWindow.SetKeyRepeatEnabled(false);
 
             m_MainWindow.Closed += new EventHandler(OnClosed);

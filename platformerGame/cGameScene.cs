@@ -35,6 +35,9 @@ namespace platformerGame
         cRegulator fpsUpdater;
 
         cParticleManager particleManager;
+
+        RenderTexture staticTexture;
+
         public cGameScene(cSfmlApp controller) : base(controller)
         {
             levelTimer = new cTimer();
@@ -64,6 +67,11 @@ namespace platformerGame
             //lightMap.Create((uint)m_World.WorldBounds.dims.X, (uint)m_World.WorldBounds.dims.Y);
             lightMap.Create(m_AppController.MainWindow.Size.X, m_AppController.MainWindow.Size.Y);
 
+            this.staticTexture = new RenderTexture((uint)m_World.WorldBounds.dims.X, (uint)m_World.WorldBounds.dims.Y);
+            this.staticTexture.SetActive(true);
+            this.staticTexture.Clear(new Color(0,0,0,0));
+            //this.staticTexture.SetView(m_View);
+            
 
             Vector2f playerStart = new Vector2f(m_World.LevelStartRegion.center.X, m_World.LevelStartRegion.rightBottom.Y);
             playerStart.X -= Constants.CHAR_FRAME_WIDTH / 2.0f;
@@ -163,6 +171,8 @@ namespace platformerGame
 
             this.PreRender(destination, alpha);
 
+            this.staticTexture.Display();
+
             m_World.DrawBackground(destination);
 
             worldEnvironment.RenderEnvironment(destination);
@@ -175,7 +185,18 @@ namespace platformerGame
 
             this.entityPool.RenderEntities(destination, alpha);
 
-            lightMap.Render(destination, viewRect);
+            
+
+            cRenderFunctions.DrawTextureSimple(destination,
+                                                viewRect.topLeft,
+                                                this.staticTexture.Texture,
+                                                new IntRect((int)viewRect.topLeft.X, (int)viewRect.topLeft.Y,
+                                                            (int)viewRect.dims.X, (int)viewRect.dims.Y),
+                                                Color.White,
+                                                BlendMode.Add);
+
+
+            this.lightMap.Render(destination, viewRect);
 
             this.entityPool.RenderBullets(destination, alpha);
 
@@ -189,6 +210,11 @@ namespace platformerGame
             destination.Draw(timeText);
 #endif     
             // cRenderFunctions.DrawLine(destination, new Vector2f(0, 400), new Vector2f(720, 400), Color.White, BlendMode.None);
+        }
+
+        public RenderTexture StaticTexture
+        {
+            get { return staticTexture; }
         }
 
         public override void Exit()

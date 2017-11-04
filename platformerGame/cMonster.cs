@@ -10,7 +10,7 @@ namespace platformerGame
 {
     class cMonster : cCharacter
     {
-        bool canThink;
+        bool disabled;
         bool killed;
         public cMonster(cGameScene scene, Vector2f pos) : base(scene, pos)
         {
@@ -142,9 +142,9 @@ namespace platformerGame
         protected override void init()
         {
             base.init();
-            this.canThink = true;
+            this.disabled = false;
             this.killed = false;
-            this.health = 5;
+            this.health = 20;
         }
 
         public override bool isActive()
@@ -155,20 +155,26 @@ namespace platformerGame
         public void Kill()
         {
             this.Scene.LightMap.remove(this.p_followLight);
-            this.Scene.ParticleManager.AddExplosion(this.Bounds.center);
+            this.killed = true;
+        }
+
+        public void Disable()
+        {
+            this.Scene.LightMap.remove(this.p_followLight);
+            this.Scene.ParticleManager.AddNormalBloodExplosion(this.Bounds.center);
             this.spriteControl.ChangeState(new cSpriteState(MotionType.LIE, this.spriteControl.getCurrentState().HorizontalFacing));
-            this.canThink = false;
+            this.disabled = true;
             this.health = 0;
         }
+
         public override void Update(float step_time)
         {
 
-            if (canThink)
+            if (!disabled)
             {
                 if (this.health <= 0)
                 {
-                    this.Kill();
-                   
+                    this.Disable();
                 }
                 else
                 {
@@ -184,16 +190,25 @@ namespace platformerGame
                 }  
                 
             }
-                
+            else
+            {
+                if (cAppMath.Vec2IsZero(this.velocity))
+                {
+                    // draw its crops or "grave"
+                    spriteControl.Render(this.Scene.StaticTexture, viewPosition);
+                    this.Kill();
+                }
+            }    
 
             base.updateMovement(step_time);
+
+           
             //base.Update(step_time);
         }
 
         public override void Render(RenderTarget destination)
         {
             p_followLight.Pos = GetCenterViewPos();
-            spriteControl.Render(destination, viewPosition);
             base.Render(destination);
         }
 
@@ -201,12 +216,12 @@ namespace platformerGame
         {
             base.Hit(amount);
             this.spriteControl.ChangeState(new cSpriteState(MotionType.FALL, this.spriteControl.getCurrentState().HorizontalFacing));
-            this.Scene.ParticleManager.AddExplosion(this.Bounds.center, 3);
+            this.Scene.ParticleManager.AddLittleBloodExplosion(this.Bounds.center, 3);
         }
 
-        public bool Thinking
+        public bool Disabled
         {
-            get { return this.canThink; }
+            get { return this.disabled; }
         }
     }
 }

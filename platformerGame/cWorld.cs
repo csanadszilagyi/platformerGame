@@ -90,6 +90,7 @@ namespace platformerGame
         public cAABB levelEndRegion;
 
         cGameScene pScene;
+        
         public cWorld(cGameScene p_scene, Vector2u window_size)
         {
             pScene = p_scene;
@@ -630,6 +631,14 @@ namespace platformerGame
                    {
                        intersectionPoint.X = x;
                        intersectionPoint.Y = y;
+
+                       p.Pos = intersectionPoint;
+                       p.LastPos = p.Pos;
+                       //if we want to drag to the wall:
+                       p.Vel.X = 0.0f;
+                       p.Vel.Y = 0.0f;
+
+                       p.Life = 0.0f;
                    }
 
                    return collided;
@@ -637,10 +646,10 @@ namespace platformerGame
              )
            );
 
-            cAABB aabb = this.getAABBFromWorldPos(intersectionPoint);
+           // cAABB aabb = this.getAABBFromWorldPos(intersectionPoint);
 
-            if (collided)
-            {
+           // if (collided)
+           // {
                 /*Vector2f N = cAppMath.Vec2Perp(p.Vel);
                 if(intersectionPoint.Y == aabb.topLeft.Y)
                 {
@@ -652,13 +661,13 @@ namespace platformerGame
                     N = cAppMath.Vec2Perp( - aabb.topLeft);
                 }
                 */
-                p.Pos = intersectionPoint; // + (-p.Heading);
-                p.LastPos = p.Pos;
+                //p.Pos = intersectionPoint; // + (-p.Heading);
+                //p.LastPos = p.Pos;
                 //if we want to drag to the wall:
-                p.Vel.X = 0.0f;
-                p.Vel.Y = 0.0f;
+                //p.Vel.X = 0.0f;
+                //p.Vel.Y = 0.0f;
                 //p.Vel = cCollision.processWorldObjCollision(p.Vel, N);
-            }
+           // }
 
         }
 
