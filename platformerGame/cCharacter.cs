@@ -278,15 +278,7 @@ namespace platformerGame
         {
             MotionType motion = MotionType.STAND;
 
-            if (isOnGround)
-            {
-                motion = (Acceleration.X == 0.0f) ? MotionType.STAND : MotionType.WALK;
-            }
-            else
-            {
-                motion = (velocity.Y < 0.0f) ? MotionType.JUMP : MotionType.FALL;
-            }
-
+            motion = isOnGround ? (Acceleration.X == 0.0f) ? MotionType.STAND : MotionType.WALK : (velocity.Y < 0.0f) ? MotionType.JUMP : MotionType.FALL;
             return new cSpriteState(motion, horizontalFacing);
 
         }
