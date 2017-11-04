@@ -1,0 +1,8 @@
+/platformerGame/bin
+/platformerGame/obj
+*.dll
+*.lib
+*.config
+*.sln
+*.csproj
+/.vs
