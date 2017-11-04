@@ -1,0 +1,83 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using SFML.Graphics;
+using SFML.System;
+
+namespace platformerGame
+{
+    class cLight
+    {
+        public Vector2f Pos { get; set; } //Center
+        public Vector2f Dir { get; set; } //Direction of the Light
+
+        private Color color;
+        private Vector3f glColor;
+        public Color OriginalColor { get; set; }
+        public float Intensity { get; set; }
+        public float Radius { get; set; }
+        public float SpreadAngle { get; set; }
+
+        //for light autenuation shader
+        public float Bleed { get; set; }
+        public float LinearizeFactor { get; set; }
+
+        private bool Alive;
+
+        public cLight()
+        {
+            Pos = new Vector2f(0, 0);
+            Dir = new Vector2f(0, 0);
+            Color = new Color(255, 255, 255, 255);
+            OriginalColor = color;
+            Intensity = 1.0f;
+            Radius = 20.0f;
+            SpreadAngle = (float)cAppMath.TWO_PI;
+            Bleed = 1.0f;
+            LinearizeFactor = 0.6f;
+            Alive = true;
+        }
+
+        public cLight(Vector2f pos) : this()
+        {
+            Pos = pos;
+        }
+        public void TurnOn()
+        {
+            Color = OriginalColor;
+        }
+
+        public void TurnOff()
+        {
+            Color = new Color(0, 0, 0, 0);
+        }
+
+        public Color Color
+        {
+            get { return color; }
+            set
+            {
+                color = value;
+                glColor.X = ((float)color.R / 255.0f);
+                glColor.Y = ((float)color.G / 255.0f);
+                glColor.Z = ((float)color.B / 255.0f);
+            }
+        }
+
+        public Vector3f GLcolor
+        {
+            get { return glColor; }
+        }
+        public virtual bool IsAlive()
+        {
+            return Alive;
+        }
+        void SetAlive(bool alive)
+        {
+            Alive = alive;
+        }
+
+     }
+}
