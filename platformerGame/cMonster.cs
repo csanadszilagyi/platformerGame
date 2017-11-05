@@ -17,7 +17,7 @@ namespace platformerGame
             p_followLight = new cLight();
             p_followLight.Radius = 80.0f;
             p_followLight.LinearizeFactor = 0.9f;
-            p_followLight.Color = new Color(240, 219, 164);
+            p_followLight.Color = new Color(245, 77, 39);
             this.Scene.LightMap.AddStaticLight(p_followLight);
         }
 

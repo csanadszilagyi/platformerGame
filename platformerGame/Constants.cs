@@ -6,53 +6,89 @@ using System.Text;
 using System.Threading.Tasks;
 
 using SFML.Graphics;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+using System.IO;
 
 namespace platformerGame
 {
     class Constants
     {
-        public const int       TILE_SIZE                    = 16;
-        public const int       TILE_SIZE_HALF               = TILE_SIZE / 2;
-        public const float     WALK_SPEED                   = 250.0f; //300.0f;
-        public const float     MAX_WALK_SPEED               = 150.0f; //200.0f;
-        public const float     GROUND_SLOW_DOWN_FACTOR      = 0.6f; //0.745f;
-        public const float     AIR_SLOW_DOWN_FACTOR         = 0.95f;
-        public const float     JUMP_SPEED                   = 300.0f; //210 250 
-        public const float     MAX_Y_SPEED                  = 400.0f; //290.0f; //400
-        public const float     GRAVITY                      = 881.25f; //680  781.25f
-        public const float     JUMP_GRAVITY                 = 460; //212.5f; 260
+        public static int TILE_SIZE = 16;
+        public static int TILE_SIZE_HALF = TILE_SIZE / 2;
 
-        public const float     BULLET_HIT_FORCE             = 1000;
+        [JsonProperty("walk-speed")]
+        public static float     WALK_SPEED { get; private set; } //300.0f;
 
-        public const float FRICTION = 0.1f; //0.02f;
-        public const float RESTITUTION = 0.5f; //0.1f;
-        public const float GLUE = 0.001f; //0.01f;
+        [JsonProperty("max-walk-speed")]
+        public static float     MAX_WALK_SPEED { get; private set; } //200.0f;
 
-        public const int CHAR_FRAME_WIDTH =  32;
-        public const int CHAR_FRAME_HEIGHT = 32; //48
+        [JsonProperty("ground-slowdown-factor")]
+        public static float     GROUND_SLOW_DOWN_FACTOR { get; private set; } //0.745f;
 
-        public const string PLAYER_TEXTURE_NAME = "player1_char_set";
-        public const string MONSTER_TEXTURE_NAME = "monster1_char_set";
+        [JsonProperty("air-slowdown-factor")]
+        public static float     AIR_SLOW_DOWN_FACTOR { get; private set; }
 
-        public static readonly IntRect CHAR_COLLISON_RECT; // = new IntRect(10, 0, 22, 32); //32-10 = 22 | 10:left, 32:width
-        public static readonly IntRect CHAR_VIEW_RECT; // = new IntRect(5, 0, 27, 32);
+        [JsonProperty("jump-speed")]
+        public static float     JUMP_SPEED { get; private set; } //210 250 
 
-        public static readonly Color LIGHTMAP_COLOR = new Color(50, 50, 50, 255);
-        public static readonly Color BACKGROUND_COLOR = Color.White;
+        [JsonProperty("max-Y-speed")]
+        public static float     MAX_Y_SPEED { get; private set; } //290.0f; //400
+
+        [JsonProperty("gravity")]
+        public static float     GRAVITY { get; private set; } //680  781.25f
+
+        [JsonProperty("jump-gravity")]
+        public static float     JUMP_GRAVITY { get; private set; } //212.5f; 260
+
+        [JsonProperty("bullet-hit-force")]
+        public static float     BULLET_HIT_FORCE { get; private set; }
+
+        [JsonProperty("friction")]
+        public static float FRICTION { get; private set; } //0.02f;
+
+        [JsonProperty("restitution")]
+        public static float RESTITUTION { get; private set; } //0.1f;
+
+        [JsonProperty("glue")]
+        public static float GLUE { get; private set; } //0.01f;
+
+        [JsonProperty("character-frame-width")]
+        public static int CHAR_FRAME_WIDTH { get; private set; }
+
+        [JsonProperty("character-frame-height")]
+        public static int CHAR_FRAME_HEIGHT { get; private set; } //48
+
+        [JsonProperty("player-texture-name")]
+        public static string PLAYER_TEXTURE_NAME { get; private set; }
+
+        [JsonProperty("monster-texture-name")]
+        public static string MONSTER_TEXTURE_NAME { get; private set; }
+
+        [JsonProperty("character-collision-rect")]
+        public static IntRect CHAR_COLLISON_RECT { get; private set; } // = new IntRect(10, 0, 22, 32); //32-10 = 22 | 10:left, 32:width
+
+        [JsonProperty("character-view-rect")]
+        public  static IntRect CHAR_VIEW_RECT { get; private set; } // = new IntRect(5, 0, 27, 32);
+
+        [JsonProperty("lightmap-color")]
+        public  static Color LIGHTMAP_COLOR { get; private set; }
+
+        [JsonProperty("background-color")]
+        public  static Color BACKGROUND_COLOR { get; private set; }
+
         static Constants()
         {
-            //32*32
-            
-            CHAR_COLLISON_RECT = new IntRect(10, 0, 22, 32); //32-10 = 22 | 10:left, 32:width
-            CHAR_VIEW_RECT = new IntRect(5, 0, 27, 32);
-            
-
-            //32*48
-            /*
-            CHAR_COLLISON_RECT = new IntRect(10, 0, 22, 48); //32-10 = 22 | 10:left, 32:width
-            CHAR_VIEW_RECT = new IntRect(5, 0, 27, 48);
-            */
+            string json = File.ReadAllText(@"constants.json");
+            FromJson(json);
         }
 
+        private static Constants FromJson(string json) => JsonConvert.DeserializeObject<Constants>(json, new JsonSerializerSettings
+            {
+                MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
+                DateParseHandling = DateParseHandling.None,
+            }
+        );
     }
 }
