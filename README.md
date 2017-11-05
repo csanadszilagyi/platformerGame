@@ -14,3 +14,5 @@ This project is under development.
 *   Map data readed from file and tiles have different sprites by them positions
 
 Currently there is one level loaded with some monsters.
+
+![platformer1](https://user-images.githubusercontent.com/23726291/32418121-49bc8faa-c264-11e7-87e5-f8026541107d.gif)
