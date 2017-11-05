@@ -12,9 +12,9 @@ This project is under development.
 *   Particle system
 *   Wavy water blocks
 *   Simple graphics, animation and sprite state control
-*   Map data readed from file and tiles have different sprites by them positions
+*   Map data loads from file and tiles have different sprites by them positions
 
-Currently there is one level loaded with some monsters.
+Currently, there is one level loaded with some monsters.
 
 ![platformer1](https://user-images.githubusercontent.com/23726291/32418121-49bc8faa-c264-11e7-87e5-f8026541107d.gif)
 
