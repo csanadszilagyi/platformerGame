@@ -45,6 +45,12 @@ namespace platformerGame
         [JsonProperty("bullet-hit-force")]
         public static float     BULLET_HIT_FORCE { get; private set; }
 
+        [JsonProperty("bullet-start-speed")]
+        public static float BULLET_START_SPEED { get; private set; }
+
+        [JsonProperty("default-weapon-firing-frequency")]
+        public static int DEFAULT_WEAPON_FIRING_FREQUENCY { get; private set; }
+
         [JsonProperty("friction")]
         public static float FRICTION { get; private set; } //0.02f;
 
@@ -66,6 +72,9 @@ namespace platformerGame
         [JsonProperty("monster-texture-name")]
         public static string MONSTER_TEXTURE_NAME { get; private set; }
 
+        [JsonProperty("monster-max-health")]
+        public static int MONSTER_MAX_HEALTH { get; private set; }
+
         [JsonProperty("character-collision-rect")]
         public static IntRect CHAR_COLLISON_RECT { get; private set; } // = new IntRect(10, 0, 22, 32); //32-10 = 22 | 10:left, 32:width
 
@@ -80,9 +89,20 @@ namespace platformerGame
 
         static Constants()
         {
-            string json = File.ReadAllText(@"constants.json");
-            FromJson(json);
         }
+
+        public static void Load()
+        {
+            if (File.Exists("constants.json"))
+            {
+                string json = File.ReadAllText(@"constants.json");
+                FromJson(json);
+            }
+            else
+                throw new FileNotFoundException("The constants.json file is missing.");
+        }
+
+        //TODO: Read properties into dictionary
 
         private static Constants FromJson(string json) => JsonConvert.DeserializeObject<Constants>(json, new JsonSerializerSettings
             {

@@ -144,7 +144,7 @@ namespace platformerGame
             base.init();
             this.disabled = false;
             this.killed = false;
-            this.health = 20;
+            this.health = Constants.MONSTER_MAX_HEALTH;
         }
 
         public override bool isActive()

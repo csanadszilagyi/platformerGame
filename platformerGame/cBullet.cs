@@ -14,8 +14,6 @@ namespace platformerGame
         const uint SLUG_LENGTH = 5;
         const uint TEXTURE_INTERSECTION_OFFSET = 23; //30 // 15; // pixel from the edge of the texture
 
-        private const float START_SPEED = 2000.0f; // 900
-
         cGameObject owner;
         Vector2f oppositeDir;
         Vector2f intersection;
@@ -44,8 +42,8 @@ namespace platformerGame
             this.oppositeDir = new Vector2f(-this.heading.X*SLUG_LENGTH, -this.heading.Y*SLUG_LENGTH);
             this.intersection = new Vector2f(0.0f, 0.0f);
             this.bounds.SetPosByTopLeft(pos);
-            this.velocity.X = this.heading.X * START_SPEED;
-            this.velocity.Y = this.heading.Y * START_SPEED;
+            this.velocity.X = this.heading.X * Constants.BULLET_START_SPEED;
+            this.velocity.Y = this.heading.Y * Constants.BULLET_START_SPEED;
             orientation = cAppMath.GetAngleOfVector(heading);
 
             this.sprite = new Sprite(cAssetManager.GetTexture("bullet3")); // bullet_yellow_sm; bullet_light_gree

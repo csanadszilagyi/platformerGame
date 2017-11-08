@@ -34,6 +34,7 @@ namespace platformerGame
         public string LevelName { get; set; }
         public cSfmlApp()
         {
+            Constants.Load();
             playerInfo = new cPlayerInfo();
         }
 

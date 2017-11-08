@@ -20,7 +20,7 @@ namespace platformerGame
             p_followLight.Color = new Color(240, 219, 164);
             this.Scene.LightMap.AddStaticLight(p_followLight);
 
-            this.weapon = new cWeapon(this, 20); // 9
+            this.weapon = new cWeapon(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY); // 9
         }
 
         protected override void initSprites()
