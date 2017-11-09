@@ -184,10 +184,21 @@ namespace platformerGame
                     Vector2f playerCenter = this.Scene.Player.Bounds.center;
 
                     if (playerCenter.X > this.Position.X)
+                    {
+                        if(velocity.X < 0.0f) this.StopMovingX();
                         this.StartMovingRight();
+                    }
 
                     if (playerCenter.X < this.Position.X)
+                    {
+                        if (velocity.X > 0.0f) this.StopMovingX();
                         this.StartMovingLeft();
+                    }
+
+                    if (this.Scene.Player.Bounds.rightBottom.Y < this.Bounds.topLeft.Y)
+                        this.StartJumping();
+                    else
+                        this.StopJumping();
 
                     this.spriteControl.Update(this.GetSpriteState());
                 }  
