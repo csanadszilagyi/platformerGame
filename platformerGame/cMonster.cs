@@ -17,7 +17,8 @@ namespace platformerGame
             p_followLight = new cLight();
             p_followLight.Radius = 80.0f;
             p_followLight.LinearizeFactor = 0.9f;
-            p_followLight.Color = new Color(245, 77, 39);
+            p_followLight.Bleed = 2.0f;
+            p_followLight.Color = new Color(20, 184,87);
             this.Scene.LightMap.AddStaticLight(p_followLight);
         }
 
@@ -145,6 +146,8 @@ namespace platformerGame
             this.disabled = false;
             this.killed = false;
             this.health = Constants.MONSTER_MAX_HEALTH;
+            walkSpeed = Constants.MONSTER_WALK_SPEED;
+            maxWalkSpeed = Constants.MONSTER_MAX_WALK_SPEED;
         }
 
         public override bool isActive()

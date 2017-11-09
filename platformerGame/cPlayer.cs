@@ -15,7 +15,7 @@ namespace platformerGame
         public cPlayer(cGameScene scene, Vector2f pos) : base(scene, pos)
         {
             p_followLight = new cLight();
-            p_followLight.Radius = 150.0f;
+            p_followLight.Radius = 80.0f;
             p_followLight.LinearizeFactor = 0.9f;
             p_followLight.Color = new Color(240, 219, 164);
             this.Scene.LightMap.AddStaticLight(p_followLight);
@@ -121,7 +121,8 @@ namespace platformerGame
         protected override void init()
         {
             base.init();
-
+            walkSpeed = Constants.PLAYER_WALK_SPEED;
+            maxWalkSpeed = Constants.PLAYER_MAX_WALK_SPEED;
         }
 
         public override void Update(float step_time)

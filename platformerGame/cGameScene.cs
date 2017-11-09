@@ -90,8 +90,8 @@ namespace platformerGame
                 waterLight.Pos = new Vector2f(wb.Area.center.X, wb.Area.topLeft.Y+Constants.TILE_SIZE/2.0f);
                 waterLight.Radius = (wb.Area.dims.X + wb.Area.dims.Y) * 0.8f;
                 waterLight.Bleed = 0.00001f; // 0.00001f;
-                waterLight.LinearizeFactor = 0.99f;
-                waterLight.Color = new Color(96,156,164);
+                waterLight.LinearizeFactor = 0.95f;
+                waterLight.Color = new Color(41,174,232); // 96,156,164
                 lightMap.AddStaticLight(waterLight);
             }
 

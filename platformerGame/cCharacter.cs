@@ -23,6 +23,9 @@ namespace platformerGame
         protected int health;
         protected cLight p_followLight = null;
 
+        protected float walkSpeed;
+        protected float maxWalkSpeed;
+
         /*
         public cCharacter() : base()
         {
@@ -62,7 +65,7 @@ namespace platformerGame
 
             //must call, else not working
             spriteControl.ChangeState(this.GetSpriteState());
-
+            
             this.health = 1;
 
         }
@@ -111,11 +114,11 @@ namespace platformerGame
 
             if (acceleration.X < 0.0f)
             {
-                velocity.X = cAppMath.Max<float>(velocity.X, -Constants.MAX_WALK_SPEED);
+                velocity.X = cAppMath.Max<float>(velocity.X, -this.maxWalkSpeed);
             }
             else if (acceleration.X > 0.0f)
             {
-                velocity.X = cAppMath.Min<float>(velocity.X, Constants.MAX_WALK_SPEED);
+                velocity.X = cAppMath.Min<float>(velocity.X, this.maxWalkSpeed);
             }
             else
             // if (isOnGround)
@@ -231,13 +234,13 @@ namespace platformerGame
         public void StartMovingRight()
         {
             //acceleration.X = Constants.WALK_SPEED;
-            this.AddForce(new Vector2f( Constants.WALK_SPEED, 0.0f));
+            this.AddForce(new Vector2f( this.walkSpeed,  0.0f));
             horizontalFacing = HorizontalFacing.FACING_RIGHT;
         }
         public void StartMovingLeft()
         {
             //acceleration.X = -Constants.WALK_SPEED;
-            this.AddForce(new Vector2f( -Constants.WALK_SPEED, 0.0f));
+            this.AddForce(new Vector2f( -this.walkSpeed, 0.0f));
             horizontalFacing = HorizontalFacing.FACING_LEFT;
             //m_HorizontalFacing = HorizontalFacing::FACING_LEFT;
         }

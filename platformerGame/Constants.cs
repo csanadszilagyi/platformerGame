@@ -18,11 +18,17 @@ namespace platformerGame
         public static int TILE_SIZE = 16;
         public static int TILE_SIZE_HALF = TILE_SIZE / 2;
 
-        [JsonProperty("walk-speed")]
-        public static float     WALK_SPEED { get; private set; } //300.0f;
+        [JsonProperty("monster-walk-speed")]
+        public static float     MONSTER_WALK_SPEED { get; private set; } //300.0f;
 
-        [JsonProperty("max-walk-speed")]
-        public static float     MAX_WALK_SPEED { get; private set; } //200.0f;
+        [JsonProperty("player-walk-speed")]
+        public static float PLAYER_WALK_SPEED { get; private set; } //300.0f;
+
+        [JsonProperty("monster-max-walk-speed")]
+        public static float     MONSTER_MAX_WALK_SPEED { get; private set; } //200.0f;
+
+        [JsonProperty("player-max-walk-speed")]
+        public static float PLAYER_MAX_WALK_SPEED { get; private set; } //200.0f;
 
         [JsonProperty("ground-slowdown-factor")]
         public static float     GROUND_SLOW_DOWN_FACTOR { get; private set; } //0.745f;
