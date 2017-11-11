@@ -26,13 +26,9 @@ namespace platformerGame
 
         cTimer levelTimer;
 
-        Text timeText;
-
         cAABB viewRect;
 
         cEntityPool entityPool;
-
-        cRegulator fpsUpdater;
 
         cParticleManager particleManager;
 
@@ -41,8 +37,6 @@ namespace platformerGame
         public cGameScene(cSfmlApp controller) : base(controller)
         {
             levelTimer = new cTimer();
-            fpsUpdater = new cRegulator();
-            fpsUpdater.resetByPeriodTime(0.5f);
         }
 
        
@@ -100,13 +94,6 @@ namespace platformerGame
 
             this.particleManager = new cParticleManager(this);
            // lightMap.renderStaticLightsToTexture();
-
-            //Idő szöveg
-            timeText = new Text("", cAssetManager.GetFont("pf_tempesta_seven"));
-            timeText.Position = new Vector2f(m_AppController.MainWindow.Size.X - 200, 25);
-            timeText.CharacterSize = 18; // in pixels, not points!
-            timeText.Color = Color.White;
-            timeText.Style = Text.Styles.Bold;
 
             //Pálya idő start
             levelTimer.Start();
@@ -201,14 +188,7 @@ namespace platformerGame
             this.entityPool.RenderBullets(destination, alpha);
 
             this.particleManager.Render(destination, alpha);
-
-#if DEBUG
-            timeText.Position = new Vector2f(viewRect.rightBottom.X - 140, viewRect.topLeft.Y + 25);
-            if(fpsUpdater.isReady())
-                timeText.DisplayedString = ((int)m_AppController.FPS).ToString(); //entityPool.getNumOfActiveBullets().ToString();
-
-            destination.Draw(timeText);
-#endif     
+   
             // cRenderFunctions.DrawLine(destination, new Vector2f(0, 400), new Vector2f(720, 400), Color.White, BlendMode.None);
         }
 

@@ -1,6 +1,8 @@
 ﻿{
-  "walk-speed": 250.0,
-  "max-walk-speed": 150.0,
+  "player-walk-speed": 250.0,
+  "monster-walk-speed": 250.0,
+  "player-max-walk-speed": 150.0,
+  "monster-max-walk-speed": 90.0,
   "ground-slowdown-factor": 0.6,
   "air-slowdown-factor": 0.95,
   "jump-speed": 300.0,
@@ -8,6 +10,8 @@
   "gravity": 881.25,
   "jump-gravity": 460,
   "bullet-hit-force": 1000,
+  "bullet-start-speed": 900,
+  "default-weapon-firing-frequency": 12,
   "friction": 0.1,
   "restitution": 0.5,
   "glue": 0.001,
@@ -15,6 +19,7 @@
   "character-frame-height": 32,
   "player-texture-name": "player1_char_set",
   "monster-texture-name": "monster1_char_set",
+  "monster-max-health": 12,
   "character-collision-rect": {
     "Left": 10,
     "Top": 0,
@@ -28,9 +33,9 @@
     "Height": 32
   },
   "lightmap-color": {
-    "R": 50,
-    "G": 50,
-    "B": 50,
+    "R": 10,
+    "G": 10,
+    "B": 10,
     "A": 255
   },
   "background-color": {

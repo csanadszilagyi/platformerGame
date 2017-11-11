@@ -122,6 +122,10 @@ namespace platformerGame
 
         }
 
+        public void LoadFromTMX(string file_name)
+        {
+
+        }
         /// <summary>
         /// Fájlból is betudja olvasni a pályát
         /// 1. sor: pálya szélessége (x ~ width ~ oszlopok száma)

@@ -31,6 +31,11 @@ namespace platformerGame
 
         cPlayerInfo playerInfo;
 
+        cRegulator fpsUpdater;
+        Text timeText;
+
+        View defaultView;
+
         public string LevelName { get; set; }
         public cSfmlApp()
         {
@@ -63,6 +68,7 @@ namespace platformerGame
             
             clearColor = new Color(0, 0, 0, 255);
 
+            this.defaultView = m_MainWindow.DefaultView;
             //resource-ok betöltése (font-ok és textúrák, képek a játékhoz)
             cAssetManager.LoadResources();
         }
@@ -72,14 +78,25 @@ namespace platformerGame
             _setUpSFML();
 
             m_DeltaTime = 0.0f;
-            m_StepTime = 0.0166f;
-            m_MaxDeltaTime = 0.25f;
+            m_StepTime = 1.0f / 60.0f;
+            m_MaxDeltaTime = 0.25f; //0.25f
             m_Accumulator = 0.0f;
             m_Time = 0.0f;
             m_FPS = 0.0f;
 
             m_Timer = new cTimer();
             //ChangeGameState( new cGameScene(this) );
+
+            fpsUpdater = new cRegulator();
+            fpsUpdater.resetByPeriodTime(0.5f);
+
+
+            //Idő szöveg
+            timeText = new Text("", cAssetManager.GetFont("pf_tempesta_seven"));
+            timeText.Position = new Vector2f(this.defaultView.Size.X-100, 30);
+            timeText.CharacterSize = 28; // in pixels, not points!
+            timeText.Color = Color.White;
+            timeText.Style = Text.Styles.Bold;
 
             cGlobalClock.Start();
 
@@ -98,6 +115,16 @@ namespace platformerGame
             m_MainWindow.Clear(clearColor);
 
             m_CurrentState.Render(m_MainWindow, alpha);
+
+
+
+#if DEBUG
+            this.m_MainWindow.SetView(this.defaultView);
+            if (fpsUpdater.isReady())
+                timeText.DisplayedString = ((int)this.FPS).ToString(); //entityPool.getNumOfActiveBullets().ToString();
+
+            this.m_MainWindow.Draw(timeText);
+#endif
 
             m_MainWindow.Display();
         }
