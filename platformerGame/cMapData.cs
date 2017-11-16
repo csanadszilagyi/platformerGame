@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 
 using SFML.System;
-
+using tileLoader;
 
 namespace platformerGame
 {
@@ -124,7 +124,13 @@ namespace platformerGame
 
         public void LoadFromTMX(string file_name)
         {
-
+            var map = new TmxMap("first.tmx");
+            TmxLayerTile[] tmxTiles = map.Layers[0].Tiles.ToArray();
+            foreach (var tmxTile in tmxTiles)
+            {
+                //tmxTile.
+               // m_Tiles.Add(new cTile())
+            }
         }
         /// <summary>
         /// Fájlból is betudja olvasni a pályát

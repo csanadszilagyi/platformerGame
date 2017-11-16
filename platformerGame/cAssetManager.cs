@@ -10,6 +10,9 @@ namespace platformerGame
 {
     class cAssetManager
     {
+        private const string TEX_RESOURCE_PATH = "Resources/textures/";
+        private const string FONT_RESOURCE_PATH = "Resources/Fonts/";
+
         private static Dictionary<string, Texture> textures;
         private static Dictionary<string, Font> fonts;
         static cAssetManager()
@@ -18,39 +21,22 @@ namespace platformerGame
             fonts = new Dictionary<string, Font>();
         }
 
+        /// <summary>
+        /// Loads game resource files.
+        /// </summary>
         public static void LoadResources()
         {
-            LoadFont("Resources/Fonts/BGOTHL.TTF");
-            LoadFont("Resources/Fonts/pf_tempesta_seven.ttf");
-            
-            /*
-            LoadTexture("Resources/textures/Bullet2.tga");
+            //loading fonts
+            foreach (string fontName in Constants.FONT_NAMES)
+            {
+                LoadFont(FONT_RESOURCE_PATH + fontName);
+            }
 
-            LoadTexture("Resources/textures/bkBlue.bmp");
-            LoadTexture("Resources/textures/TileSet2.tga");
-
-            LoadTexture("Resources/textures/fire1.png");
-            */
-
-            LoadTexture("Resources/textures/player1_char_set.png");
-            LoadTexture("Resources/textures/player1_char_set_48.png");
-            LoadTexture("Resources/textures/monster1_char_set.png");
-            LoadTexture("Resources/textures/bkBlue.bmp");
-            LoadTexture("Resources/textures/wall.png");
-            LoadTexture("Resources/textures/wall_smaller.bmp");
-            LoadTexture("Resources/textures/door1_sm.png");
-            LoadTexture("Resources/textures/tileSet_32.png");
-            LoadTexture("Resources/textures/tileSet_16.png");
-            LoadTexture("Resources/textures/bullet2.png");
-            LoadTexture("Resources/textures/bullet3.png");
-            LoadTexture("Resources/textures/bullet4.png");
-            LoadTexture("Resources/textures/bullet4_B.png");
-            LoadTexture("Resources/textures/bullet_yellow.png");
-            LoadTexture("Resources/textures/bullet_yellow_sm.png");
-            LoadTexture("Resources/textures/bullet_light_green.png");
-            LoadTexture("Resources/textures/light1.png");
-            LoadTexture("Resources/textures/simple_particle.tga");
-            LoadTexture("Resources/textures/smoke_particle.tga");
+            //loadin textures
+            foreach (string texName in Constants.TEXTURES_NAMES)
+            {
+                LoadTexture(TEX_RESOURCE_PATH + texName);
+            }
         }
 
         public static string GenerateIDFromFilePath(string file_path)

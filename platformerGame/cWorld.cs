@@ -107,7 +107,7 @@ namespace platformerGame
             m_TileSetTexture = cAssetManager.GetTexture("tileSet_16");
             m_TileSetTexture.Smooth = true;
 
-            m_BGtexture = cAssetManager.GetTexture("wall_smaller"); //("bkBlue");
+            m_BGtexture = cAssetManager.GetTexture(Constants.BG_TEXTURE);
             m_BGtexture.Repeated = true;
             m_BGtexture.Smooth = true;
 

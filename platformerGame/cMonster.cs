@@ -12,6 +12,8 @@ namespace platformerGame
     {
         bool disabled;
         bool killed;
+
+        cLight eye;
         public cMonster(cGameScene scene, Vector2f pos) : base(scene, pos)
         {
             p_followLight = new cLight();
@@ -19,7 +21,18 @@ namespace platformerGame
             p_followLight.LinearizeFactor = 0.9f;
             p_followLight.Bleed = 2.0f;
             p_followLight.Color = new Color(20, 184,87);
-            this.Scene.LightMap.AddStaticLight(p_followLight);
+            //this.Scene.LightMap.AddStaticLight(p_followLight);
+
+
+            eye = new cLight();
+            eye.Radius = 10.0f;
+            eye.LinearizeFactor = 0.98f;
+            eye.Bleed = 5.0f;
+            eye.OriginalColor = new Color(255, 39, 13);
+            eye.Color = new Color(255, 39, 13);
+            
+            this.Scene.LightMap.AddStaticLight(eye);
+
         }
 
         protected override void initSprites()
@@ -164,6 +177,8 @@ namespace platformerGame
         public void Disable()
         {
             this.Scene.LightMap.remove(this.p_followLight);
+            this.Scene.LightMap.remove(this.eye);
+
             this.Scene.ParticleManager.AddNormalBloodExplosion(this.Bounds.center);
             this.spriteControl.ChangeState(new cSpriteState(MotionType.LIE, this.spriteControl.getCurrentState().HorizontalFacing));
             this.disabled = true;
@@ -183,22 +198,34 @@ namespace platformerGame
                 {
                     Vector2f playerCenter = this.Scene.Player.Bounds.center;
 
-                    if (playerCenter.X > this.Position.X)
+                    if (cAppMath.Vec2Distance(playerCenter, this.Bounds.center) <= 100.0)
                     {
-                        if(velocity.X < 0.0f) this.StopMovingX();
-                        this.StartMovingRight();
-                    }
+                        //this.wake();
 
-                    if (playerCenter.X < this.Position.X)
-                    {
-                        if (velocity.X > 0.0f) this.StopMovingX();
-                        this.StartMovingLeft();
-                    }
+                        if (playerCenter.X > this.Position.X)
+                        {
+                            if (velocity.X < 0.0f) this.StopMovingX();
+                            this.StartMovingRight();
+                        }
 
-                    if (this.Scene.Player.Bounds.rightBottom.Y < this.Bounds.topLeft.Y)
-                        this.StartJumping();
+                        if (playerCenter.X < this.Position.X)
+                        {
+                            if (velocity.X > 0.0f) this.StopMovingX();
+                            this.StartMovingLeft();
+                        }
+
+                        if (this.Scene.Player.Bounds.topLeft.Y < this.Bounds.topLeft.Y)
+                            this.StartJumping();
+                        else
+                            this.StopJumping();
+
+
+                    }
                     else
-                        this.StopJumping();
+                    {
+                        this.StopMoving();
+                        //this.sleep();
+                    }
 
                     this.spriteControl.Update(this.GetSpriteState());
                 }  
@@ -222,8 +249,11 @@ namespace platformerGame
 
         public override void Render(RenderTarget destination)
         {
-            p_followLight.Pos = GetCenterViewPos();
+            Vector2f cw = GetCenterViewPos();
+            p_followLight.Pos = cw;
+            eye.Pos = new Vector2f(cw.X+2, cw.Y - 5);
             base.Render(destination);
+
         }
 
         public override void Hit(int amount)
@@ -233,6 +263,15 @@ namespace platformerGame
             this.Scene.ParticleManager.AddLittleBloodExplosion(this.Bounds.center, 3);
         }
 
+        protected void wake()
+        {
+            this.eye.TurnOn();
+        }
+
+        protected void sleep()
+        {
+            this.eye.TurnOff();
+        }
         public bool Disabled
         {
             get { return this.disabled; }

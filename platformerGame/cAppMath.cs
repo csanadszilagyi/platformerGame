@@ -21,24 +21,24 @@ namespace platformerGame
         public const double    MAX_DOUBLE  = double.MaxValue;
         public const double    MIN_DOUBLE  = double.MinValue;
         
-        private static readonly Random random = new Random();
+        //private static readonly Random random = new Random();
 
         //==============================================================================================
         // RANDOM HELPER FUNCTIONS
         //==============================================================================================
         public static int GetRandomNumber(int min, int max)
         {
-             return random.Next(min, max);
+             return cAppRandom.GetRandomNumber(min, max);
         }
 
         public static byte GetRandomByte(byte min, byte max)
         {
-            return (byte)random.Next(min, max);
+            return (byte)cAppRandom.GetRandomNumber(min, max);
         }
 
         public static double GetRandomDouble()
         {
-            return random.NextDouble();
+            return cAppRandom.GetRandomDouble();
         }
         
         public static double GetRandomDoubleInRange(double x, double y)

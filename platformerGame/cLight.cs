@@ -16,7 +16,9 @@ namespace platformerGame
         private Color color;
         private Vector3f glColor;
         public Color OriginalColor { get; set; }
-        public float Intensity { get; set; }
+
+        private float opacity;
+
         public float Radius { get; set; }
         public float SpreadAngle { get; set; }
 
@@ -24,7 +26,7 @@ namespace platformerGame
         public float Bleed { get; set; }
         public float LinearizeFactor { get; set; }
 
-        private bool Alive;
+        public bool Active { get; set; }
 
         public cLight()
         {
@@ -32,12 +34,12 @@ namespace platformerGame
             Dir = new Vector2f(0, 0);
             Color = new Color(255, 255, 255, 255);
             OriginalColor = color;
-            Intensity = 1.0f;
+            Opacity = 255.0f;
             Radius = 20.0f;
             SpreadAngle = (float)cAppMath.TWO_PI;
             Bleed = 1.0f;
             LinearizeFactor = 0.6f;
-            Alive = true;
+            Active = true;
         }
 
         public cLight(Vector2f pos) : this()
@@ -66,17 +68,19 @@ namespace platformerGame
             }
         }
 
+        public float Opacity
+        {
+            get { return opacity; }
+            set
+            {
+                opacity = value;
+
+            }
+        }
+
         public Vector3f GLcolor
         {
             get { return glColor; }
-        }
-        public virtual bool IsAlive()
-        {
-            return Alive;
-        }
-        void SetAlive(bool alive)
-        {
-            Alive = alive;
         }
 
      }

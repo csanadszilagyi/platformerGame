@@ -55,5 +55,10 @@ namespace platformerGame
         {
             return (float)random.NextDouble();
         }
+
+        public static double GetRandomDouble()
+        {
+            return random.NextDouble();
+        }
     }
 }

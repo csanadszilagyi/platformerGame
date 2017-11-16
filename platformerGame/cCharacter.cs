@@ -105,7 +105,7 @@ namespace platformerGame
 
         public Vector2f GetCenterViewPos()
         {
-            return new Vector2f(viewPosition.X + mapCollisionRect.halfDims.X, viewPosition.Y + mapCollisionRect.halfDims.Y);
+            return viewPosition + mapCollisionRect.halfDims;
         }
         protected virtual void updateX(float step_time, cWorld world)
         {

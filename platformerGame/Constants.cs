@@ -93,6 +93,15 @@ namespace platformerGame
         [JsonProperty("background-color")]
         public  static Color BACKGROUND_COLOR { get; private set; }
 
+        [JsonProperty("font-names")]
+        public static string[] FONT_NAMES { get; private set; }
+
+        [JsonProperty("texture-names")]
+        public static string[] TEXTURES_NAMES { get; private set; }
+
+        [JsonProperty("bg-texture")]
+        public static string BG_TEXTURE { get; private set; }
+
         static Constants()
         {
         }
@@ -107,8 +116,6 @@ namespace platformerGame
             else
                 throw new FileNotFoundException("The constants.json file is missing.");
         }
-
-        //TODO: Read properties into dictionary
 
         private static Constants FromJson(string json) => JsonConvert.DeserializeObject<Constants>(json, new JsonSerializerSettings
             {
