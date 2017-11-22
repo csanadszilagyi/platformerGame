@@ -6,3 +6,4 @@
 *.sln
 *.csproj
 /.vs
+*VC.db
