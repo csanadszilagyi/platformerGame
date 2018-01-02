@@ -16,6 +16,9 @@ namespace platformerGame
 
         List<cMonster> monsters;
 
+        cQuadTree<cMonster> treeMonsters;
+        cQuadTree<cBullet> treeBullets;
+
         Vector2f worldSize;
 
         cPlayer pPlayer;
@@ -26,6 +29,9 @@ namespace platformerGame
             this.pPlayer = p_player;
             this.bullets = new List<cBullet>();
             this.monsters = new List<cMonster>();
+
+            this.treeMonsters = new cQuadTree<cMonster>(1, scene.World.WorldBounds);
+            this.treeBullets = new cQuadTree<cBullet>(1, scene.World.WorldBounds);
         }
         public void AddBullet(cGameObject owner, Vector2f pos, Vector2f direction)
         {
@@ -44,13 +50,18 @@ namespace platformerGame
         }
         public void Update(float step_time)
         {
-            
+            treeMonsters.Clear();
+
+            //treeBullets.Clear();
 
             //update bullets
             for (int i = 0; i < bullets.Count; i++)
             {
                 if (bullets[i].isActive())
+                {
                     bullets[i].Update(step_time);
+                    //treeBullets.AddEntity(bullets[i]);
+                }
                 else
                     bullets.RemoveAt(i);
             }
@@ -59,7 +70,10 @@ namespace platformerGame
             for (int i = 0; i < monsters.Count; i++)
             {
                 if (monsters[i].isActive())
+                {
                     monsters[i].Update(step_time);
+                    treeMonsters.AddEntity(monsters[i]);
+                }
                 else
                 {
                     monsters.RemoveAt(i);
@@ -71,21 +85,23 @@ namespace platformerGame
 
         public void checkBulletVsEntityCollisions()
         {
+            List<cMonster> collisionMonsters = new List<cMonster>();
+
             for (int b = 0; b < bullets.Count; b++)
             {
                 int m = 0;
-                bool collision = false;
                 Vector2f intersection = new Vector2f(0.0f, 0.0f);
-                while (m < monsters.Count && !collision)
+
+                collisionMonsters = treeMonsters.GetEntitiesAtPos(bullets[b].Position);
+
+                while (m < collisionMonsters.Count && !cCollision.testBulletVsEntity(bullets[b].Position, bullets[b].LastPosition, collisionMonsters[m].Bounds, ref intersection))
                 {
-                    if(!monsters[m].Disabled)
-                        collision = cCollision.testBulletVsEntity(bullets[b].Position, bullets[b].LastPosition, monsters[m].Bounds, ref intersection);
                     m++;
                 }
 
-                if (collision)
+                if (m < collisionMonsters.Count)
                 {
-                    cCollision.resolveMonsterVsBullet(monsters[m-1], bullets[b], intersection);
+                    cCollision.resolveMonsterVsBullet(collisionMonsters[m], bullets[b], intersection);
                 }
             }
         }
@@ -107,14 +123,17 @@ namespace platformerGame
 
         public void RenderEntities(RenderTarget destination, float alpha)
         {
-            
-
             //draw monsters
             for (int i = 0; i < monsters.Count; i++)
             {
                 monsters[i].CalculateViewPos(alpha);
                 monsters[i].Render(destination);
             }
+        }
+
+        public void RenderQuadtree(RenderTarget destination)
+        {
+            this.treeMonsters.DrawBounds(destination);
         }
 
         public List<IDrawable> ListVisibles(cAABB view_region)

@@ -12,13 +12,15 @@ namespace platformerGame
     class cQuadTree<T> where T : cQuadTreeOccupant
     {
         public const int MAX_OBJECTS = 10;
-        public const int MAX_LEVEL = 5;
+        public const int MAX_LEVEL = 4;
 
         List<T> entities;
 
         int level;
         cAABB bounds;
 
+        RectangleShape shape;
+        Text label;
         //cQuadTree*					m_pParent;
 
         cQuadTree<T> pNW; //north-west : left-top
@@ -34,7 +36,21 @@ namespace platformerGame
             this.level = _level;
             this.bounds = _bounds;
 
+            this.shape = new RectangleShape(bounds.dims);
+            this.shape.Position = bounds.topLeft;
+            this.shape.OutlineColor = Color.Red;
+            this.shape.FillColor = Color.Transparent;
+            this.shape.OutlineThickness = 1.0f;
+
             entities = new List<T>();
+
+            label = new Text();
+            label.Position = new Vector2f(bounds.rightBottom.X - 50, bounds.rightBottom.Y - 30);
+            label.Font = cAssetManager.GetFont("BGOTHL");
+            label.CharacterSize = 24;
+            label.Color = Color.White;
+            label.Style = Text.Styles.Bold;
+
             SplitToRects();
         }
 
@@ -93,7 +109,7 @@ namespace platformerGame
 
         public void AddEntity(T entity)
         {
-            if (level == MAX_LEVEL)
+            if (level >= MAX_LEVEL)
             {
                 entities.Add(entity);
                 return;
@@ -102,34 +118,36 @@ namespace platformerGame
             if (Contains(pNW, entity))
             {
                 pNW.AddEntity(entity);
-                return;
+                //return;
             }
 
             if (Contains(pNE, entity))
             {
                 pNE.AddEntity(entity);
-                return;
+                //return;
             }
 
             if (Contains(pSW, entity))
             {
                 pSW.AddEntity(entity);
-                return;
+                //return;
             }
 
             if (Contains(pSE, entity))
             {
-
                 pSE.AddEntity(entity);
-                return;
+                //return;
             }
 
+            /*
             if (Contains(this, entity)) //contains
             {
                 //logger << "Entity added to tree" << "";
                 entities.Add(entity);
                 //m_Text.setString( StringOf<uint>(m_Entities.size()) );
             }
+            */
+            
         }
         public List<T> GetEntitiesAtPos(Vector2f pos)
         {
@@ -183,6 +201,25 @@ namespace platformerGame
             }
 
             return returnEntities;
+        }
+
+        public void DrawBounds(RenderTarget target)
+        {
+            label.DisplayedString = this.entities.Count.ToString();
+
+            target.Draw(this.shape, new RenderStates(BlendMode.Alpha));
+            target.Draw(label);
+
+            if(this.level < MAX_LEVEL)
+            {
+                pNW.DrawBounds(target);
+                pNE.DrawBounds(target);
+                pSW.DrawBounds(target);
+                pSE.DrawBounds(target);
+            }
+            
+
+            
         }
 
     }

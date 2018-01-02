@@ -188,6 +188,10 @@ namespace platformerGame
             this.entityPool.RenderBullets(destination, alpha);
 
             this.particleManager.Render(destination, alpha);
+
+            this.entityPool.RenderQuadtree(destination);
+
+
    
             // cRenderFunctions.DrawLine(destination, new Vector2f(0, 400), new Vector2f(720, 400), Color.White, BlendMode.None);
         }

@@ -98,7 +98,7 @@ namespace platformerGame
 		    return returner;
 	    }
 
-    public static void Raytrace(int x0, int y0, int x1, int y1, VisitMethod visitAndContinue)
+    public static void Raytrace(int x0, int y0, int x1, int y1, VisitMethod breakVisit)
         {
             int dx = Math.Abs(x1 - x0);
             int dy = Math.Abs(y1 - y0);
@@ -111,10 +111,9 @@ namespace platformerGame
             dx *= 2;
             dy *= 2;
             bool exit = false;
-            while(n > 0 && !exit)
+            while(n > 0 && !breakVisit(x, y))
             //for (; n > 0; --n)
             {
-                exit = visitAndContinue(x, y);
 
                 if (error > 0)
                 {

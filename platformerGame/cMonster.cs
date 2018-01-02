@@ -198,7 +198,7 @@ namespace platformerGame
                 {
                     Vector2f playerCenter = this.Scene.Player.Bounds.center;
 
-                    if (cAppMath.Vec2Distance(playerCenter, this.Bounds.center) <= 100.0)
+                    if (cAppMath.Vec2DistanceSqrt(playerCenter, this.Bounds.center) <= 100.0 * 100.0)
                     {
                         //this.wake();
 
@@ -227,24 +227,25 @@ namespace platformerGame
                         //this.sleep();
                     }
 
-                    this.spriteControl.Update(this.GetSpriteState());
-                }  
-                
-            }
-            else
-            {
-                if (cAppMath.Vec2IsZero(this.velocity))
-                {
-                    // draw its crops or "grave"
-                    spriteControl.Render(this.Scene.StaticTexture, viewPosition);
-                    this.Kill();
+                    
                 }
-            }    
 
-            base.updateMovement(step_time);
+                this.spriteControl.Update(this.GetSpriteState());
 
-           
-            //base.Update(step_time);
+            }
+         else
+         {
+            if (cAppMath.Vec2IsZero(this.velocity))
+            {
+                // draw its crops or "grave"
+                spriteControl.Render(this.Scene.StaticTexture, viewPosition);
+                this.Kill();
+            }
+         }    
+
+         base.updateMovement(step_time);
+
+         //base.Update(step_time);
         }
 
         public override void Render(RenderTarget destination)
