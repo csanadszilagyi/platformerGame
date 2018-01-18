@@ -336,5 +336,10 @@ namespace platformerGame
             gameCommands.Enqueue(command);
         }
 
+        public bool onScreen(cAABB box)
+        {
+            return cCollision.OverlapAABB(this.viewRect, box);
+        }
+
     }
 }

@@ -17,7 +17,7 @@ namespace platformerGame.Particles
         protected VertexArray vertices;
         protected RenderStates renderStates;
 
-        public cBaseParticleController(cParticleManager manager, int max_particles = 30)
+        public cBaseParticleController(cParticleManager manager, uint max_particles = 30)
         {
             this.particleManager = manager;
             this.pool = new cParticlePool(max_particles);

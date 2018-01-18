@@ -15,7 +15,7 @@ namespace platformerGame.Particles
         double minScale = 0.3;
         double maxScale = 0.6;
 
-        public cExplosionController(cParticleManager manager, int max_particles = 300) : base(manager, max_particles)
+        public cExplosionController(cParticleManager manager, uint max_particles = 300) : base(manager, max_particles)
         {
             this.renderStates = new RenderStates(BlendMode.Add);
             this.renderStates.Texture = manager.ExplosionTexture;
@@ -85,7 +85,7 @@ namespace platformerGame.Particles
         {
             cWorld world = particleManager.Scene.World;
 
-            for(int i = 0; i < pool.CountActive; ++i)
+            for(uint i = 0; i < pool.CountActive; ++i)
             {
                 Particle p = pool.get(i);
                 // Particle's update code comes here.
@@ -144,9 +144,9 @@ namespace platformerGame.Particles
         public override void BuildVertexBuffer(float alpha)
         {
             uint multiplier = 4;
-            uint vNum = ((uint)pool.CountActive * multiplier) + 1;
+            uint vNum = (pool.CountActive * multiplier) + 1;
 
-            vertices.Clear();
+            //vertices.Clear();
             vertices.Resize(vNum);
 
             float division = 2.0f;
@@ -157,53 +157,138 @@ namespace platformerGame.Particles
 
             Vector2f newDims = new Vector2f();
 
-            for (int i = 0; i < pool.CountActive; ++i)
+            for (uint i = 0; i < pool.CountActive; ++i)
             {
                 Particle p = pool.get(i);
-                p.ViewPos = cAppMath.Interpolate(p.LastPos, p.Pos, alpha);
-
-                uint vertexIndex = (uint)i * multiplier;
 
                 newDims.X = p.Dims.X / division;
                 newDims.Y = p.Dims.Y / division;
 
-                // Top-left
-                Vertex v0 = new Vertex(
-                                    new Vector2f(p.ViewPos.X - newDims.X,
-                                                 p.ViewPos.Y - newDims.Y),
-                                    p.Color,
-                                    new Vector2f(0.0f, 0.0f)
-                                    );
+                    p.ViewPos = cAppMath.Interpolate(p.LastPos, p.Pos, alpha);
 
-                // Top-right
-                Vertex v1 = new Vertex(
-                                   new Vector2f(p.ViewPos.X + newDims.X,
-                                                p.ViewPos.Y - newDims.Y),
-                                   p.Color,
-                                   new Vector2f(tsizeX, 0.0f)
-                                   );
+                    uint vertexIndex = i * multiplier;
 
-                // Bottom-right
-                Vertex v2 = new Vertex(
-                                   new Vector2f(p.ViewPos.X + newDims.X,
-                                                p.ViewPos.Y + newDims.Y),
-                                   p.Color,
-                                   new Vector2f(tsizeX, tsizeY)
-                                   );
 
-                //Bottom-left
-                Vertex v3 = new Vertex(
-                                   new Vector2f(p.ViewPos.X - newDims.X,
-                                                p.ViewPos.Y + newDims.Y),
-                                   p.Color,
-                                   new Vector2f(0.0f, tsizeY)
-                                   );
 
-                vertices[vertexIndex + 0] = v0;
-                vertices[vertexIndex + 1] = v1;
-                vertices[vertexIndex + 2] = v2;
-                vertices[vertexIndex + 3] = v3;
+                    // Top-left
+                    Vertex v0 = new Vertex(
+                                        new Vector2f(p.ViewPos.X - newDims.X,
+                                                     p.ViewPos.Y - newDims.Y),
+                                        p.Color,
+                                        new Vector2f(0.0f, 0.0f)
+                                        );
 
+                    // Top-right
+                    Vertex v1 = new Vertex(
+                                       new Vector2f(p.ViewPos.X + newDims.X,
+                                                    p.ViewPos.Y - newDims.Y),
+                                       p.Color,
+                                       new Vector2f(tsizeX, 0.0f)
+                                       );
+
+                    // Bottom-right
+                    Vertex v2 = new Vertex(
+                                       new Vector2f(p.ViewPos.X + newDims.X,
+                                                    p.ViewPos.Y + newDims.Y),
+                                       p.Color,
+                                       new Vector2f(tsizeX, tsizeY)
+                                       );
+
+                    //Bottom-left
+                    Vertex v3 = new Vertex(
+                                       new Vector2f(p.ViewPos.X - newDims.X,
+                                                    p.ViewPos.Y + newDims.Y),
+                                       p.Color,
+                                       new Vector2f(0.0f, tsizeY)
+                                       );
+
+                    
+                    vertices[vertexIndex + 0] = v0;
+                    vertices[vertexIndex + 1] = v1;
+                    vertices[vertexIndex + 2] = v2;
+                    vertices[vertexIndex + 3] = v3;
+            }
+        }
+
+        public void BuildVertexBufferOnlyVisibles(float alpha)
+        {
+            uint multiplier = 4;
+            uint vNum = (pool.CountActive * multiplier) + 1;
+
+            vertices.Clear();
+            //vertices.Resize(vNum);
+
+            float division = 2.0f;
+
+            Vector2u uSize = particleManager.ExplosionTexture.Size;
+            float tsizeX = uSize.X;
+            float tsizeY = uSize.Y;
+
+            Vector2f newDims = new Vector2f();
+            cAABB bounds = new cAABB();
+
+            for (uint i = 0; i < pool.CountActive; ++i)
+            {
+                Particle p = pool.get(i);
+
+                newDims.X = p.Dims.X / division;
+                newDims.Y = p.Dims.Y / division;
+
+                
+                bounds.SetDims(newDims);
+                bounds.SetPosByCenter(p.Pos);
+
+                if(particleManager.Scene.onScreen(bounds))
+                {
+                    p.ViewPos = cAppMath.Interpolate(p.LastPos, p.Pos, alpha);
+
+                    //uint vertexIndex = (uint)i * multiplier;
+
+
+
+                    // Top-left
+                    Vertex v0 = new Vertex(
+                                        new Vector2f(p.ViewPos.X - newDims.X,
+                                                     p.ViewPos.Y - newDims.Y),
+                                        p.Color,
+                                        new Vector2f(0.0f, 0.0f)
+                                        );
+
+                    // Top-right
+                    Vertex v1 = new Vertex(
+                                       new Vector2f(p.ViewPos.X + newDims.X,
+                                                    p.ViewPos.Y - newDims.Y),
+                                       p.Color,
+                                       new Vector2f(tsizeX, 0.0f)
+                                       );
+
+                    // Bottom-right
+                    Vertex v2 = new Vertex(
+                                       new Vector2f(p.ViewPos.X + newDims.X,
+                                                    p.ViewPos.Y + newDims.Y),
+                                       p.Color,
+                                       new Vector2f(tsizeX, tsizeY)
+                                       );
+
+                    //Bottom-left
+                    Vertex v3 = new Vertex(
+                                       new Vector2f(p.ViewPos.X - newDims.X,
+                                                    p.ViewPos.Y + newDims.Y),
+                                       p.Color,
+                                       new Vector2f(0.0f, tsizeY)
+                                       );
+
+                    /*
+                    vertices[vertexIndex + 0] = v0;
+                    vertices[vertexIndex + 1] = v1;
+                    vertices[vertexIndex + 2] = v2;
+                    vertices[vertexIndex + 3] = v3;
+                    */
+                    vertices.Append(v0);
+                    vertices.Append(v1);
+                    vertices.Append(v2);
+                    vertices.Append(v3);
+                }
             }
         }
 
@@ -212,7 +297,7 @@ namespace platformerGame.Particles
 
             destination.Draw(vertices, renderStates);
             /*
-            for (int i = 0; i < pool.CountActive; ++i)
+            for (uint i = 0; i < pool.CountActive; ++i)
             {
                 Particle p = pool.get(i);
 
@@ -225,7 +310,7 @@ namespace platformerGame.Particles
             */
         }
 
-        public int NumActive
+        public uint NumActive
         {
             get { return pool.CountActive; }
         }
