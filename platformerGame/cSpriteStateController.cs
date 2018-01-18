@@ -63,7 +63,9 @@ namespace platformerGame
                       uint anim_start_frame,
                       int num_frames,
                       uint frame_time,
-                      IntRect view_rect)
+                      IntRect view_rect,
+                      bool flip_vertically = false,
+                      bool flip_horizontally = false)
         {
             if(view_rect.Width == 0 && view_rect.Height == 0)
             {
@@ -71,26 +73,28 @@ namespace platformerGame
                 view_rect.Height = a_frame_height;
             }
 
-            cAnimation temp = new cAnimation(texture, view_rect);
-            //temp.SetSpriteSheet(texture);
+            cAnimation anim = new cAnimation(texture, view_rect);
+            anim.FlipHorizontally = flip_horizontally;
+            anim.FlipVertically = flip_vertically;
+            //anim.SetSpriteSheet(texture);
 
             //float a_frame_width = texture.getSize().x / max_frames;
             //float a_frame_height = texture.getSize().y;
 
             for (int x = 0; x < num_frames; ++x)
             {
-                temp.AddFrame(new IntRect((start_frame_column + x) * a_frame_width,
+                anim.AddFrame(new IntRect((start_frame_column + x) * a_frame_width,
                                                start_frame_row * a_frame_height,
                                                a_frame_width,
                                                a_frame_height));
             }
 
-            temp.SetFrameTime(frame_time);
-            temp.SetStartFrame(anim_start_frame);
+            anim.SetFrameTime(frame_time);
+            anim.SetStartFrame(anim_start_frame);
 
-            //std::pair<SpriteState, cAnimation> state_pair = std::pair<SpriteState, cAnimation>(state_type, temp);
+            //std::pair<SpriteState, cAnimation> state_pair = std::pair<SpriteState, cAnimation>(state_type, anim);
 
-            m_SpriteStates.Add(state_type, temp);
+            m_SpriteStates.Add(state_type, anim);
         }
 
         public void ChangeState(cSpriteState state_type)

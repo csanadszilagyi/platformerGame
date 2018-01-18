@@ -199,6 +199,10 @@ namespace platformerGame
 		    return ((vec.X * vec.X + vec.Y * vec.Y) <= 0.0f);
 	    }
 
+        public static Vector2f Vec2Abs(Vector2f v)
+        {
+            return new Vector2f(Math.Abs(v.X), Math.Abs(v.Y));
+        }
         public static void Vec2Truncate(ref Vector2f vec, double max)
         {
             if (Vec2Length(vec) > max)

@@ -22,6 +22,9 @@ namespace platformerGame
         Vector2f worldSize;
 
         cPlayer pPlayer;
+
+        //Dictionary<int, cGameObject> entityMap;
+
         public cEntityPool(cGameScene scene, Vector2f world_size, cPlayer p_player)
         {
             this.pScene = scene;
@@ -50,6 +53,9 @@ namespace platformerGame
         }
         public void Update(float step_time)
         {
+
+            this.checkBulletVsEntityCollisions(step_time);
+
             treeMonsters.Clear();
 
             //treeBullets.Clear();
@@ -80,10 +86,36 @@ namespace platformerGame
                 }
             }
 
-            this.checkBulletVsEntityCollisions();
+            
         }
 
-        public void checkBulletVsEntityCollisions()
+        private int getIndexOfClosestMonsterColliding(List<cMonster> mons, cBullet bul, Vector2f pos_by, float time)
+        {
+            int index = -1;
+            double prevDist = Double.MaxValue;
+            double newDist = 0.0;
+            for(int i = 0; i < mons.Count; i++)
+            {
+                if (mons[i].Disabled)
+                    continue;
+
+                if (cSatCollision.checkAndResolve(bul, mons[i], time, false))
+                {
+                    newDist = cAppMath.Vec2DistanceSqrt(mons[i].Bounds.center, pos_by);
+
+                    if (newDist < prevDist)
+                    {
+                        prevDist = newDist;
+                        index = i;
+                    }
+                }
+                
+            }
+
+            return index;
+        }
+
+        public void checkBulletVsEntityCollisions(float step_time)
         {
             List<cMonster> collisionMonsters = new List<cMonster>();
 
@@ -94,15 +126,37 @@ namespace platformerGame
 
                 collisionMonsters = treeMonsters.GetEntitiesAtPos(bullets[b].Position);
 
-                while (m < collisionMonsters.Count && !cCollision.testBulletVsEntity(bullets[b].Position, bullets[b].LastPosition, collisionMonsters[m].Bounds, ref intersection))
+                
+                int monster = getIndexOfClosestMonsterColliding(collisionMonsters, bullets[b], bullets[b].Position, step_time);
+                
+                if(monster > -1)
                 {
+                    cCollision.resolveMonsterVsBullet(collisionMonsters[monster], bullets[b], intersection);
+                }
+                
+
+                /*
+                while (m < collisionMonsters.Count
+                        // && !cSatCollision.checkAndResolve(bullets[b], collisionMonsters[m], step_time, false)
+                        //!cCollision.testBulletVsEntity(bullets[b].Position, bullets[b].LastPosition, collisionMonsters[m].Bounds, ref intersection)
+                        )
+                {
+                    if (bullets[b].Alive == false) break;
+
+                    if (!collisionMonsters[m].Disabled && cSatCollision.checkAndResolve(bullets[b], collisionMonsters[m], step_time, false))
+                    {
+                        cCollision.resolveMonsterVsBullet(collisionMonsters[m], bullets[b], intersection);
+                    }
                     m++;
                 }
+                */
 
+                /*
                 if (m < collisionMonsters.Count)
                 {
                     cCollision.resolveMonsterVsBullet(collisionMonsters[m], bullets[b], intersection);
                 }
+                */
             }
         }
         

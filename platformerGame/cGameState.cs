@@ -24,6 +24,8 @@ namespace platformerGame
         /// Az állapot induláskor kell végre hajtani
         /// </summary>
         public abstract void Enter();
+
+        public abstract void BeforeUpdate();
         public abstract void Update(float step_time);
 
         public abstract void Render(RenderTarget destination, float alpha);

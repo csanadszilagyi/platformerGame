@@ -53,10 +53,10 @@ namespace platformerGame
         {
             m_WindowSize = new Vector2u(1280, 720);
             
-            //m_MainWindow = new RenderWindow(formHandle);
+            //if WPF: m_MainWindow = new RenderWindow(formHandle);
             m_MainWindow =  new RenderWindow(new VideoMode(m_WindowSize.X, m_WindowSize.Y, 32), "Platformer", Styles.Close);
             m_MainWindow.SetVisible(true);
-            m_MainWindow.SetVerticalSyncEnabled(true); // false
+            m_MainWindow.SetVerticalSyncEnabled(true);
             m_MainWindow.SetFramerateLimit(0);
             m_MainWindow.SetKeyRepeatEnabled(false);
 
@@ -105,6 +105,12 @@ namespace platformerGame
 
             
         }
+
+        private void _beforeUpdate()
+        {
+            m_CurrentState.BeforeUpdate();
+        }
+
         private void _update(float step_time)
         {
             m_CurrentState.Update(step_time);
@@ -145,6 +151,8 @@ namespace platformerGame
                     m_DeltaTime = m_MaxDeltaTime;
 
                 m_Accumulator += m_DeltaTime;
+
+                _beforeUpdate();
 
                 while (m_Accumulator > m_StepTime) //m_StepTime
                 {

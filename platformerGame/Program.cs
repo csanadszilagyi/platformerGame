@@ -19,7 +19,7 @@ namespace platformerGame
             }
             catch (Exception e)
             {
-                StreamWriter sw = new StreamWriter("error_log.txt");
+                StreamWriter sw = new StreamWriter("ErrorLog_"+ DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss tt") + ".txt");
                 sw.WriteLine("Error created at " + DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss tt")); //yyyy/MM/dd HH:mm:ss:
                 sw.WriteLine(e.Message);
                 sw.WriteLine(e.Data.ToString());

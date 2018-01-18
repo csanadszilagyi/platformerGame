@@ -95,5 +95,22 @@ namespace platformerGame
             return (cAABB)this.MemberwiseClone();
         }
 
+        /// <summary>
+        /// for fast SA. collision detection (see @cSatCollision.cs)
+        /// </summary>
+        /// <returns></returns>
+        public Vector2f[] getLocalVertices()
+        {
+            Vector2f[] b = new Vector2f[4]
+            {
+               new Vector2f(-halfDims.X, -halfDims.Y),
+               new Vector2f(halfDims.X, -halfDims.Y),
+               new Vector2f(halfDims.X, halfDims.Y),
+               new Vector2f(-halfDims.X, halfDims.Y)
+            };
+
+            return b;
+        }
+
     }
 }

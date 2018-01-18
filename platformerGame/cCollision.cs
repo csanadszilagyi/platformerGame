@@ -175,8 +175,10 @@ namespace platformerGame
             impulse.Y = bullet.Heading.Y * Constants.BULLET_HIT_FORCE;
             m.AddForce(impulse);
             m.Hit(1);
-            bullet.Position = intersection;
-            bullet.LastPosition = intersection;
+            
+           // bullet.Position = intersection;
+           // bullet.LastPosition = intersection;
+            
             bullet.kill();
         }
 

@@ -15,6 +15,7 @@ namespace platformerGame
         List<IntRect> m_Frames;
 
         bool m_FlipHorizontally;
+        bool m_FlipVertically;
 
         uint m_FrameTime; //in milliseconds
         uint m_StartFrame;
@@ -30,7 +31,7 @@ namespace platformerGame
             m_ViewOffsetRect = view_offset_rect;
             m_Frames = new List<IntRect>();
             m_FlipHorizontally = false;
-
+            m_FlipVertically = false;
             m_CurrentFrame = 0;
 
             m_CurrentAnimTime = cGlobalClock.GetTimeInMilliseconds();
@@ -104,8 +105,16 @@ namespace platformerGame
         {
             m_Frames.Clear();
         }
-	    public void SetFlipHorizontally(bool b) { m_FlipHorizontally = b; }
-        public bool IsFlippedHorizontally()     {return m_FlipHorizontally;}
+	    public bool FlipHorizontally
+        {
+            get { return m_FlipHorizontally; }
+            set { m_FlipHorizontally = value; }
+        }
+        public bool FlipVertically
+        {
+            get { return m_FlipVertically; }
+            set { m_FlipVertically = value; }
+        }
 
         public void AddFrame(IntRect rect)
         {

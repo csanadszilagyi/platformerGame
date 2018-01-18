@@ -14,13 +14,16 @@ namespace platformerGame
         bool killed;
 
         cLight eye;
+
+        cTimer locateTime;
+
         public cMonster(cGameScene scene, Vector2f pos) : base(scene, pos)
         {
             p_followLight = new cLight();
             p_followLight.Radius = 80.0f;
             p_followLight.LinearizeFactor = 0.9f;
             p_followLight.Bleed = 2.0f;
-            p_followLight.Color = new Color(20, 184,87);
+            p_followLight.Color = new Color(20, 184, 87);
             //this.Scene.LightMap.AddStaticLight(p_followLight);
 
 
@@ -30,8 +33,10 @@ namespace platformerGame
             eye.Bleed = 5.0f;
             eye.OriginalColor = new Color(255, 39, 13);
             eye.Color = new Color(255, 39, 13);
-            
+
             this.Scene.LightMap.AddStaticLight(eye);
+
+            locateTime = new cTimer();
 
         }
 
@@ -179,7 +184,9 @@ namespace platformerGame
             this.Scene.LightMap.remove(this.p_followLight);
             this.Scene.LightMap.remove(this.eye);
 
-            this.Scene.ParticleManager.AddNormalBloodExplosion(this.Bounds.center);
+            //this.Scene.ParticleManager.AddNormalBloodExplosion(this.Bounds.center);
+            this.Scene.QueueCommand(new GameCommands.comNormalBloodExplosion(this.Scene, this.Bounds.center));
+
             this.spriteControl.ChangeState(new cSpriteState(MotionType.LIE, this.spriteControl.getCurrentState().HorizontalFacing));
             this.disabled = true;
             this.health = 0;
@@ -187,72 +194,83 @@ namespace platformerGame
 
         public override void Update(float step_time)
         {
-
-            if (!disabled)
+            if (!this.disabled)
             {
-                if (this.health <= 0)
+
+                Vector2f playerCenter = this.Scene.Player.Bounds.center;
+                double sqrDistFromPlayer = cAppMath.Vec2DistanceSqrt(playerCenter, this.Bounds.center);
+
+                Vector2i posA = new Vector2i((int)this.Bounds.center.X, (int)this.Bounds.center.Y);
+                Vector2i posB = new Vector2i((int)this.Scene.Player.Bounds.center.X, (int)this.Scene.Player.Bounds.center.Y);
+                bool playerHiddenForMe = true;
+                Vector2f intersectionPoint = new Vector2f(0.0f, 0.0f);
+
+                cAppMath.Raytrace(posA.X, posA.Y, posB.X, posB.Y, new VisitMethod(
+                   (int x, int y) =>
+                   {
+                       playerHiddenForMe = this.m_pScene.World.IsObastacleAtPos(new Vector2f(x, y));
+
+                       return playerHiddenForMe;
+                   }
+                 )
+               );
+
+                if (!playerHiddenForMe && sqrDistFromPlayer <= 1000000.0) // 100 unit distance
                 {
-                    this.Disable();
+                    //this.wake();
+
+                    if (playerCenter.X > this.Position.X)
+                    {
+                        if (velocity.X < 0.0f) this.StopMovingX();
+                        this.StartMovingRight();
+                    }
+
+                    if (playerCenter.X < this.Position.X)
+                    {
+                        if (velocity.X > 0.0f) this.StopMovingX();
+                        this.StartMovingLeft();
+                    }
+
+                    if (this.Scene.Player.Bounds.topLeft.Y < this.Bounds.topLeft.Y)
+                        this.StartJumping();
+                    else
+                        this.StopJumping();
                 }
                 else
                 {
-                    Vector2f playerCenter = this.Scene.Player.Bounds.center;
-
-                    if (cAppMath.Vec2DistanceSqrt(playerCenter, this.Bounds.center) <= 100.0 * 100.0)
-                    {
-                        //this.wake();
-
-                        if (playerCenter.X > this.Position.X)
-                        {
-                            if (velocity.X < 0.0f) this.StopMovingX();
-                            this.StartMovingRight();
-                        }
-
-                        if (playerCenter.X < this.Position.X)
-                        {
-                            if (velocity.X > 0.0f) this.StopMovingX();
-                            this.StartMovingLeft();
-                        }
-
-                        if (this.Scene.Player.Bounds.topLeft.Y < this.Bounds.topLeft.Y)
-                            this.StartJumping();
-                        else
-                            this.StopJumping();
-
-
-                    }
-                    else
-                    {
-                        this.StopMoving();
-                        //this.sleep();
-                    }
-
-                    
+                    this.StopMoving();
+                    //this.sleep();
                 }
 
                 this.spriteControl.Update(this.GetSpriteState());
 
+                if (this.health <= 0)
+                {
+                    this.Disable();
+                }
+
             }
-         else
-         {
-            if (cAppMath.Vec2IsZero(this.velocity))
+            else
             {
-                // draw its crops or "grave"
-                spriteControl.Render(this.Scene.StaticTexture, viewPosition);
-                this.Kill();
+
+                if (cAppMath.Vec2IsZero(this.velocity))
+                {
+                    this.Kill();
+                    // draw its crops or "grave"
+                    spriteControl.Render(this.Scene.StaticTexture, viewPosition);
+                }
             }
-         }    
 
-         base.updateMovement(step_time);
+            base.updateMovement(step_time);
 
-         //base.Update(step_time);
+            //base.Update(step_time);
         }
 
         public override void Render(RenderTarget destination)
         {
             Vector2f cw = GetCenterViewPos();
             p_followLight.Pos = cw;
-            eye.Pos = new Vector2f(cw.X+2, cw.Y - 5);
+            eye.Pos = new Vector2f(cw.X + 2, cw.Y - 5);
             base.Render(destination);
 
         }
@@ -260,8 +278,10 @@ namespace platformerGame
         public override void Hit(int amount)
         {
             base.Hit(amount);
-            this.spriteControl.ChangeState(new cSpriteState(MotionType.FALL, this.spriteControl.getCurrentState().HorizontalFacing));
-            this.Scene.ParticleManager.AddLittleBloodExplosion(this.Bounds.center, 3);
+            //this.spriteControl.ChangeState(new cSpriteState(MotionType.FALL, this.spriteControl.getCurrentState().HorizontalFacing));
+            //this.Scene.ParticleManager.AddLittleBloodExplosion(this.Bounds.center, 3);
+
+            this.Scene.QueueCommand(new GameCommands.comLittleBloodExplosion(this.Scene, this.Bounds.center));
         }
 
         protected void wake()

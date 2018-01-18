@@ -16,6 +16,7 @@ namespace platformerGame
 
         List<T> entities;
 
+        static int numLevels = 0;
         int level;
         cAABB bounds;
 
@@ -33,6 +34,7 @@ namespace platformerGame
 
         public cQuadTree(int _level, cAABB _bounds)
         {
+            
             this.level = _level;
             this.bounds = _bounds;
 
@@ -45,7 +47,10 @@ namespace platformerGame
             entities = new List<T>();
 
             label = new Text();
-            label.Position = new Vector2f(bounds.rightBottom.X - 50, bounds.rightBottom.Y - 30);
+
+            float xPos = bounds.rightBottom.X - level * 50;
+            label.Position = new Vector2f(xPos, bounds.rightBottom.Y - 30);
+
             label.Font = cAssetManager.GetFont("BGOTHL");
             label.CharacterSize = 24;
             label.Color = Color.White;
@@ -67,6 +72,8 @@ namespace platformerGame
                 return;
             }
 
+            numLevels++;
+
             float subWidth = bounds.halfDims.X;
             float subHeight = bounds.halfDims.Y;
             float x = bounds.topLeft.X;
@@ -87,6 +94,7 @@ namespace platformerGame
                 return;
             }
             else
+            //if(this.level + 1 <= numLevels)
             {
                 pNW.Clear();
                 pNE.Clear();
@@ -109,11 +117,19 @@ namespace platformerGame
 
         public void AddEntity(T entity)
         {
+            /*
+            if (entities.Count >= MAX_OBJECTS)
+            {
+                SplitToRects();
+            }
+            */
+
             if (level >= MAX_LEVEL)
             {
                 entities.Add(entity);
                 return;
             }
+
 
             if (Contains(pNW, entity))
             {
@@ -147,6 +163,7 @@ namespace platformerGame
                 //m_Text.setString( StringOf<uint>(m_Entities.size()) );
             }
             */
+
             
         }
         public List<T> GetEntitiesAtPos(Vector2f pos)
@@ -206,10 +223,9 @@ namespace platformerGame
         public void DrawBounds(RenderTarget target)
         {
             label.DisplayedString = this.entities.Count.ToString();
-
             target.Draw(this.shape, new RenderStates(BlendMode.Alpha));
             target.Draw(label);
-
+            
             if(this.level < MAX_LEVEL)
             {
                 pNW.DrawBounds(target);
@@ -217,9 +233,6 @@ namespace platformerGame
                 pSW.DrawBounds(target);
                 pSE.DrawBounds(target);
             }
-            
-
-            
         }
 
     }

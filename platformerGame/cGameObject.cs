@@ -30,6 +30,49 @@ namespace platformerGame
         //protected cAABB boundingBox;
         protected cAABB mapCollisionRect;
 
+        protected float mass;
+
+        protected bool movAble;
+
+        public cGameObject() : base()
+        {
+            m_pScene = null;
+            position = new Vector2f(0.0f, 0.0f); ;
+            lastPosition = new Vector2f(0.0f, 0.0f); ;
+            viewPosition = new Vector2f(0.0f, 0.0f); ;
+            velocity = new Vector2f(0.0f, 0.0f);
+            acceleration = new Vector2f(0.0f, 0.0f);
+            force = new Vector2f(0.0f, 0.0f);
+            MaxSpeed = 0.0f;
+            SlowDown = 1.0f;
+            orientation = 0.0;
+            mass = 1.0f;
+            movAble = true;
+
+            m_ID = GetNextValidID();
+        }
+        public cGameObject(cGameScene scene, Vector2f pos) : base()
+        {
+            m_pScene = scene;
+            position = pos;
+            lastPosition = pos;
+            viewPosition = pos;
+
+            velocity = new Vector2f(0.0f, 0.0f);
+            acceleration = new Vector2f(0.0f, 0.0f);
+            force = new Vector2f(0.0f, 0.0f);
+            orientation = 0.0;
+            mass = 1.0f;
+            movAble = true;
+
+            m_ID = GetNextValidID();
+        }
+
+        protected static int GetNextValidID()
+        {
+            return m_NextValidID++;
+        }
+
         public Vector2f ViewSize
         {
             get { return viewSize; }
@@ -61,39 +104,6 @@ namespace platformerGame
         {
             get { return mapCollisionRect; }
             set { mapCollisionRect = value; } // .ShallowCopy()
-        }
-
-        public cGameObject() : base()
-        {
-            m_pScene = null;
-            position = new Vector2f(0.0f, 0.0f); ;
-            lastPosition = new Vector2f(0.0f, 0.0f); ;
-            viewPosition = new Vector2f(0.0f, 0.0f); ;
-            velocity = new Vector2f(0.0f, 0.0f);
-            acceleration = new Vector2f(0.0f, 0.0f);
-            force = new Vector2f(0.0f, 0.0f);
-            MaxSpeed = 0.0f;
-            SlowDown = 1.0f;
-            orientation = 0.0;
-            m_ID = GetNextValidID();
-        }
-        public cGameObject(cGameScene scene, Vector2f pos) : base()
-        {
-            m_pScene = scene;
-            position = pos;
-            lastPosition = pos;
-            viewPosition = pos;
-
-            velocity = new Vector2f(0.0f, 0.0f);
-            acceleration = new Vector2f(0.0f, 0.0f);
-            force = new Vector2f(0.0f, 0.0f);
-            orientation = 0.0;
-            m_ID = GetNextValidID();
-        }
-
-        protected static int GetNextValidID()
-        {
-            return m_NextValidID++;
         }
 
         public int ID
@@ -235,6 +245,23 @@ namespace platformerGame
             }
         }
 
+        public float Mass
+        {
+            get { return this.mass; }
+            set { this.mass = value; }
+        }
+
+        public bool MovAble
+        {
+            get { return this.movAble; }
+            set { this.movAble = true; }
+        }
+
+        public bool Unmovable
+        {
+           get { return !this.movAble; }
+        }
+
         public void AddForce(Vector2f impulse)
         {
             this.force += impulse;
@@ -251,6 +278,16 @@ namespace platformerGame
         public virtual bool isActive()
         {
             return true;
+        }
+
+        public void MoveBy(Vector2f offset)
+        {
+            this.position += offset;
+        }
+
+        public void AddVelocity(Vector2f offset)
+        {
+            this.velocity += offset;
         }
     }
 }

@@ -86,7 +86,9 @@ namespace platformerGame
         
         public cAABB getBoundingBox(Vector2f pos_by)
         {
-            return new cAABB(pos_by, mapCollisionRect.dims);
+            mapCollisionRect.SetPosByTopLeft(pos_by);
+            return mapCollisionRect;
+            //return new cAABB(pos_by, mapCollisionRect.dims);
         }
         
         public bool IsOnOneWayPlatform
@@ -506,7 +508,7 @@ namespace platformerGame
             int tileBeginX = Math.Min(world.ToMapPos(oldTopRight).X, tileEndX);
 
             int tileBeginY = world.ToMapPos(newBottomRight).Y;
-            int tileEndY = world.ToMapPos(newTopRight).Y;
+            int tileEndY = world.ToMapPos(newTopRight).Y; // changed to handle right walking between walls when falling
 
             for (int tileIndexX = tileBeginX; tileIndexX < tileEndX; ++tileIndexX)
             {

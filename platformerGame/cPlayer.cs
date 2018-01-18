@@ -57,9 +57,9 @@ namespace platformerGame
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
                                          0,
-                                         0,
-                                         3,
-                                         FRAME_TIME,
+                                         0, // 0
+                                         3, // 3
+                                         60, //FRAME_TIME,
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.WALK, HorizontalFacing.FACING_RIGHT),
@@ -68,9 +68,9 @@ namespace platformerGame
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
                                          1,
-                                         0,
-                                         3,
-                                         FRAME_TIME,
+                                         0, // 0
+                                         3, // 3
+                                         60, //FRAME_TIME,
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.JUMP, HorizontalFacing.FACING_LEFT),

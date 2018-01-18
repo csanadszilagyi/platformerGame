@@ -33,8 +33,8 @@ namespace platformerGame
             if(this.isReadForNextShot())
             {
                 Vector2f dir = cAppMath.Vec2NormalizeReturn(target - owner.Bounds.center);
-                Vector2f toTarget = cAppMath.GetRandomVecBySpread(dir, spread);
-                cBullet b = new cBullet(this.owner, owner.Bounds.center, toTarget);
+                Vector2f toSpreadTarget = cAppMath.GetRandomVecBySpread(dir, spread);
+                cBullet b = new cBullet(this.owner, owner.Bounds.center, toSpreadTarget);
                 owner.Scene.EntityPool.AddBullet(b);
             }
         }

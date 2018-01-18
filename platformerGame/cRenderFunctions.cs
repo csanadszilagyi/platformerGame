@@ -110,9 +110,11 @@ namespace platformerGame
                 sub_rect.Height = (int)texture.Size.Y;
             }
 
-          /*  Vector2f centre;
+            /*
+            Vector2f centre = new Vector2f();
             centre.X = location.X + texture.Size.X / 2.0f;
-            centre.Y = location.Y + texture.Size.Y / 2.0f;*/
+            centre.Y = location.Y + texture.Size.Y / 2.0f;
+            */
 
             //Set the position in space.
             Transform translationT = Transform.Identity;
@@ -168,7 +170,16 @@ namespace platformerGame
             vertices[3] = vtx;
             */
 
-            
+            if(flip_vertically)
+            {
+                Utils.Swap<float>(ref top, ref bottom);
+            }
+
+            if (flip_horizontally)
+            {
+                Utils.Swap<float>(ref right, ref left);
+            }
+
             vertices.Append(new Vertex(new Vector2f(0.0f, 0.0f), coloration, new Vector2f(left, top)));
             vertices.Append(new Vertex(new Vector2f(widthBeforeTransform, 0), coloration, new Vector2f(right, top)));
             vertices.Append(new Vertex(new Vector2f(widthBeforeTransform, heightBeforeTransform), coloration, new Vector2f(right, bottom)));

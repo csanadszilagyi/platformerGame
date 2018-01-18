@@ -39,5 +39,13 @@ namespace platformerGame
             c.A = 255;
             return c;
         }
+
+        //==========================================================================================================
+        public static void Swap<T>(ref T a, ref T b)
+        {
+            T c = a;
+            a = b;
+            b = c;
+        }
     }
 }

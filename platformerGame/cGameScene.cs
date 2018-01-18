@@ -9,6 +9,9 @@ using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 
+using platformerGame.GameCommands;
+using platformerGame.Particles;
+
 namespace platformerGame
 {
     /// <summary>
@@ -33,6 +36,8 @@ namespace platformerGame
         cParticleManager particleManager;
 
         RenderTexture staticTexture;
+
+        Queue<cBaseGameCommand> gameCommands;
 
         public cGameScene(cSfmlApp controller) : base(controller)
         {
@@ -93,12 +98,23 @@ namespace platformerGame
             worldEnvironment.SetWaterBlocks(waterBlocks);
 
             this.particleManager = new cParticleManager(this);
-           // lightMap.renderStaticLightsToTexture();
+            // lightMap.renderStaticLightsToTexture();
 
+            gameCommands = new Queue<cBaseGameCommand>(30);
             //Pálya idő start
             levelTimer.Start();
 
         }
+
+
+        public override void BeforeUpdate()
+        {
+            while(gameCommands.Count > 0)
+            {
+                gameCommands.Dequeue().Execute();
+            }
+        }
+
         public override void Update(float step_time)
         {
             UpdatePlayerInput();
@@ -151,6 +167,8 @@ namespace platformerGame
             destination.SetView(m_View);
 
             this.lightMap.separateVisibleLights(viewRect);
+
+            this.particleManager.PreRender(alpha);
             //TODO: Entity pool PreRender, filter visible objects
         }
         public override void Render(RenderTarget destination, float alpha)
@@ -189,10 +207,12 @@ namespace platformerGame
 
             this.particleManager.Render(destination, alpha);
 
+            /*
+#if DEBUG
             this.entityPool.RenderQuadtree(destination);
+#endif
+*/
 
-
-   
             // cRenderFunctions.DrawLine(destination, new Vector2f(0, 400), new Vector2f(720, 400), Color.White, BlendMode.None);
         }
 
@@ -309,6 +329,11 @@ namespace platformerGame
         public cParticleManager ParticleManager
         {
             get { return this.particleManager; }
+        }
+
+        public void QueueCommand(cBaseGameCommand command)
+        {
+            gameCommands.Enqueue(command);
         }
 
     }

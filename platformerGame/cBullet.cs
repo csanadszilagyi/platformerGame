@@ -92,6 +92,8 @@ namespace platformerGame
                 position.X += velocity.X * step_time;
                 position.Y += velocity.Y * step_time;
 
+                this.bounds.SetPosByTopLeft(position);
+
                 if (this.checkCollisionWithWorld(owner.Scene.World, ref intersection))
                 {
                     //this.alive = false; // if not set to false, bullets will be shown
@@ -103,7 +105,7 @@ namespace platformerGame
 
                 if (cAppMath.Vec2IsZero(velocity))
                 {
-                    cAppMath.Vec2NormalizeReturn(velocity);
+                    cAppMath.Vec2Normalize(ref velocity);
 
                     //Side = Math->Vec2Perp(Heading);
                 }
@@ -120,6 +122,12 @@ namespace platformerGame
         {
             this.alive = false;
         }
+
+        public bool Alive
+        {
+            get { return this.alive; }
+        }
+
         public override bool isActive()
         {
             return this.alive && this.alpha > 1.0f; //&& cCollision.IsPointInsideBox(this.position, this.owner.Scene.World.WorldBounds);
@@ -134,7 +142,7 @@ namespace platformerGame
 
             destination.Draw(this.sprite, new RenderStates(BlendMode.Add));
             //cRenderFunctions.DrawLine(destination, this.viewPosition, this.viewPosition + this.oppositeDir, 2.0f, new Color(237, 247, 89, 255), BlendMode.Add);
-            //cRenderFunctions.DrawRectangleShape(destination, this.bounds, Color.Green, BlendMode.Alpha, cAppMath.RadianToDegress(this.orientation));
+            //cRenderFunctions.DrawRectangleShape(destination, this.Bounds, Color.Green, BlendMode.Add); //cAppMath.RadianToDegress(this.orientation)
         }
 
     }
