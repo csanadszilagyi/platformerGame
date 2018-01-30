@@ -31,12 +31,12 @@ namespace platformerGame
             timer.Start();
         }
 
-        public static float GetCurrentTime()
+        public static double GetCurrentTime()
         {
             return timer.GetCurrentTime();
         }
 
-        public static float GetTimeInMilliseconds()
+        public static double GetTimeInMilliseconds()
         {
             return timer.GetCurrentTimeAsMilliseconds();
         }

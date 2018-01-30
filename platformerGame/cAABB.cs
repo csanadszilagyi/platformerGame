@@ -112,5 +112,15 @@ namespace platformerGame
             return b;
         }
 
+        public Vector2f getTopRight()
+        {
+            return new Vector2f(topLeft.X + dims.X, topLeft.Y);
+        }
+
+        public Vector2f getLeftBottom()
+        {
+            return new Vector2f(topLeft.X, topLeft.Y + dims.Y);
+        }
+
     }
 }

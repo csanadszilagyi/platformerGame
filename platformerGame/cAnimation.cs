@@ -21,8 +21,8 @@ namespace platformerGame
         uint m_StartFrame;
 
         int m_CurrentFrame;
-        float m_CurrentAnimTime;
-        float m_LastAnimTime;
+        double m_CurrentAnimTime;
+        double m_LastAnimTime;
 
         IntRect m_ViewOffsetRect; //view rect offsets inside animation rect
 	    public cAnimation(Texture sprite_sheet, IntRect view_offset_rect = new IntRect())

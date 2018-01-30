@@ -89,6 +89,7 @@ namespace platformerGame
         public cAABB levelStartRegion;
         public cAABB levelEndRegion;
 
+        Sprite tempSprite;
         cGameScene pScene;
         
         public cWorld(cGameScene p_scene, Vector2u window_size)
@@ -115,7 +116,7 @@ namespace platformerGame
             background.TextureRect = new IntRect(0, 0, (int)m_WorldBounds.dims.X, (int)m_WorldBounds.dims.Y); // (int)m_TextureOfTiles.Size.X, (int)m_TextureOfTiles.Size.Y);
             background.Color = Constants.BACKGROUND_COLOR;
 
-            
+            tempSprite = new Sprite(m_TileSetTexture);
         }
 
         public void LoadLevel(string file_name)
@@ -464,7 +465,7 @@ namespace platformerGame
 
             const uint spaceOffset = 0;
 
-            Sprite tempSprite = new Sprite(m_TileSetTexture);
+            
            
 
             const int subTILE_SIZE = 32; //40
@@ -638,6 +639,7 @@ namespace platformerGame
                        p.Vel.X = 0.0f;
                        p.Vel.Y = 0.0f;
 
+                       p.Intersects = true;
                        p.Life = 0.0f;
                    }
 
@@ -712,10 +714,14 @@ namespace platformerGame
             {
                 for (int x = minTileX; x <= maxTileX; x++)
                 {
-                    if ( y >= 0 && x >= 0 && y < this.m_Level1.Height && x < this.m_Level1.Width && !this.m_Level1.GetTileAtXY(x, y).IsWalkAble())
+                    if ( y >= 0 && x >= 0 && y < this.m_Level1.Height && x < this.m_Level1.Width )
                     {
-                      
-                        boxes.Add(this.getAABBFromMapPos(new Vector2i(x, y)));
+                        TileType ty = this.m_Level1.GetTileAtXY(x, y).Type;
+
+                        if (ty == TileType.WALL || ty == TileType.ONEWAY_PLATFORM)
+                        {
+                            boxes.Add(this.getAABBFromMapPos(new Vector2i(x, y)));
+                        }
                         
                     }
                 }

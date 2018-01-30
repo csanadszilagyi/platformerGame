@@ -149,7 +149,7 @@ namespace platformerGame
 
             do
             {
-                waterNodes[(int)i].Update(step_time);
+                waterNodes[(int)i].Update(step_time * 1.75f);
 
                 //csak a felső csatlakozó vertexeket akarjuk mozgatni, így azokkal foglalkozunk
                 vIndex = 2 + (i * 2);

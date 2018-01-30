@@ -13,18 +13,34 @@ namespace platformerGame.Particles
     abstract class cBaseParticleController
     {
         protected cParticleManager particleManager;
-        protected cParticlePool pool;
+        protected cParticlePoolList pool;
         protected VertexArray vertices;
         protected RenderStates renderStates;
 
         public cBaseParticleController(cParticleManager manager, uint max_particles = 30)
         {
             this.particleManager = manager;
-            this.pool = new cParticlePool(max_particles);
+            this.pool = new cParticlePoolList((int)max_particles); // new ParticlePool()
             this.vertices = new VertexArray(PrimitiveType.Quads);
+            this.renderStates = new RenderStates(BlendMode.Add);
         }
 
-        protected abstract void initParticle(Particle particle, Vector2f position);
+        protected void loopAddition(cEmissionInfo emission,  uint num_particles)
+        {
+            uint i = 0;
+            while ((emission.Particle = pool.getNew()) != null && i < num_particles)
+            {
+                initParticle(emission);
+                ++i;
+            }
+        }
+
+        public int NumActive
+        {
+            get { return pool.CountActive; }
+        }
+
+        protected abstract void initParticle(cEmissionInfo emission);
 
         public abstract void Update(float step_time);
 

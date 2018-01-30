@@ -1,18 +1,19 @@
 ﻿using SFML.System;
+using platformerGame.Particles;
 
 namespace platformerGame.GameCommands
 {
     class comNormalBloodExplosion : cBaseGameCommand
     {
-        Vector2f pos;
-        public comNormalBloodExplosion(cGameScene scene, Vector2f pos) : base(scene)
+        cEmissionInfo emission;
+        public comNormalBloodExplosion(cGameScene scene, cEmissionInfo emission) : base(scene)
         {
-            this.pos = pos;
+            this.emission = emission;
         }
 
         public override void Execute()
         {
-            scene.ParticleManager.Explosions.NormalBlood(pos);
+            scene.ParticleManager.Explosions.NormalBlood(emission);
         }
     }
 }

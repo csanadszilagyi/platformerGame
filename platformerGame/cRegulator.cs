@@ -8,23 +8,23 @@ namespace platformerGame
 {
     class cRegulator
     {
-        float freq;
-        float periodTime; //in seconds
+        double freq;
+        double periodTime; //in seconds
 
         //in milliseconds
-        float currentTime = 0.0f;
-        float lastTime = 0.0f;
+        double currentTime = 0.0;
+        double lastTime = 0.0;
 	    public cRegulator()
         {
-            freq = 0.0f;
-            periodTime = 0.0f;
+            freq = 0.0;
+            periodTime = 0.0;
         }
 
         public bool isReady()
         {
             currentTime = cGlobalClock.GetTimeInMilliseconds();
 
-            if ((currentTime - lastTime) >= periodTime * 1000.0f)
+            if ((currentTime - lastTime) >= periodTime * 1000.0)
             {
                 lastTime = currentTime;
                 return true;
@@ -33,23 +33,23 @@ namespace platformerGame
             return false;
         }
 
-        public void resetByFrequency(float frequency)
+        public void resetByFrequency(double frequency)
         {
             this.freq = frequency;
-            this.periodTime = (frequency > 0.0f) ? (1.0f / frequency) : 0.0f;
+            this.periodTime = (frequency > 0.0) ? (1.0 / frequency) : 0.0;
             lastTime = cGlobalClock.GetTimeInMilliseconds();
         }
         public void resetByPeriodTime(float period_time_in_seconds)
         {
             this.periodTime = period_time_in_seconds;
-            this.freq = (periodTime > 0.0f) ? (1.0f / periodTime) : 0.0f;
+            this.freq = (periodTime > 0.0) ? (1.0 / periodTime) : 0.0;
             lastTime = cGlobalClock.GetTimeInMilliseconds();
         }
-        public float getPeriodTime()
+        public double getPeriodTime()
         {
             return periodTime;
         }
-        public float getFrequency()
+        public double getFrequency()
         {
             return freq;
         }

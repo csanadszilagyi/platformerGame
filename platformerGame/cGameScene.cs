@@ -51,7 +51,7 @@ namespace platformerGame
             m_View.Size = new Vector2f(worldSize.X, worldSize.Y);
             m_View.Center = new Vector2f(worldSize.X / 2.0f, worldSize.Y / 2.0f);
             m_View.Viewport = new FloatRect(0.0f, 0.0f, 1.0f, 1.0f);
-            m_View.Zoom(0.6f); //0.8f
+            m_View.Zoom(0.6f); //0.6f
             m_AppController.MainWindow.SetView(m_View);
 
             viewRect = new cAABB();
@@ -100,7 +100,7 @@ namespace platformerGame
             this.particleManager = new cParticleManager(this);
             // lightMap.renderStaticLightsToTexture();
 
-            gameCommands = new Queue<cBaseGameCommand>(30);
+            gameCommands = new Queue<cBaseGameCommand>(50);
             //Pálya idő start
             levelTimer.Start();
 
@@ -109,15 +109,21 @@ namespace platformerGame
 
         public override void BeforeUpdate()
         {
-            while(gameCommands.Count > 0)
-            {
-                gameCommands.Dequeue().Execute();
-            }
+           
+
+          
         }
 
         public override void Update(float step_time)
         {
+
+
             UpdatePlayerInput();
+
+            while (gameCommands.Count > 0)
+            {
+                gameCommands.Dequeue().Execute();
+            }
 
             entityPool.Update(step_time);
             m_Player.Update(step_time);
@@ -126,15 +132,16 @@ namespace platformerGame
             {
                 //vége a pályának
                 
-                AppController.PlayerInfo.Time = levelTimer.GetCurrentTime();
+                //AppController.PlayerInfo.Time = levelTimer.GetCurrentTime();
                 //AppController.PlayerInfo.Level = AppController.LevelName;
-                AppController.CloseApp();
+                //AppController.CloseApp();
             }
 
             this.particleManager.Update(step_time);
 
             worldEnvironment.Update(step_time);
 
+            
         }
 
         private void PreRender(RenderTarget destination, float alpha)
@@ -189,10 +196,10 @@ namespace platformerGame
             worldEnvironment.RenderWaterBlocks(destination);
 
             this.entityPool.RenderEntities(destination, alpha);
-
+            
             
 
-            cRenderFunctions.DrawTextureSimple(destination,
+            cRenderFunctions.DrawTextureSimple( destination,
                                                 viewRect.topLeft,
                                                 this.staticTexture.Texture,
                                                 new IntRect((int)viewRect.topLeft.X, (int)viewRect.topLeft.Y,
@@ -202,6 +209,8 @@ namespace platformerGame
 
 
             this.lightMap.Render(destination, viewRect);
+
+            this.entityPool.RenderPickups(destination, alpha);
 
             this.entityPool.RenderBullets(destination, alpha);
 
@@ -295,9 +304,10 @@ namespace platformerGame
 
         public override void HandleSingleMouseClick(MouseButtonEventArgs e)
         {
-            if(e.Button == Mouse.Button.Right)
+            Vector2f mousePos = this.GetMousePos();
+            if (e.Button == Mouse.Button.Right)
             {
-                this.entityPool.AddMonster(new cMonster(this, this.GetMousePos()));
+                 this.entityPool.AddMonster(new cMonster(this, mousePos));
                // this.particleManager.AddExplosion(this.GetMousePos());
             }
         }

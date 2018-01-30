@@ -12,7 +12,7 @@ namespace platformerGame.GameCommands
 
         public override void Execute()
         {
-            scene.ParticleManager.Explosions.LittleBlood(pos);
+            scene.ParticleManager.Explosions.LittleBlood(new Particles.cEmissionInfo(pos));
         }
     }
 }

@@ -19,8 +19,10 @@ namespace platformerGame.Particles
         cGameScene scene;
 
         readonly Texture explosionTexture;
+        readonly Texture fireworksTexture;
 
         cExplosionController explosions;
+        cFireworksController fireworks;
 
         Text label;
 
@@ -29,8 +31,10 @@ namespace platformerGame.Particles
             this.scene = scene;
 
             explosionTexture = cAssetManager.GetTexture("simple_particle");
+            fireworksTexture = cAssetManager.GetTexture("bullet_light_green");
 
             explosions = new cExplosionController(this);
+            fireworks = new cFireworksController(this);
 
             label = new Text();
             label.Position = new Vector2f(20, 45);
@@ -44,12 +48,14 @@ namespace platformerGame.Particles
 
         public void Update(float step_time)
         {
+            fireworks.Update(step_time);
             explosions.Update(step_time);
         }
 
         public void PreRender(float alpha)
         {
             // if we want calculate viewPos before all renderings are started...
+            fireworks.BuildVertexBuffer(alpha);
             explosions.BuildVertexBuffer(alpha);
         }
 
@@ -57,12 +63,18 @@ namespace platformerGame.Particles
         {
             //label.DisplayedString = "Active explosion particles: " + explosions.NumActive.ToString();
             //destination.Draw(label);
+            fireworks.Render(destination, alpha);
             explosions.Render(destination, alpha);
         }
 
         public Texture ExplosionTexture
         {
             get { return explosionTexture; }
+        }
+
+        public Texture FireworksTexture
+        {
+            get { return fireworksTexture; }
         }
 
         public cGameScene Scene
@@ -73,6 +85,11 @@ namespace platformerGame.Particles
         public cExplosionController Explosions
         {
             get { return explosions; }
+        }
+
+        public cFireworksController Fireworks
+        {
+            get { return fireworks; }
         }
     }
 }

@@ -30,6 +30,8 @@ namespace platformerGame
 
         public float Rotation; // in radian
 
+        public bool Intersects;
+
         public Particle()
         {
             Pos = new Vector2f(0.0f, 0.0f);
@@ -47,6 +49,7 @@ namespace platformerGame
             Life = 1.0f;
             Rotation = 0.0f;
             Scale = 1.0f;
+            Intersects = false;
         }
 
         public cAABB getBoundingBox()
@@ -74,6 +77,7 @@ namespace platformerGame
             this.Life = p.Life;
             this.Rotation = p.Rotation;
             this.Scale = p.Scale;
+            this.Intersects = p.Intersects;
         }
 
     }
