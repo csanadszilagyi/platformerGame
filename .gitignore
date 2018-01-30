@@ -7,4 +7,5 @@
 *.csproj
 /.vs
 *VC.db
+*.opendb
 /platformerGame/UNUSED
