@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using SFML.System;
 
-namespace platformerGame
+namespace platformerGame.Utilities
 {
     enum Side
     {

@@ -101,6 +101,8 @@ namespace platformerGame
         /// <returns></returns>
         public Vector2f[] getLocalVertices()
         {
+           // return Utilities.cSatCollision.BuildBox(dims.X, dims.Y);
+            
             Vector2f[] b = new Vector2f[4]
             {
                new Vector2f(-halfDims.X, -halfDims.Y),
@@ -110,6 +112,7 @@ namespace platformerGame
             };
 
             return b;
+            
         }
 
         public Vector2f getTopRight()

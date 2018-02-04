@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using SFML.System;
 
-namespace platformerGame
+namespace platformerGame.Utilities
 {
     /// <summary>
     /// Collision detection based on the Separating Axis Theorem (for fast moving objects, like projectiles).
@@ -15,11 +15,11 @@ namespace platformerGame
     {
         public static bool checkAndResolve(cGameObject objA, cGameObject objB, float dt, bool resolve = false)
         {
-            float t = dt;
+            float t = dt; // 1.0f / 200.0f
             Vector2f N = new Vector2f(0.0f, 0.0f);
 
             //objA.GetBoundingBox().m_Center - objB.GetBoundingBox().m_Center;
-            Vector2f RelPos = objA.Bounds.center - objB.Bounds.center;
+            Vector2f RelPos = objA.Position - objB.Position; // objA.Bounds.center - objB.Bounds.center;
            // Vector2f RelPos = objA.Position - objB.Position;
             Vector2f RelVel = objA.Velocity - objB.Velocity;
 
@@ -32,7 +32,7 @@ namespace platformerGame
                 {
                     if (t < 0.0f)
                     {
-                        ProcessOverlap(objA, objB, new Vector2f(N.X * (-t), N.Y * (-t)));
+                        ProcessOverlap(objA, objB, N * (-t));
                     }
                     else
                     {
@@ -62,15 +62,15 @@ namespace platformerGame
             
             float dt = cAppMath.Vec2Dot(Dt, Dt);
             float CoF = Constants.FRICTION;
-
+            
             if (dt < Constants.GLUE * Constants.GLUE)
                 CoF = 1.01f;
-                
-            //D = -(1.0f + s_fRestitution) * Dn - (CoF) * Dt;
-
-            D.X = -(1.0f + Constants.RESTITUTION) * Dn.X - (CoF * Dt.X);
-            D.Y = -(1.0f + Constants.RESTITUTION) * Dn.Y - (CoF * Dt.Y);
+               
+            //D = -(1.0f + Constants.RESTITUTION) * Dn - (CoF) * Dt;
+            D.X = -(1.0f + Constants.RESTITUTION) * Dn.X - (CoF) * Dt.X;
+            D.Y = -(1.0f + Constants.RESTITUTION) * Dn.Y - (CoF) * Dt.Y;
             
+
             float m0 = objA.Mass;
             float m1 = objB.Mass;
             float m = m0 + m1;
@@ -92,7 +92,7 @@ namespace platformerGame
 
             if (m1 > 0.0f)
             {
-                objB.AddVelocity(D * -r1);
+                objB.AddVelocity(D * (-r1));
                 /*
                 Vector2f velB = objB.Velocity + D * -r1;
                 objB.Velocity = velB;
@@ -109,9 +109,9 @@ namespace platformerGame
         {
             Vector2f mtd = xMTD;
 
-            float time = 1.0f / 120.0f;
+            float time = (1.0f / 200.0f); // 0.0166f; // 1.0f / 120.0f;
 
-            //Math.Vec2Truncate(mtd, 0.1f);
+            //cAppMath.Vec2Truncate(ref mtd, 0.1f);
 
             //mtd.X = Math.Clamp<float>(mtd.X, 3.0f, -3.0f);
             //mtd.Y = Math.Clamp<float>(mtd.Y, 3.0f, -3.0f);
@@ -119,23 +119,29 @@ namespace platformerGame
             if (objA.Unmovable)
             {
                 objB.MoveBy(mtd * -time);
-
-                //objB.Position.X -= mtd.X * 0.0166f;// *0.5f;
-                //objB.Position.Y -= mtd.Y * 0.0166f;// *0.5f;
-                                                   //return;
+                /*
+                Vector2f p = objB.Position;
+                p.X -= mtd.X * time; // *0.5f;
+                p.Y -= mtd.Y * time; // *0.5f;
+                objB.Position = p;
+                */
             }
             else
             if (objB.Unmovable)
             {
+
                 objA.MoveBy(mtd * time);
+
                 //objA.Position.X += mtd.X * 0.0166f;// * 0.5f;
                 //objA.Position.Y += mtd.Y * 0.0166f;// * 0.5f;
                 //return;
             }
             else
             {
+                
                 objA.MoveBy(mtd * time);
                 objB.MoveBy(mtd * -time);
+                
 
                 /*
                 objA.Position.X += mtd.X * 0.5f;
@@ -146,21 +152,21 @@ namespace platformerGame
                 */
             }
 
+           
             Vector2f N = mtd;
-            N = cAppMath.Vec2NormalizeReturn(N);
+            cAppMath.Vec2Normalize(ref N);
             ProcessCollision(objA, objB, N, 0.0f);
+            
         }
 
 
-        public static Vector2f[] BuildBox(ref int NumVertices, float width, float height)
+        public static Vector2f[] BuildBox(float width, float height)
         {
             Vector2f[] axVertices = new Vector2f[4];
-
-            axVertices[0] = new Vector2f(-width / 2, -height / 2);
-            axVertices[1] = new Vector2f(width / 2, -height / 2);
-            axVertices[2] = new Vector2f(width / 2, height / 2);
-            axVertices[3] = new Vector2f(-width / 2, height / 2);
-            NumVertices = 4;
+            axVertices[0] = new Vector2f(-width / 2.0f, -height / 2.0f);
+            axVertices[1] = new Vector2f(width / 2.0f, -height / 2.0f);
+            axVertices[2] = new Vector2f(width / 2.0f, height / 2.0f);
+            axVertices[3] = new Vector2f(-width / 2.0f, height / 2.0f);
             return axVertices;
         }
 

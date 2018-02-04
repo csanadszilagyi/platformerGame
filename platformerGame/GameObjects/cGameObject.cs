@@ -1,6 +1,8 @@
 ﻿using SFML.System;
 using SFML.Graphics;
 
+using platformerGame.Utilities;
+
 namespace platformerGame
 {
     class cGameObject : cQuadTreeOccupant, IDrawable
@@ -8,7 +10,7 @@ namespace platformerGame
         protected int m_ID;
         protected static int m_NextValidID;
       
-        protected cGameScene m_pScene;
+        protected cGameScene pscene;
 
         protected Vector2f position;
         protected Vector2f lastPosition;
@@ -37,7 +39,7 @@ namespace platformerGame
         protected cAABB hitBox;
         public cGameObject() : base()
         {
-            m_pScene = null;
+            pscene = null;
             position = new Vector2f(0.0f, 0.0f); ;
             lastPosition = new Vector2f(0.0f, 0.0f); ;
             viewPosition = new Vector2f(0.0f, 0.0f); ;
@@ -55,7 +57,7 @@ namespace platformerGame
         }
         public cGameObject(cGameScene scene, Vector2f pos) : base()
         {
-            m_pScene = scene;
+            pscene = scene;
             position = pos;
             lastPosition = pos;
             viewPosition = pos;
@@ -80,20 +82,6 @@ namespace platformerGame
             get { return viewSize; }
             set { viewSize = value; }
         }
-
-        public override cAABB Bounds
-        {
-            get
-            {
-                return base.Bounds;
-            }
-
-            set
-            {
-                base.Bounds = value;
-            }
-        }
-
         
         public cAABB HitBox
         {
@@ -114,7 +102,7 @@ namespace platformerGame
         }
         public cGameScene Scene
         {
-            get { return m_pScene; }
+            get { return pscene; }
         }
 
         public Vector2f Position
@@ -256,7 +244,7 @@ namespace platformerGame
         public bool MovAble
         {
             get { return this.movAble; }
-            set { this.movAble = true; }
+            set { this.movAble = value; }
         }
 
         public bool Unmovable
@@ -314,13 +302,13 @@ namespace platformerGame
         public static cGameObject MakeWall(cAABB box)
         {
             cGameObject go = new cGameObject();
-            go.Position = box.topLeft;
+            go.Position = box.center;
             go.LastPosition = go.Position;
             go.Velocity = new Vector2f(0.0f, 0.0f);
-            go.viewPosition = go.Position;
+            go.ViewPosition = go.Position;
             //box.SetDims(new Vector2f(Constants.TILE_SIZE, Constants.TILE_SIZE));
-            go.bounds = box;
-            go.hitBox = box;
+            go.Bounds = box;
+            go.HitBox = box;
             go.MovAble = false; // important!
             go.Mass = 0.0f;
             return go;

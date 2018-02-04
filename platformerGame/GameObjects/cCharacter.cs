@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using SFML.Graphics;
 using SFML.System;
 
+using platformerGame.Utilities;
+
 namespace platformerGame
 {
     class cCharacter : cGameObject
@@ -220,7 +222,7 @@ namespace platformerGame
 
         protected virtual void updateMovement(float step_time)
         {
-            cWorld world = m_pScene.World;
+            cWorld world = pscene.World;
 
             lastPosition.X = position.X;
             lastPosition.Y = position.Y;
@@ -445,9 +447,9 @@ namespace platformerGame
                     if (world.GetCurrentLevel().GetTileAtXY(tileIndexX, tileIndexY).Type == TileType.WALL)
                     /*world.isRectOnWall()*/
                     {
-                        world.GetCurrentLevel().GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = true;
-
                         //world.GetCurrentLevel().GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = true;
+
+                        world.GetCurrentLevel().GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = true;
                         groundY = (int)(tileIndexY * Constants.TILE_SIZE + world.WorldBounds.topLeft.Y);
                         return true;
                     }

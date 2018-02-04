@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 using SFML.System;
 
+using platformerGame.Utilities;
+
 namespace platformerGame.Weapons
 {
     class cShotgun : cWeapon

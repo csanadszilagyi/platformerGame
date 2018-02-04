@@ -9,6 +9,8 @@ using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 
+using platformerGame.Utilities;
+
 namespace platformerGame
 {
     class cRenderFunctions

@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using SFML.Graphics;
 using SFML.System;
 
+using platformerGame.Utilities;
+
 namespace platformerGame
 {
     class cMonster : cCharacter
@@ -217,7 +219,7 @@ namespace platformerGame
                 cAppMath.Raytrace(posA.X, posA.Y, posB.X, posB.Y, new VisitMethod(
                    (int x, int y) =>
                    {
-                       playerHiddenForMe = this.m_pScene.World.IsObastacleAtPos(new Vector2f(x, y));
+                       playerHiddenForMe = this.pscene.World.IsObastacleAtPos(new Vector2f(x, y));
 
                        return playerHiddenForMe;
                    }

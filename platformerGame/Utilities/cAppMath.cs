@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using SFML.System;
 
-namespace platformerGame
+namespace platformerGame.Utilities
 {
     /// <summary>
     /// Used as a callback function in the RayTrace function.
@@ -135,7 +135,6 @@ namespace platformerGame
             int error = dx - dy;
             dx *= 2;
             dy *= 2;
-            bool exit = false;
             while (n > 0 && !breakVisit(x, y))
             //for (; n > 0; --n)
             {
@@ -219,6 +218,7 @@ namespace platformerGame
         {
             return (a.X * b.X) + (a.Y * b.Y);
         }
+
         public static bool Vec2IsZero(Vector2f vec)
         {
             return ((vec.X * vec.X + vec.Y * vec.Y) <= 0.0f);

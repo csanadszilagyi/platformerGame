@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 using SFML.Graphics;
 using SFML.System;
+
 using platformerGame.Weapons;
 using platformerGame.GameObjects;
+using platformerGame.Utilities;
 
 namespace platformerGame
 {

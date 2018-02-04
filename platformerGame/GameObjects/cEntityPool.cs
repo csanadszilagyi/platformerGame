@@ -8,6 +8,7 @@ using SFML.Graphics;
 using SFML.System;
 
 using platformerGame.GameObjects;
+using platformerGame.Utilities;
 
 namespace platformerGame
 {
@@ -68,7 +69,10 @@ namespace platformerGame
 
         public void Update(float step_time)
         {
+
             spatialGrid.ClearAll();
+
+            // checkPickupsCollisionEachOther(step_time);
 
             this.checkBulletVsEntityCollisions(step_time);
             
@@ -178,6 +182,23 @@ namespace platformerGame
             }
 
             return index;
+        }
+
+
+        private void checkPickupsCollisionEachOther(float step_time)
+        {
+            KeyValuePair<int, cPickupAble>[] pics = pickups.ToArray();
+
+            for(int i = 0; i<pics.Length-1; i++)
+            {
+                for (int j = i+1; j < pics.Length; j++)
+                {
+                    if(j != i)
+                    {
+                        cSatCollision.checkAndResolve(pics[i].Value, pics[j].Value, step_time, true);
+                    }
+                }
+            }
         }
 
         public void checkPlayerCanUseOrPickupOrInteract()

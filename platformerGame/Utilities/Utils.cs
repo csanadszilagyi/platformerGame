@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using SFML.Graphics;
 
-namespace platformerGame
+namespace platformerGame.Utilities
 {
     class Utils
     {

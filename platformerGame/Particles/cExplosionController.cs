@@ -8,6 +8,8 @@ using System.Diagnostics;
 using SFML.System;
 using SFML.Graphics;
 
+using platformerGame.Utilities;
+
 namespace platformerGame.Particles
 {
     class cExplosionController : cBaseParticleController

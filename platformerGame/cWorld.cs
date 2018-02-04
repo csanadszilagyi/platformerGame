@@ -9,6 +9,8 @@ using SFML.System;
 using SFML.Graphics;
 using SFML.Window;
 
+using platformerGame.Utilities;
+
 namespace platformerGame
 {
     class TileMask
@@ -698,29 +700,35 @@ namespace platformerGame
                 p.Vel.Y = 0.0f;
             }
         }
+
         public List<cAABB> getCollidableBlocks(cAABB with)
         {
             List<cAABB> boxes = new List<cAABB>();
 
-            const int offset = 2; //def: 1
+            const int offset = 1; //def: 1
 
-            int minTileX = (int)(with.topLeft.X / Constants.TILE_SIZE) - offset;
-            int minTileY = (int)(with.topLeft.Y / Constants.TILE_SIZE) - offset;
+            //Vector2i ctile = ToMapPos(with.center);
+            Vector2i minTile = ToMapPos(with.topLeft);
+            Vector2i maxTile = ToMapPos(with.rightBottom);
+            
+            //int lastTileID = -1;
 
-            int maxTileX = (int)(with.rightBottom.X / Constants.TILE_SIZE) + offset;
-            int maxTileY = (int)(with.rightBottom.Y / Constants.TILE_SIZE) + offset;
-
-            for (int y = minTileY; y <= maxTileY; y++)
+            for (int y = minTile.Y - offset; y <= maxTile.Y + offset; y++)
             {
-                for (int x = minTileX; x <= maxTileX; x++)
+                for (int x = minTile.X - offset; x <= maxTile.X + offset; x++)
                 {
                     if ( y >= 0 && x >= 0 && y < this.m_Level1.Height && x < this.m_Level1.Width )
                     {
-                        TileType ty = this.m_Level1.GetTileAtXY(x, y).Type;
+                        cTile tile = this.GetCurrentLevel().GetTileAtXY(x, y);
+                        
+                        TileType tt = tile.Type;
+                        //int tid = tile.IdCode;
 
-                        if (ty == TileType.WALL || ty == TileType.ONEWAY_PLATFORM)
+                        if (/*lastTileID != tid &&*/ (tt == TileType.WALL || tt == TileType.ONEWAY_PLATFORM) )
                         {
-                            boxes.Add(this.getAABBFromMapPos(new Vector2i(x, y)));
+                            // tile.PlayerCollidable = true;
+                            //lastTileID = tid;
+                            boxes.Add( this.getAABBFromMapPos(new Vector2i(x, y) ));
                         }
                         
                     }

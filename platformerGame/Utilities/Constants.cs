@@ -11,7 +11,7 @@ using Newtonsoft.Json.Linq;
 
 using System.IO;
 
-namespace platformerGame
+namespace platformerGame.Utilities
 {
     class Constants
     {

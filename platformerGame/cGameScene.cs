@@ -11,6 +11,7 @@ using SFML.Window;
 
 using platformerGame.GameCommands;
 using platformerGame.Particles;
+using platformerGame.Utilities;
 
 namespace platformerGame
 {

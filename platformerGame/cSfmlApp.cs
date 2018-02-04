@@ -9,6 +9,8 @@ using SFML.Graphics;
 using SFML.System;
 using System.Threading;
 
+using platformerGame.Utilities;
+
 namespace platformerGame
 {
     class cSfmlApp

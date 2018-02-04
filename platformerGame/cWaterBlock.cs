@@ -8,6 +8,8 @@ using SFML.Window;
 using SFML.System;
 using SFML.Graphics;
 
+using platformerGame.Utilities;
+
 namespace platformerGame
 {
     class cWaterNode

@@ -8,6 +8,8 @@ using System.IO;
 using SFML.System;
 using tileLoader;
 
+using platformerGame.Utilities;
+
 namespace platformerGame
 {
     class cMapData

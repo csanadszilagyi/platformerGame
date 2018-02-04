@@ -105,15 +105,16 @@ namespace platformerGame
 
         }
 
+        public void GetCells()
+        {
+        }
+
         public void HandleObject(int id, cAABB bounds)
         {
             int topLeftIndex = GetCellIndexAtWorldPos(bounds.topLeft);
             int topRightIndex = GetCellIndexAtWorldPos(bounds.getTopRight());
             int bottomRightIndex = GetCellIndexAtWorldPos(bounds.rightBottom);
             int bottomLeftIndex = GetCellIndexAtWorldPos(bounds.getLeftBottom());
-
-            try
-            {
 
 
                 if (topLeftIndex == bottomRightIndex)
@@ -136,12 +137,6 @@ namespace platformerGame
                     }
                 }
             }
-            catch(Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-            }
-
-        }
 
         public int[] getObjectsAtWorldPos(Vector2f world_pos)
         {

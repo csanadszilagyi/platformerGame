@@ -8,7 +8,7 @@ using System.Diagnostics;
 
 using SFML.System;
 
-namespace platformerGame
+namespace platformerGame.Utilities
 {
     class cTimer
     {
