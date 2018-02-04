@@ -92,7 +92,7 @@ namespace platformerGame
           
 
             this.bounds.SetPosByTopLeft(position);
-            this.hitBox = bounds;
+            this.hitCollisionRect = bounds;
 
             if (this.checkCollisionWithWorld(owner.Scene.World, ref intersection))
             {

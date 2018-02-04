@@ -35,7 +35,7 @@ namespace platformerGame.GameObjects
             this.bounds = new cAABB();
             this.bounds.SetDims(new Vector2f(24.0f, 22.0f));
             this.bounds.SetPosByCenter(pos);
-            this.HitBox = bounds;
+            this.HitCollisionRect = bounds;
 
             this.MaxSpeed = EMIT_SPEED*2;
             this.mass = 1.0f;
@@ -113,7 +113,7 @@ namespace platformerGame.GameObjects
             position.Y += velocity.Y * step_time;
 
             Bounds.SetPosByCenter(position);
-            this.hitBox = bounds;
+            this.hitCollisionRect = bounds;
 
             grid.HandleObject(this.ID, bounds);
 
@@ -165,7 +165,7 @@ namespace platformerGame.GameObjects
             }
                 
 
-            if (cCollision.OverlapAABB(player.Bounds, this.HitBox))
+            if (cCollision.OverlapAABB(player.Bounds, this.HitCollisionRect))
             {
                 player.pickUp(this);
                 pickedUp = true;

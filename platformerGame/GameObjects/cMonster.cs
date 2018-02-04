@@ -186,18 +186,12 @@ namespace platformerGame
             Vector2f emitDirection = cAppMath.Vec2NormalizeReturn(by.Velocity);
             this.Scene.QueueCommand(new GameCommands.comNormalBloodExplosion(this.Scene, new Particles.cEmissionInfo(this.Bounds.center, emitDirection)));
 
-            /*if (emitDirection.Y > 0.0f)
-                emitDirection.Y = -emitDirection.Y;
-                */
-
-            cAABB playerAABB = this.getBoundingBox(position);
-
             this.Scene.QueueCommand(new platformerGame.GameCommands.comPlacePickup(
                     this.Scene,
                     new GameObjects.cPickupAble(
                         this.Scene,
                         this.Scene.EntityPool.SpatialGrid,
-                        new Vector2f(playerAABB.center.X, playerAABB.center.Y),
+                        this.Bounds.center,
                         emitDirection)
 
                         )
@@ -207,7 +201,6 @@ namespace platformerGame
 
         public override void Update(float step_time)
         {
-
                 Vector2f playerCenter = this.Scene.Player.Bounds.center;
                 double sqrDistFromPlayer = cAppMath.Vec2DistanceSqrt(playerCenter, this.Bounds.center);
 

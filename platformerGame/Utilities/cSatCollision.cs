@@ -19,12 +19,12 @@ namespace platformerGame.Utilities
             Vector2f N = new Vector2f(0.0f, 0.0f);
 
             //objA.GetBoundingBox().m_Center - objB.GetBoundingBox().m_Center;
-            Vector2f RelPos = objA.Position - objB.Position; // objA.Bounds.center - objB.Bounds.center;
-           // Vector2f RelPos = objA.Position - objB.Position;
+
+            Vector2f RelPos =  objA.Bounds.center - objB.Bounds.center; //objA.Position - objB.Position;
             Vector2f RelVel = objA.Velocity - objB.Velocity;
 
-            if( Collide(    objA.HitBox.getLocalVertices(), 4,
-                            objB.HitBox.getLocalVertices(), 4,
+            if( Collide(    objA.HitCollisionRect.getLocalVertices(), 4,
+                            objB.HitCollisionRect.getLocalVertices(), 4,
                             RelPos, RelVel,
                             ref N, ref t ))
             {

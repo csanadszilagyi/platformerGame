@@ -30,13 +30,14 @@ namespace platformerGame
 
         protected Vector2f viewSize;
         //protected cAABB boundingBox;
-        protected cAABB mapCollisionRect;
+        
 
         protected float mass;
 
         protected bool movAble;
 
-        protected cAABB hitBox;
+        protected cAABB hitCollisionRect;
+
         public cGameObject() : base()
         {
             pscene = null;
@@ -51,7 +52,7 @@ namespace platformerGame
             orientation = 0.0;
             mass = 1.0f;
             movAble = true;
-            hitBox = new cAABB();
+            hitCollisionRect = new cAABB();
             m_ID = GetNextValidID();
             
         }
@@ -68,7 +69,7 @@ namespace platformerGame
             orientation = 0.0;
             mass = 1.0f;
             movAble = true;
-            hitBox = new cAABB();
+            hitCollisionRect = new cAABB();
             m_ID = GetNextValidID();
         }
 
@@ -83,17 +84,10 @@ namespace platformerGame
             set { viewSize = value; }
         }
         
-        public cAABB HitBox
+        public cAABB HitCollisionRect
         {
-            get { return hitBox; }
-            set { hitBox = value; }
-        }
-        
-
-        public cAABB MapCollisionRect
-        {
-            get { return mapCollisionRect; }
-            set { mapCollisionRect = value; } // .ShallowCopy()
+            get { return hitCollisionRect; }
+            set { hitCollisionRect = value; }
         }
 
         public int ID
@@ -293,9 +287,9 @@ namespace platformerGame
             go.LastPosition = p.LastPos;
             go.Velocity = p.Vel;
             go.viewPosition = p.ViewPos;
-            go.hitBox = new cAABB();
-            go.hitBox.SetDims(new Vector2f(1, 1));
-            go.hitBox.SetPosByCenter(p.Pos);
+            go.HitCollisionRect = new cAABB();
+            go.HitCollisionRect.SetDims(new Vector2f(1, 1));
+            go.HitCollisionRect.SetPosByCenter(p.Pos);
             return go;
         }
 
@@ -308,7 +302,7 @@ namespace platformerGame
             go.ViewPosition = go.Position;
             //box.SetDims(new Vector2f(Constants.TILE_SIZE, Constants.TILE_SIZE));
             go.Bounds = box;
-            go.HitBox = box;
+            go.HitCollisionRect = box;
             go.MovAble = false; // important!
             go.Mass = 0.0f;
             return go;

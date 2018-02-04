@@ -28,36 +28,31 @@ namespace platformerGame
         protected float walkSpeed;
         protected float maxWalkSpeed;
 
-        /*
-        public cCharacter() : base()
-        {
 
-            spriteControl = new cSpriteStateController();
-            init();
-            InitSprites();
-        }
-    */
         public cCharacter(cGameScene scene, Vector2f pos) : base(scene, pos)
         {
             spriteControl = new cSpriteStateController();
             initSprites();
             init();
-
         }
 
         protected virtual void initSprites()
         {
             spriteControl.Clear();
         }
+
         protected virtual void init()
         {
-            mapCollisionRect = new cAABB(0,0,1,1);
-            mapCollisionRect.SetDims(new Vector2f(Constants.CHAR_COLLISON_RECT.Width, Constants.CHAR_COLLISON_RECT.Height));
-            mapCollisionRect.SetPosByTopLeft(position);
+            bounds = new cAABB(0,0,1,1);
+            bounds.SetDims(new Vector2f(Constants.CHAR_COLLISON_RECT.Width, Constants.CHAR_COLLISON_RECT.Height));
+            bounds.SetPosByTopLeft(position);
+
+            this.hitCollisionRect.SetDims(new Vector2f(32.0f, 32.0f));
+            this.hitCollisionRect.SetPosByTopLeft(position);
 
             shape = new RectangleShape();
             shape.FillColor = Color.Green;
-            shape.Size = new Vector2f(mapCollisionRect.dims.X, mapCollisionRect.dims.Y);
+            shape.Size = new Vector2f(bounds.dims.X, bounds.dims.Y);
 
             isJumpActive = false;
             isOnGround = false;
@@ -68,34 +63,9 @@ namespace platformerGame
             //must call, else not working
             spriteControl.ChangeState(this.GetSpriteState());
 
-            this.hitBox.SetDims(new Vector2f(32.0f, 32.0f));
-            this.hitBox.SetPosByTopLeft(position);
-
             this.health = 1;
-
         }
 
-        public override cAABB Bounds
-        {
-            get
-            {
-                return getBoundingBox(this.position);
-            }
-
-            set
-            {
-                this.Bounds = value;
-            }
-        }
-   
-        
-        public cAABB getBoundingBox(Vector2f pos_by)
-        {
-            mapCollisionRect.SetPosByTopLeft(pos_by);
-            return mapCollisionRect;
-            //return new cAABB(pos_by, mapCollisionRect.dims);
-        }
-        
         public bool IsOnOneWayPlatform
         {
             get { return isOnOnewWayPlatform; }
@@ -112,7 +82,7 @@ namespace platformerGame
 
         public Vector2f GetCenterViewPos()
         {
-            return viewPosition + mapCollisionRect.halfDims;
+            return viewPosition + bounds.halfDims;
         }
         protected virtual void updateX(float step_time, cWorld world)
         {
@@ -157,7 +127,7 @@ namespace platformerGame
                 float wallLeftX;
                 if (hasRightWall2(world, delta, out wallLeftX))
                 {
-                    position.X = wallLeftX - mapCollisionRect.dims.X;
+                    position.X = wallLeftX - bounds.dims.X;
                     velocity.X = 0.0f;
                 }
                 else
@@ -188,7 +158,7 @@ namespace platformerGame
             {
                 if (hasGround(world, delta, out groundY))
                 {
-                    position.Y = groundY - mapCollisionRect.dims.Y;
+                    position.Y = groundY - bounds.dims.Y;
                     isOnGround = true;
                     velocity.Y = 0.0f;
 
@@ -206,7 +176,7 @@ namespace platformerGame
                 float bottomY;
                 if (hasCeiling(world, delta, out bottomY))
                 {
-                    position.Y = bottomY + 1.0f; //- mapCollisionRect.dims.Y;
+                    position.Y = bottomY + 1.0f; //- bounds.dims.Y;
 
                     velocity.Y = 0.0f;
                 }
@@ -227,17 +197,14 @@ namespace platformerGame
             lastPosition.X = position.X;
             lastPosition.Y = position.Y;
 
-           // mapCollisionRect.SetPosByTopLeft(position);
-
-
             updateX(step_time, world);
             updateY(step_time, world);
 
+            bounds.SetPosByTopLeft(position);
+            this.hitCollisionRect.SetPosByTopLeft(position);
+
             this.force.X = 0.0f;
             this.force.Y = 0.0f;
-
-            this.hitBox.SetPosByTopLeft(position);
-
         }
 
         public void StartMovingRight()
@@ -301,14 +268,7 @@ namespace platformerGame
         {
 
             //viewPosition = cAppMath.Interpolate(position, lastPosition, alpha);
-
-            
-
             this.spriteControl.Render(destination, viewPosition);
-            /*
-            shape.Position = viewPosition; // - (viewSize / 2.0f);
-            destination.Draw(shape);
-            */
         }
 
         protected bool hasCeiling(cWorld world, float delta, out float bottomY)
@@ -320,7 +280,7 @@ namespace platformerGame
 
             Vector2f oldTopLeft = new Vector2f(position.X, position.Y);
             Vector2f newTopLeft = new Vector2f(position.X, predictedPosY);
-            Vector2f newTopRight = new Vector2f(newTopLeft.X + mapCollisionRect.dims.X - 2.0f, newTopLeft.Y);
+            Vector2f newTopRight = new Vector2f(newTopLeft.X + bounds.dims.X - 2.0f, newTopLeft.Y);
 
             int endY = world.ToMapPos(oldTopLeft).Y; //mMap.GetMapTileYAtPoint(newBottomLeft.y);
             int begY = Math.Min(world.ToMapPos(newTopLeft).Y, endY);
@@ -333,7 +293,7 @@ namespace platformerGame
             for (int tileIndexY = begY; tileIndexY <= endY; ++tileIndexY)
             {
                 var topLeft = cAppMath.Interpolate(newTopLeft, oldTopLeft, (float)Math.Abs(endY - tileIndexY) / dist);
-                var topRight = new Vector2f(topLeft.X + mapCollisionRect.dims.X - 1, topLeft.Y);
+                var topRight = new Vector2f(topLeft.X + bounds.dims.X - 1, topLeft.Y);
 
                 for (var checkedTile = topLeft; ; checkedTile.X += Constants.TILE_SIZE)
                 {
@@ -369,9 +329,9 @@ namespace platformerGame
             Vector2f left = new Vector2f(-1, 0);
             Vector2f right = new Vector2f(1, 0);
 
-            Vector2f oldBottomLeft = new Vector2f(position.X, position.Y + mapCollisionRect.dims.Y);
-            Vector2f newBottomLeft = new Vector2f(position.X, predictedPosY + mapCollisionRect.dims.Y);
-            Vector2f newBottomRight = new Vector2f(newBottomLeft.X + mapCollisionRect.dims.X - 2.0f, newBottomLeft.Y);
+            Vector2f oldBottomLeft = new Vector2f(position.X, position.Y + bounds.dims.Y);
+            Vector2f newBottomLeft = new Vector2f(position.X, predictedPosY + bounds.dims.Y);
+            Vector2f newBottomRight = new Vector2f(newBottomLeft.X + bounds.dims.X - 2.0f, newBottomLeft.Y);
 
             int endY = world.ToMapPos(newBottomLeft).Y; //mMap.GetMapTileYAtPoint(newBottomLeft.y);
             int begY = Math.Max(world.ToMapPos(oldBottomLeft).Y - 1, endY);
@@ -383,7 +343,7 @@ namespace platformerGame
             for (int tileIndexY = begY; tileIndexY <= endY; ++tileIndexY)
             {
                 var bottomLeft = cAppMath.Interpolate(newBottomLeft, oldBottomLeft, (float)Math.Abs(endY - tileIndexY) / dist);
-                var bottomRight = new Vector2f(bottomLeft.X + mapCollisionRect.dims.X - 2.0f, bottomLeft.Y);
+                var bottomRight = new Vector2f(bottomLeft.X + bounds.dims.X - 2.0f, bottomLeft.Y);
 
                 for (var checkedTile = bottomLeft; ; checkedTile.X += Constants.TILE_SIZE)
                 {
@@ -401,7 +361,7 @@ namespace platformerGame
                         isOnOnewWayPlatform = false;
                         return true;
                     }
-                    else if (tile == TileType.ONEWAY_PLATFORM && position.Y <= groundY - MapCollisionRect.dims.Y)
+                    else if (tile == TileType.ONEWAY_PLATFORM && position.Y <= groundY - bounds.dims.Y)
                     {
                         isOnOnewWayPlatform = true;
                         return true;
@@ -426,11 +386,11 @@ namespace platformerGame
 
             float predictedPosY = position.Y + delta;
 
-            Vector2f oldBottomRight = new Vector2f(position.X + mapCollisionRect.halfDims.X, position.Y + mapCollisionRect.dims.Y);
+            Vector2f oldBottomRight = new Vector2f(position.X + bounds.halfDims.X, position.Y + bounds.dims.Y);
 
-            Vector2f oldBottomLeft = new Vector2f(position.X, position.Y + mapCollisionRect.dims.Y);
-            Vector2f newBottomLeft = new Vector2f(oldBottomLeft.X, predictedPosY + mapCollisionRect.dims.Y);
-            Vector2f newBottomRight = new Vector2f(newBottomLeft.X + mapCollisionRect.halfDims.X, newBottomLeft.Y);
+            Vector2f oldBottomLeft = new Vector2f(position.X, position.Y + bounds.dims.Y);
+            Vector2f newBottomLeft = new Vector2f(oldBottomLeft.X, predictedPosY + bounds.dims.Y);
+            Vector2f newBottomRight = new Vector2f(newBottomLeft.X + bounds.halfDims.X, newBottomLeft.Y);
 
             int tileEndX = world.ToMapPos(oldBottomLeft).X+1;
             int tileBeginX = Math.Min(world.ToMapPos(oldBottomLeft).X, tileEndX);
@@ -474,7 +434,7 @@ namespace platformerGame
 
             Vector2f oldTopLeft = new Vector2f(position.X, position.Y);
             Vector2f newTopLeft = new Vector2f(predictedPosX - 1, position.Y);
-            Vector2f newBottomLeft = new Vector2f(newTopLeft.X, newTopLeft.Y + mapCollisionRect.dims.Y - 2.0f);
+            Vector2f newBottomLeft = new Vector2f(newTopLeft.X, newTopLeft.Y + bounds.dims.Y - 2.0f);
 
             int tileEndX = world.ToMapPos(newTopLeft).X - 1;
             int tileBeginX = Math.Max(world.ToMapPos(oldTopLeft).X, tileEndX);
@@ -505,11 +465,11 @@ namespace platformerGame
         {
             wallLeftX = 0.0f;
 
-            float predictedPosX = position.X + mapCollisionRect.dims.X + delta;
+            float predictedPosX = position.X + bounds.dims.X + delta;
 
-            Vector2f oldTopRight = new Vector2f(position.X + mapCollisionRect.dims.X, position.Y);
+            Vector2f oldTopRight = new Vector2f(position.X + bounds.dims.X, position.Y);
             Vector2f newTopRight = new Vector2f(predictedPosX, position.Y);
-            Vector2f newBottomRight = new Vector2f(newTopRight.X+2, newTopRight.Y + mapCollisionRect.dims.Y - 2.0f);
+            Vector2f newBottomRight = new Vector2f(newTopRight.X+2, newTopRight.Y + bounds.dims.Y - 2.0f);
 
             int tileEndX = world.ToMapPos(newTopRight).X + 1;
             int tileBeginX = Math.Min(world.ToMapPos(oldTopRight).X, tileEndX);

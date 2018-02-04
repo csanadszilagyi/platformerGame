@@ -19,7 +19,7 @@ namespace platformerGame
             bounds = _bounds.ShallowCopy();
         }
 
-        public virtual cAABB Bounds
+        public cAABB Bounds
         {
             get { return bounds; }
             set { bounds = value; }
