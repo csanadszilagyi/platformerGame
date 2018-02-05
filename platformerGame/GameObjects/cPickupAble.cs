@@ -7,6 +7,7 @@ using SFML.Graphics;
 using SFML.System;
 
 using platformerGame.Utilities;
+using platformerGame.GameObjects.PickupInfo;
 
 namespace platformerGame.GameObjects
 {
@@ -15,6 +16,8 @@ namespace platformerGame.GameObjects
         Sprite sprite;
         cSpatialGrid grid;
 
+        cPickupInfo pickup;
+        
         bool pickedUp;
         bool pulling;
 
@@ -32,7 +35,7 @@ namespace platformerGame.GameObjects
             this.heading = emit_direction;
 
             this.bounds = new cAABB();
-            this.bounds.SetDims(new Vector2f(24.0f, 22.0f));
+            this.bounds.SetDims(new Vector2f(16.0f, 22.0f));
             this.bounds.SetPosByCenter(pos);
             this.HitCollisionRect = bounds;
 
@@ -45,11 +48,9 @@ namespace platformerGame.GameObjects
 
             this.sprite = new Sprite(cAssetManager.GetTexture("pickups"));
 
-            int[] tcoords = { 0, 24, 48 };
-            int tx = cAppRandom.Chooose<int>(tcoords);
-            int ty = cAppRandom.Chooose<int>(tcoords, 2);
+            pickup = PickupEffects.getWeighted(); //.get(PickupType.HEALTH);
 
-            this.sprite.TextureRect = new IntRect(tx, ty, 24, 24);
+            this.sprite.TextureRect = pickup.TextureRect;
             //this.sprite.Scale = new Vector2f(0.5f, 0.5f);
             //this.sprite.Rotation = (float)cAppMath.RadianToDegress(this.orientation);
 
@@ -169,7 +170,7 @@ namespace platformerGame.GameObjects
 
             if (d <= MAX_PULL_DISTANCE)
             {
-                //pull pickup
+                // pull pickup
                 Vector2f toPlayer = cAppMath.Vec2NormalizeReturn(player.Bounds.center - this.Bounds.center);
                 this.pulling = true;
                 // G * ((m1*m2) / (d*d))
@@ -182,17 +183,11 @@ namespace platformerGame.GameObjects
             }
                 
 
-            if (cCollision.OverlapAABB(player.Bounds, this.HitCollisionRect))
+            if (!pickedUp && cCollision.OverlapAABB(player.Bounds, this.HitCollisionRect))
             {
-                player.pickUp(this);
+                player.pickUp(pickup);
                 pickedUp = true;
             }
-        }
-
-        
-        public void pickUp()
-        {
-            pickedUp = true;
         }
     }
 }

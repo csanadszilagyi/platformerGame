@@ -11,9 +11,10 @@ namespace platformerGame.Utilities
     /// then by using roll() function, itt will pick randomly a weight(proportion),
     /// and then returns the specified type of value.
     /// Bigger weight, bigger chance...
+    /// NOTE: strinsg has no default constructor, so cant be used
     /// </summary>
     /// <typeparam name="T">T is the type of the value</typeparam>
-    class ProbabilityRoll<T>
+    class ProbabilityRoll<T> where T : new()
     {
         /// <summary>
         /// the first type of the tuple is weight, second is value
@@ -91,7 +92,7 @@ namespace platformerGame.Utilities
 
             // should never run, because the condition inside for loop should evaulate true sometime,
             // so we always return from there. 
-            return Activator.CreateInstance<T>();
+            return default(T); //Activator.CreateInstance<T>();
         }
 
         public T roll(bool use_empty = false)

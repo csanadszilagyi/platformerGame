@@ -8,14 +8,15 @@ using SFML.Graphics;
 using SFML.System;
 
 using platformerGame.Weapons;
-using platformerGame.GameObjects;
 using platformerGame.Utilities;
+using platformerGame.GameObjects.PickupInfo;
 
 namespace platformerGame
 {
     class cPlayer : cCharacter
     {
         cWeapon weapon;
+        Text healthText;
         public cPlayer(cGameScene scene, Vector2f pos) : base(scene, pos)
         {
             p_followLight = new cLight();
@@ -25,6 +26,12 @@ namespace platformerGame
             this.Scene.LightMap.AddStaticLight(p_followLight);
 
             this.weapon = new cShotgun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY); // 9
+
+            healthText = new Text("", cAssetManager.GetFont("pf_tempesta_seven"));
+            healthText.Position = new Vector2f(pscene.AppController.MainWindow.DefaultView.Size.X - 500, 30);
+            healthText.CharacterSize = 28; // in pixels, not points!
+            healthText.Color = Color.White;
+            healthText.Style = Text.Styles.Bold;
         }
 
         protected override void initSprites()
@@ -147,11 +154,14 @@ namespace platformerGame
             shape.Position = viewPosition; // - (viewSize / 2.0f);
             destination.Draw(shape);
             */
+            healthText.DisplayedString = health.ToString();
+            destination.Draw(healthText);
+
         }
 
-        public void pickUp(cPickupAble pickup)
+        public void pickUp(cPickupInfo pickup)
         {
-            
+            pickup.applyEffect(this);
         }
 
         public cWeapon CurrentWeapon

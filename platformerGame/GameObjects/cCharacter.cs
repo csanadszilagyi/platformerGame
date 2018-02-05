@@ -500,6 +500,12 @@ namespace platformerGame
             this.health -= amount;
         }
 
+        public int Health
+        {
+            get { return health; }
+            set { health = value; }
+        }
+
         ~cCharacter()
         {
             spriteControl.Clear();
