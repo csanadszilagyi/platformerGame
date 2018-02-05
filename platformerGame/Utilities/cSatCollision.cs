@@ -13,6 +13,18 @@ namespace platformerGame.Utilities
     /// </summary>
     class cSatCollision
     {
+        public static bool checkOnly(cGameObject objA, cGameObject objB, ref float dt, out Vector2f mtd)
+        {
+            mtd = new Vector2f(0.0f, 0.0f);
+            Vector2f RelPos = objA.Bounds.center - objB.Bounds.center;
+            Vector2f RelVel = objA.Velocity - objB.Velocity;
+
+            return Collide(objA.HitCollisionRect.getLocalVertices(), 4,
+                            objB.HitCollisionRect.getLocalVertices(), 4,
+                            RelPos, RelVel,
+                            ref mtd, ref dt);
+        }
+
         public static bool checkAndResolve(cGameObject objA, cGameObject objB, float dt, bool resolve = false)
         {
             float t = dt; // 1.0f / 200.0f
@@ -30,14 +42,7 @@ namespace platformerGame.Utilities
             {
                 if(resolve)
                 {
-                    if (t < 0.0f)
-                    {
-                        ProcessOverlap(objA, objB, N * (-t));
-                    }
-                    else
-                    {
-                        ProcessCollision(objA, objB, N, t);
-                    }
+                    handleCollision(objA, objB, N, t);
                 }
 
                 return true;
@@ -46,6 +51,17 @@ namespace platformerGame.Utilities
             return false;
         }
 
+        public static void handleCollision(cGameObject objA, cGameObject objB, Vector2f N, float t)
+        {
+            if (t < 0.0f)
+            {
+                ProcessOverlap(objA, objB, N * (-t));
+            }
+            else
+            {
+                ProcessCollision(objA, objB, N, t);
+            }
+        }
 
         // two objects overlapped. push them away from each other
         private static void ProcessCollision(cGameObject objA, cGameObject objB, Vector2f N, float t)

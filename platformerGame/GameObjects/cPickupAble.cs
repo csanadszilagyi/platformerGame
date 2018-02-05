@@ -17,12 +17,15 @@ namespace platformerGame.GameObjects
 
         bool pickedUp;
         bool pulling;
+        bool collidingWorld;
 
         const float EMIT_SPEED = 150.0f;
         const int MAX_PULL_DISTANCE = 80;
         const int PULL_FORCE = 10;
 
         List<cAABB> walls;
+        cAABB collidingTile;
+
         public cPickupAble() : base()
         { }
 
@@ -38,7 +41,7 @@ namespace platformerGame.GameObjects
             this.HitCollisionRect = bounds;
 
             this.MaxSpeed = EMIT_SPEED*2;
-            this.mass = 1.0f;
+            this.mass = 100.0f;
 
             this.velocity.X = this.heading.X * EMIT_SPEED;
             this.velocity.Y = this.heading.Y * EMIT_SPEED;
@@ -56,6 +59,8 @@ namespace platformerGame.GameObjects
 
             this.sprite.Origin = new Vector2f(12.0f, 12.0f);
             walls = new List<cAABB>();
+
+            collidingWorld = false;
         }
 
         public override bool isActive()
@@ -71,23 +76,40 @@ namespace platformerGame.GameObjects
             {
                 // check Collisions with world
                 walls.Clear();
-                Bounds.SetPosByCenter(position);
                 walls = world.getCollidableBlocks(Bounds);
-                cGameObject wallObject;
-                for(int i = 0;  i < walls.Count;  i++)
-                {
-                    wallObject = cGameObject.MakeWall(walls[i]);
 
-                    if (cSatCollision.checkAndResolve(this, wallObject, step_time, true))
-                        continue;
+                if (velocity.X > 0.0f)
+                {
+                    for (int i = 0; i < walls.Count; i++)
+                    {
+                        cGameObject wallObject = cGameObject.MakeWall(walls[i]);
+                        if (cSatCollision.checkAndResolve(this, wallObject, step_time, true))
+                        {
+                            break;
+                        }
+
+                    }
                 }
+                else // we have to iterate from end to the start
+                {
+                    for (int i = walls.Count-1; i >= 0; i--)
+                    {
+                        cGameObject wallObject = cGameObject.MakeWall(walls[i]);
+                        if (cSatCollision.checkAndResolve(this, wallObject, step_time, true))
+                        {
+                            break;
+                        }
+
+                    }
+                }
+
+               
                 
             }
         }
 
         public override void Update(float step_time)
         {
-            checkCollisionWithWorld(step_time);
 
             force.Y += (false == pulling) ? (Constants.GRAVITY * 40.0f * step_time) : 0.0f;
 
@@ -106,7 +128,7 @@ namespace platformerGame.GameObjects
 
             cAppMath.Vec2Truncate(ref velocity, MaxSpeed);
 
-            
+            checkCollisionWithWorld(step_time);
 
             lastPosition = position;
             position.X += velocity.X * step_time;
@@ -132,10 +154,18 @@ namespace platformerGame.GameObjects
             //sprite.Rotation = (float)cAppMath.RadianToDegress(orientation);
             destination.Draw(this.sprite, new RenderStates(BlendMode.Alpha));
             
+            if(collidingWorld && collidingTile != null)
+            {
+                RectangleShape rs = new RectangleShape();
+                rs.Size = collidingTile.dims;
+                rs.Position = collidingTile.topLeft;
+                rs.FillColor = new Color(255, 0, 0, 150);
+                destination.Draw(rs, new RenderStates(BlendMode.Alpha));
+            }
+            
+
+
             /*
-            RectangleShape rs = new RectangleShape();
-            rs.Size = new Vector2f(16, 16);
-            rs.FillColor = new Color(255,0,0,100);
             for(int i = 0; i< walls.Count; i++)
             {
                 rs.Position = walls[i].topLeft;
