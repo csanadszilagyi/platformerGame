@@ -101,7 +101,7 @@ namespace platformerGame.GameObjects
 
         public override void Update(float step_time)
         {
-
+            // applying some gravity
             force.Y += (false == pulling) ? (Constants.GRAVITY * 40.0f * step_time) : 0.0f;
 
             velocity.X += force.X * step_time;
@@ -119,6 +119,8 @@ namespace platformerGame.GameObjects
 
             cAppMath.Vec2Truncate(ref velocity, MaxSpeed);
 
+            // get more precise result calling it here (because of the updated velocity)
+            // instead of calling at the beginning of this update method
             checkCollisionWithWorld(step_time);
 
             lastPosition = position;
