@@ -128,10 +128,22 @@ namespace platformerGame
         {
             var map = new TmxMap("first.tmx");
             TmxLayerTile[] tmxTiles = map.Layers[0].Tiles.ToArray();
+            var tileSet = map.Tilesets[0].Tiles;
+
+            m_Width = map.Width;
+            m_Height = map.Height;
+            m_NumOfTiles = m_Width * m_Height;
+
             foreach (var tmxTile in tmxTiles)
             {
-                //tmxTile.
-               // m_Tiles.Add(new cTile())
+                int gid = tmxTile.Gid;
+                uint type;
+                if( uint.TryParse(tileSet[gid].Type, out type) )
+                {
+                    cTile gameTile = new cTile(gid, (TileType)type);
+                    m_Tiles.Add(gameTile);
+                }
+
             }
         }
         /// <summary>

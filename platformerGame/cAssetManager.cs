@@ -49,7 +49,7 @@ namespace platformerGame
             return file_path.Substring(start, len);
         }
 
-        private static void LoadFont(string file_name)
+        public static void LoadFont(string file_name)
         {
             Font f = new Font(file_name);
 
@@ -58,13 +58,15 @@ namespace platformerGame
             fonts.Add(id_name, f);
         }
 
-        private static void LoadTexture(string file_name)
+        public static void LoadTexture(string file_name)
         {
             Texture t = new Texture(file_name);
             t.Smooth = true;
             string id_name = GenerateIDFromFilePath(file_name);
- 
-            textures.Add(id_name, t);
+            if(false == textures.ContainsKey(id_name))
+            {
+                textures.Add(id_name, t);
+            }
         }
 
         public static Font GetFont(string id)

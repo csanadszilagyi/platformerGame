@@ -59,7 +59,7 @@ namespace platformerGame.GameObjects
 
         public override bool isActive()
         {
-            return !pickedUp;
+            return (false == pickedUp);
         }
 
         protected void checkCollisionWithWorld(float step_time)
@@ -80,7 +80,7 @@ namespace platformerGame.GameObjects
                         cGameObject wallObject = cGameObject.MakeWall(wallsPossibleColliding[i]);
                         if (cSatCollision.checkAndResolve(this, wallObject, step_time, true))
                         {
-                            break;
+                            return;
                         }
                     }
                 }
@@ -92,7 +92,7 @@ namespace platformerGame.GameObjects
                         cGameObject wallObject = cGameObject.MakeWall(wallsPossibleColliding[i]);
                         if (cSatCollision.checkAndResolve(this, wallObject, step_time, true))
                         {
-                            break;
+                            return;
                         }
 
                     }
