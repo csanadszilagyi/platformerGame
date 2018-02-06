@@ -9,7 +9,7 @@ using SFML.System;
 
 using platformerGame.Utilities;
 
-namespace platformerGame
+namespace platformerGame.GameObjects
 {
     class cBullet : cGameObject
     {

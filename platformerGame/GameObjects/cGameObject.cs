@@ -3,7 +3,7 @@ using SFML.Graphics;
 
 using platformerGame.Utilities;
 
-namespace platformerGame
+namespace platformerGame.GameObjects
 {
     class cGameObject : cQuadTreeOccupant, IDrawable
     {

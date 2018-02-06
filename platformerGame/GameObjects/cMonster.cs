@@ -8,7 +8,7 @@ using SFML.System;
 
 using platformerGame.Utilities;
 
-namespace platformerGame
+namespace platformerGame.GameObjects
 {
     class cMonster : cCharacter
     {
@@ -184,17 +184,31 @@ namespace platformerGame
             this.killed = true;
 
             Vector2f emitDirection = cAppMath.Vec2NormalizeReturn(by.Velocity);
-            this.Scene.QueueCommand(new GameCommands.comNormalBloodExplosion(this.Scene, new Particles.cEmissionInfo(this.Bounds.center, emitDirection)));
+            this.Scene.QueueCommand(
+                () => { pscene.ParticleManager.Explosions.NormalBlood(new Particles.cEmissionInfo(this.Bounds.center, emitDirection)); }
+                //new GameCommands.comNormalBloodExplosion(this.Scene, new Particles.cEmissionInfo(this.Bounds.center, emitDirection))
+                );
 
-            this.Scene.QueueCommand(new platformerGame.GameCommands.comPlacePickup(
+            this.Scene.QueueCommand(
+                () => {
+                    pscene.EntityPool.AddPickup(
+                        new cPickupAble(
+                            this.Scene,
+                            this.Scene.EntityPool.SpatialGrid,
+                            this.Bounds.center,
+                            emitDirection
+                        )
+                   );
+                }
+                /*
+                new platformerGame.GameCommands.comPlacePickup(
                     this.Scene,
                     new GameObjects.cPickupAble(
                         this.Scene,
                         this.Scene.EntityPool.SpatialGrid,
                         this.Bounds.center,
-                        emitDirection)
-
-                        )
+                        emitDirection) )
+                        */
                 );
 
         }
@@ -279,7 +293,10 @@ namespace platformerGame
             //this.spriteControl.ChangeState(new cSpriteState(MotionType.FALL, this.spriteControl.getCurrentState().HorizontalFacing));
             //this.Scene.ParticleManager.AddLittleBloodExplosion(this.Bounds.center, 3);
 
-            this.Scene.QueueCommand(new GameCommands.comLittleBloodExplosion(this.Scene, this.Bounds.center));
+            this.Scene.QueueCommand(
+                () => {
+                    pscene.ParticleManager.Explosions.LittleBlood(new Particles.cEmissionInfo(this.Bounds.center));
+                });
         }
 
         public bool IsKilled

@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using SFML;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 
-using platformerGame.GameCommands;
+using platformerGame.GameObjects;
 using platformerGame.Particles;
 using platformerGame.Utilities;
 
 namespace platformerGame
 {
+
     /// <summary>
     /// Magát a belső játékot összefogó és megvalósító osztály
     /// </summary>
@@ -38,7 +35,7 @@ namespace platformerGame
 
         RenderTexture staticTexture;
 
-        Queue<cBaseGameCommand> gameCommands;
+        Queue<Action> gameCommands;
 
         public cGameScene(cSfmlApp controller) : base(controller)
         {
@@ -101,7 +98,7 @@ namespace platformerGame
             this.particleManager = new cParticleManager(this);
             // lightMap.renderStaticLightsToTexture();
 
-            gameCommands = new Queue<cBaseGameCommand>(50);
+            gameCommands = new Queue<Action>(50);
             //Pálya idő start
             levelTimer.Start();
 
@@ -117,13 +114,11 @@ namespace platformerGame
 
         public override void Update(float step_time)
         {
-
-
             UpdatePlayerInput();
 
             while (gameCommands.Count > 0)
             {
-                gameCommands.Dequeue().Execute();
+                gameCommands.Dequeue().Invoke();
             }
 
             entityPool.Update(step_time);
@@ -342,9 +337,9 @@ namespace platformerGame
             get { return this.particleManager; }
         }
 
-        public void QueueCommand(cBaseGameCommand command)
+        public void QueueCommand(Action action)
         {
-            gameCommands.Enqueue(command);
+            gameCommands.Enqueue(action);
         }
 
         public bool onScreen(cAABB box)
