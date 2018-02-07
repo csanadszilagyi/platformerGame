@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using SFML.Graphics;
 
-namespace platformerGame
+namespace platformerGame.Map
 {
     enum TileType
     {
@@ -34,6 +34,7 @@ namespace platformerGame
         public bool PlayerCollidable { get; set; }
 
         public bool IsCheckedWater { get; set; }
+
         public cTile()
         {
             IdCode = 0;

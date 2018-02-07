@@ -10,7 +10,7 @@ using tileLoader;
 
 using platformerGame.Utilities;
 
-namespace platformerGame
+namespace platformerGame.Map
 {
     class cMapData
     {
@@ -128,21 +128,41 @@ namespace platformerGame
         {
             var map = new TmxMap("first.tmx");
             TmxLayerTile[] tmxTiles = map.Layers[0].Tiles.ToArray();
-            var tileSet = map.Tilesets[0].Tiles;
 
+            var tileSet = map.Tilesets[0];
+            var tileSetTiles = map.Tilesets[0].Tiles;
+
+            
             m_Width = map.Width;
             m_Height = map.Height;
             m_NumOfTiles = m_Width * m_Height;
 
+            int firstGid = map.Tilesets[0].FirstGid;
+            
+            int tileID = 0;
             foreach (var tmxTile in tmxTiles)
             {
                 int gid = tmxTile.Gid;
                 uint type;
-                if( uint.TryParse(tileSet[gid].Type, out type) )
+
+                int typeID = gid - firstGid;
+
+                cTile gameTile = null;
+
+                if (typeID < 0)
                 {
-                    cTile gameTile = new cTile(gid, (TileType)type);
-                    m_Tiles.Add(gameTile);
+                    gameTile = new cTile(tileID, TileType.EMPTY);
+                    //gameTile.PosOnTexture
                 }
+                else
+                if ( uint.TryParse(tileSetTiles[typeID].Type, out type) )
+                {
+                    gameTile = new cTile(tileID, (TileType)type);
+                    
+                }
+
+                m_Tiles.Add(gameTile);
+                tileID++;
 
             }
         }

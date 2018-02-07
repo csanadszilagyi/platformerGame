@@ -10,6 +10,7 @@ using SFML.Graphics;
 using SFML.Window;
 
 using platformerGame.Utilities;
+using platformerGame.Map;
 
 namespace platformerGame
 {
