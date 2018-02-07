@@ -148,8 +148,8 @@ namespace platformerGame.GameObjects
             shape.Position = viewPosition; // - (viewSize / 2.0f);
             destination.Draw(shape);
             */
-            healthText.DisplayedString = health.ToString();
-            destination.Draw(healthText);
+            //healthText.DisplayedString = health.ToString();
+            //destination.Draw(healthText);
 
         }
 

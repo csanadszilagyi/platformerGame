@@ -287,9 +287,11 @@ namespace platformerGame.GameObjects
             go.LastPosition = p.LastPos;
             go.Velocity = p.Vel;
             go.viewPosition = p.ViewPos;
-            go.HitCollisionRect = new cAABB();
-            go.HitCollisionRect.SetDims(new Vector2f(1, 1));
-            go.HitCollisionRect.SetPosByCenter(p.Pos);
+            go.Bounds.SetDims(new Vector2f(2.0f, 2.0f));
+            go.Bounds.SetPosByCenter(p.Pos);
+            go.mass = 1.0f;
+            go.movAble = true;
+            go.HitCollisionRect = go.Bounds.ShallowCopy();
             return go;
         }
 

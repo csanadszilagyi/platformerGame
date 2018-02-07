@@ -62,7 +62,7 @@ namespace platformerGame.Particles
             particle.Color = Utils.GetRandomGreenColor();
             particle.Opacity = 255.0f;
             particle.Life = 1.0f;
-            particle.Fade = 90; //Math->GetRandomNumber(100, 240);
+            particle.Fade = 80; // 90; //Math->GetRandomNumber(100, 240);
 
             particle.Intersects = false;
         }
@@ -99,13 +99,17 @@ namespace platformerGame.Particles
                             p.Dims.Y += p.ScaleSpeed * step_time; //+=
                             p.Dims.y += p.ScaleSpeed * step_time; //+=
                     */
-                    cAppMath.Vec2Truncate(ref p.Vel, p.MaxSpeed * 1.5f);
+                    
 
 
                     p.Vel.Y += (Constants.GRAVITY * 40.0f * (step_time * step_time));
 
                     p.Vel.X *= p.SlowDown;
                     p.Vel.Y *= p.SlowDown;
+
+                    cAppMath.Vec2Truncate(ref p.Vel, p.MaxSpeed * 1.5f);
+
+                    //world.collideParticleSAT(p, step_time);
 
                     //p.Heading = cAppMath.Vec2NormalizeReturn(p.Vel);
                     p.LastPos = p.Pos;
@@ -121,7 +125,7 @@ namespace platformerGame.Particles
                     }
 
                     world.collideParticleRayTrace(p, step_time);
-
+                    
 
                
                 

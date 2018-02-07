@@ -64,39 +64,9 @@ namespace platformerGame.GameObjects
 
         protected void checkCollisionWithWorld(float step_time)
         {
-            cWorld world = Scene.World;
-
             if (false == pulling)
             {
-                // check collisions with world
-                List<cAABB> wallsPossibleColliding = world.getCollidableBlocks(Bounds);
-
-                // we must check this, because we need to iterate through the possible
-                // colliding tiles from other direction according to this condition
-                if (velocity.X > 0.0f)
-                {
-                    for (int i = 0; i < wallsPossibleColliding.Count; i++)
-                    {
-                        cGameObject wallObject = cGameObject.MakeWall(wallsPossibleColliding[i]);
-                        if (cSatCollision.checkAndResolve(this, wallObject, step_time, true))
-                        {
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    // we have to iterate from "end" to the "start" in order to have the last colliding block below us
-                    for (int i = wallsPossibleColliding.Count-1; i >= 0; i--)
-                    {
-                        cGameObject wallObject = cGameObject.MakeWall(wallsPossibleColliding[i]);
-                        if (cSatCollision.checkAndResolve(this, wallObject, step_time, true))
-                        {
-                            break;
-                        }
-
-                    }
-                }
+                pscene.World.collideSAT(this, step_time);
             }
         }
 

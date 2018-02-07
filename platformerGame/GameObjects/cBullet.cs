@@ -67,7 +67,7 @@ namespace platformerGame.GameObjects
                 (int x, int y) =>
                 {
 
-                    collided = world.IsObastacleAtPos(new Vector2f(x, y)); //world.GetCurrentLevel().IsObstacleAtPos(x, y);
+                    collided = world.IsWallAtPos(new Vector2f(x, y)); //world.GetCurrentLevel().IsObstacleAtPos(x, y);
 
                     intersectionPoint.X = x; // = world.ToWorldPos(new Vector2i(x, y));
                     intersectionPoint.Y = y;

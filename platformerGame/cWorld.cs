@@ -10,6 +10,7 @@ using SFML.Graphics;
 using SFML.Window;
 
 using platformerGame.Utilities;
+using platformerGame.GameObjects;
 
 namespace platformerGame
 {
@@ -570,8 +571,18 @@ namespace platformerGame
         public bool IsObastacleAtPos(Vector2f world_pos)
         {
             Vector2i map = ToMapPos(world_pos);
-            return !m_Level1.GetTileAtXY(map.X, map.Y).IsWalkAble();
+            TileType tt = GetCurrentLevel().GetTypeAtPos(map);
+            return tt == TileType.WALL || tt == TileType.ONEWAY_PLATFORM;
+            //return !m_Level1.GetTileAtXY(map.X, map.Y).TypeIsWalkAble();
         }
+
+        public bool IsWallAtPos(Vector2f world_pos)
+        {
+            Vector2i map = ToMapPos(world_pos);
+            TileType tt = GetCurrentLevel().GetTypeAtPos(map);
+            return tt == TileType.WALL;
+        }
+
         public cTile GetTileByWorldPos(Vector2f world_pos)
         {
             Vector2i map = ToMapPos(world_pos);
@@ -619,6 +630,47 @@ namespace platformerGame
             m_Level1.Clear();
         }
 
+        public void collideSAT(cGameObject obj, float step_time)
+        {
+            // check collisions with world
+            List<cAABB> wallsPossibleColliding = this.getCollidableBlocks(obj.Bounds);
+
+            // we must check this, because we need to iterate through the possible
+            // colliding tiles from other direction according to this condition
+            if (obj.Velocity.X > 0.0f)
+            {
+                for (int i = 0; i < wallsPossibleColliding.Count; i++)
+                {
+                    cGameObject wallObject = cGameObject.MakeWall(wallsPossibleColliding[i]);
+                    if (cSatCollision.checkAndResolve(obj, wallObject, step_time, true))
+                    {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                // we have to iterate from "end" to the "start" in order to have the last colliding block below us
+                for (int i = wallsPossibleColliding.Count - 1; i >= 0; i--)
+                {
+                    cGameObject wallObject = cGameObject.MakeWall(wallsPossibleColliding[i]);
+                    if (cSatCollision.checkAndResolve(obj, wallObject, step_time, true))
+                    {
+                        break;
+                    }
+
+                }
+            }
+        }
+
+        public void collideParticleSAT(Particle particle, float step_time)
+        {
+            cGameObject obj = cGameObject.fromParticle(particle);
+            this.collideSAT(obj, step_time);
+            particle.Pos = obj.Position;
+            particle.Vel = obj.Velocity;
+        }
+
         public void collideParticleRayTrace(Particle p, float step_time)
         {
             Vector2i posA = new Vector2i((int)p.LastPos.X, (int)p.LastPos.Y);
@@ -649,56 +701,6 @@ namespace platformerGame
                }
              )
            );
-
-           // cAABB aabb = this.getAABBFromWorldPos(intersectionPoint);
-
-           // if (collided)
-           // {
-                /*Vector2f N = cAppMath.Vec2Perp(p.Vel);
-                if(intersectionPoint.Y == aabb.topLeft.Y)
-                {
-                    N = cAppMath.Vec2Perp(new Vector2f(aabb.rightBottom.X, aabb.topLeft.Y) - aabb.topLeft);
-                }
-                else
-                if (intersectionPoint.Y == aabb.rightBottom.Y)
-                {
-                    N = cAppMath.Vec2Perp( - aabb.topLeft);
-                }
-                */
-                //p.Pos = intersectionPoint; // + (-p.Heading);
-                //p.LastPos = p.Pos;
-                //if we want to drag to the wall:
-                //p.Vel.X = 0.0f;
-                //p.Vel.Y = 0.0f;
-                //p.Vel = cCollision.processWorldObjCollision(p.Vel, N);
-           // }
-
-        }
-
-        public void collideParticle(Particle p, float step_time)
-        {
-            Vector2f posA = new Vector2f((int)p.LastPos.X, (int)p.LastPos.Y);
-            Vector2f posB = new Vector2f((int)p.Pos.X, (int)p.Pos.Y);
-            bool collided = false;
-            Vector2f intersectionPoint = new Vector2f(0.0f, 0.0f);
-
-            List<cAABB> blocks = this.getCollidableBlocks(p.getBoundingBox());
-            int i = 0;
-            while(i < blocks.Count && !collided)
-            {
-                collided = cCollision.testLineVsAABB(p.LastPos, p.Pos, blocks[i], ref intersectionPoint);
-                i++;
-            }
-           
-            if(collided)
-            {
-                //Vector2f N = cAppMath.Vec2Perp(p.Vel);
-
-                p.Pos = intersectionPoint; // + (-p.Heading);
-                p.LastPos = p.Pos;
-                p.Vel.X = 0.0f;
-                p.Vel.Y = 0.0f;
-            }
         }
 
         public List<cAABB> getCollidableBlocks(cAABB with)
