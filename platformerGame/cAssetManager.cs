@@ -69,6 +69,15 @@ namespace platformerGame
             }
         }
 
+        public static Texture LoadAndReturnTexture(string file_name)
+        {
+            Texture t = new Texture(file_name);
+            t.Smooth = true;
+            string id_name = GenerateIDFromFilePath(file_name);
+            textures.Add(id_name, t);
+            return t;
+        }
+
         public static Font GetFont(string id)
         {
             return fonts[id];
