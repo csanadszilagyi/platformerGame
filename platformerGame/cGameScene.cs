@@ -79,6 +79,7 @@ namespace platformerGame
             entityPool = new cEntityPool(this, m_World.WorldBounds.dims, m_Player);
 
             //vizekhez adunk fényt
+            /*
             List<cWaterBlock> waterBlocks = m_World.GetWaterBlocks();
 
             foreach (cWaterBlock wb in waterBlocks)
@@ -94,6 +95,7 @@ namespace platformerGame
 
             //háttér, környezeti tárgyak megjelenítése
             worldEnvironment.SetWaterBlocks(waterBlocks);
+            */
 
             this.particleManager = new cParticleManager(this);
             // lightMap.renderStaticLightsToTexture();
@@ -135,7 +137,7 @@ namespace platformerGame
 
             this.particleManager.Update(step_time);
 
-            worldEnvironment.Update(step_time);
+           // worldEnvironment.Update(step_time);
 
             
         }
@@ -183,13 +185,13 @@ namespace platformerGame
 
             m_World.DrawBackground(destination);
 
-            worldEnvironment.RenderEnvironment(destination);
+            //worldEnvironment.RenderEnvironment(destination);
 
             m_World.Render(destination, viewRect);
 
             m_Player.Render(destination);
 
-            worldEnvironment.RenderWaterBlocks(destination);
+            //worldEnvironment.RenderWaterBlocks(destination);
 
             this.entityPool.RenderEntities(destination, alpha);
             

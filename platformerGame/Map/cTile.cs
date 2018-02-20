@@ -14,9 +14,7 @@ namespace platformerGame.Map
         WALL = 1,               //Fal - nem járható
         ONEWAY_PLATFORM = 2,    //"Leugrós" platform
         WATER = 3,              //Víz
-        SPIKE = 4,              //Tüske
-        LEVEL_START = 6,        //Pálya kezdő poz
-        LEVEL_END = 5        //Pálya végpont
+        SPIKE = 4             //Tüske
     }
     class cTile
     {
@@ -30,7 +28,7 @@ namespace platformerGame.Map
         /// </summary>
         public TileType Type { get; set; }
         
-        public IntRect PosOnTexture { get; set; }
+        public cAABB PosOnTexture { get; set; }
         public bool PlayerCollidable { get; set; }
 
         public bool IsCheckedWater { get; set; }
@@ -40,7 +38,7 @@ namespace platformerGame.Map
             IdCode = 0;
             Type = TileType.EMPTY;
             PlayerCollidable = false;
-            PosOnTexture = new IntRect(0, 0, 1, 1);
+            PosOnTexture = new cAABB(0, 0, 1, 1);
             IsCheckedWater = false;
         }
         public cTile(int id_code, TileType type)
@@ -48,7 +46,7 @@ namespace platformerGame.Map
             this.IdCode = id_code;
             this.Type = type;
             PlayerCollidable = false;
-            PosOnTexture = new IntRect(0, 0, 1, 1);
+            PosOnTexture = new cAABB(0, 0, 1, 1);
             IsCheckedWater = false;
 
         }

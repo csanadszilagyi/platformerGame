@@ -9,72 +9,133 @@ using SFML.System;
 using tileLoader;
 
 using platformerGame.Utilities;
+using SFML.Graphics;
+using System.Text.RegularExpressions;
 
 namespace platformerGame.Map
 {
+    class TileLayers
+    {
+        public const int   WALLS = 0,
+                              BACKGROUND_1 = 1,
+                              BACKGROUND_2 = 2;
+    }
+
     class cMapData
     {
-        List<cTile> m_Tiles;
+        Dictionary<int, List<cTile>> layers;
 
-        int m_NumOfTiles;
-        int m_Width;
-        int m_Height;
+        int numOfTiles;
+        int width;
+        int height;
+
+        Texture tilesetTexture;
+        cAABB levelStartRegion;
+        cAABB levelEndRegion;
 
         public cMapData()
         {
-            m_Tiles = new List<cTile>();
+            layers = new Dictionary<int, List<cTile>>();
+            tilesetTexture = null;
+            levelStartRegion = new cAABB();
+            levelEndRegion = new cAABB();
         }
 
         public void Clear()
         {
-            m_Tiles.Clear();
+            layers.Clear();
         }
         public List<cTile> Tiles
         {
-            get { return m_Tiles; }
+            get { return layers[TileLayers.WALLS]; }
         }
         public int NumOfTiles
         {
-            get { return m_NumOfTiles; }
+            get { return numOfTiles; }
         }
 
         public int Width
         {
-            get { return m_Width; }
+            get { return width; }
         }
 
         public int Height
         {
-            get { return m_Height; }
+            get { return height; }
+        }
+
+        public Texture TilesetTexture
+        {
+            get
+            {
+                return tilesetTexture;
+            }
+        }
+
+        public cAABB LevelStartRegion
+        {
+            get
+            {
+                return levelStartRegion;
+            }
+        }
+
+        public cAABB LevelEndRegion
+        {
+            get
+            {
+                return levelEndRegion;
+            }
         }
 
         public bool IsObstacleAtPos(int x, int y)
         {
-            return !m_Tiles[GetIndexByXY(x, y)].IsWalkAble();
+            return !layers[TileLayers.WALLS][GetIndexByXY(x, y)].IsWalkAble();
         }
 
         public bool IsObstacleAtPos(Vector2i pos)
         {
-            return !m_Tiles[GetIndexByXY(pos.X, pos.Y)].IsWalkAble();
+            return !layers[TileLayers.WALLS][GetIndexByXY(pos.X, pos.Y)].IsWalkAble();
         }
 
         public TileType GetTypeAtPos(Vector2i pos)
         {
-            return m_Tiles[GetIndexByXY(pos.X, pos.Y)].Type;
+            return layers[TileLayers.WALLS][GetIndexByXY(pos.X, pos.Y)].Type;
         }
         public int GetIndexByXY(int x, int y)
         {
-            int index = y * m_Width + x;
+            int index = y * width + x;
             return index;
         }
 
-        public cTile GetTileAtXY(int x, int y)
+        public cTile[] getAllTileAtXY(int x, int y)
+        {
+            int index = GetIndexByXY(x, y);
+
+            List<cTile> ret = new List<cTile>();
+
+            if (index >= 0 && index < NumOfTiles)
+            {
+                foreach (var layerTiles in layers)
+                {
+                        ret.Add(layerTiles.Value[index]);
+                }
+
+                ret.Reverse();
+                return ret.ToArray();
+                
+            }
+
+            return null;
+        }
+
+        public cTile GetTileAtXY(int x, int y, int layer = TileLayers.WALLS)
         {
             int index = GetIndexByXY(x, y);
             //return m_Tiles[index];
             if (index >= 0 && index < NumOfTiles)
             {
-                return m_Tiles[index];
+                return layers[layer][index];
             }
             else
             {
@@ -85,16 +146,16 @@ namespace platformerGame.Map
             }
         }
 
-        public cTile GetTileAtIndex(int index)
+        public cTile GetTileAtIndex(int index, int layer = TileLayers.WALLS)
         {
             if (index >= 0 && index < NumOfTiles)
             {
-                return m_Tiles[index];
+                return layers[layer][index];
             }
             else
             {
                 int index2 = cAppMath.Clamp<int>(index, 0, NumOfTiles - 1);
-                return m_Tiles[index2];
+                return layers[layer][index2];
             }
         }
 
@@ -102,70 +163,181 @@ namespace platformerGame.Map
         {
             Vector2i pos = new Vector2i();
 
-            pos.Y = index / m_Width; //or: index / m_Height;
-            pos.X = index % m_Width; //or: index -  (pos.y * m_Width);
+            pos.Y = index / width; //or: index / m_Height;
+            pos.X = index % width; //or: index -  (pos.y * m_Width);
 
             return pos;
         }
         public void Create(int w, int h)
         {
-            m_Width = w;
-            m_Height = h;
-            m_NumOfTiles = m_Width * m_Height;
-
-            for (int i = 0; i < m_NumOfTiles; i++)
+            width = w;
+            height = h;
+            numOfTiles = width * height;
+            layers[TileLayers.WALLS] = new List<cTile>();
+            for (int i = 0; i < numOfTiles; i++)
             {
                /* if(cAppRandom.GetRandomFloat() < 0.4f)
                     m_Tiles.Add(new cTile(i + 1, TileType.WALL));
                 else*/
-                    m_Tiles.Add(new cTile(i + 1, TileType.EMPTY));
+                    layers[TileLayers.WALLS].Add(new cTile(i + 1, TileType.EMPTY));
             }
 
 
         }
 
-        public void LoadFromTMX(string file_name)
+        private cAABB getTextureRect(int type_id, int tiles_in_row)
         {
-            var map = new TmxMap("first.tmx");
-            TmxLayerTile[] tmxTiles = map.Layers[0].Tiles.ToArray();
+            int posY = type_id / tiles_in_row; //or: index / m_Height;
+            int posX = type_id % tiles_in_row; //or: index -  (pos.y * m_Width);
 
-            var tileSet = map.Tilesets[0];
-            var tileSetTiles = map.Tilesets[0].Tiles;
+            return new cAABB(posX* Constants.TILE_SIZE, posY* Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE);
+        }
 
-            
-            m_Width = map.Width;
-            m_Height = map.Height;
-            m_NumOfTiles = m_Width * m_Height;
+        private void loadBackgrounds(TmxMap map, Dictionary<int, TmxTilesetTile> tile_types, int first_gid, int tiles_in_row)
+        {
+            List<string> backgroundNames = new List<string>();
 
-            int firstGid = map.Tilesets[0].FirstGid;
-            
+            string pattern = @"\bbackground";
+
+            foreach (var layer in map.Layers)
+            {
+                if( Regex.IsMatch(layer.Name, pattern))
+                {
+                    backgroundNames.Add(layer.Name);
+                }
+            }
+
+            foreach(string bgName in backgroundNames)
+            {
+                TmxLayerTile[] tmxTiles = map.Layers[bgName].Tiles.ToArray();
+
+
+                int tileID = 0;
+                foreach (var tmxTile in tmxTiles)
+                {
+                    int gid = tmxTile.Gid;
+                    int type;
+
+                    int typeID = gid - first_gid;
+
+                    cTile gameTile = null;
+
+                    try
+                    {
+                        if (typeID < 0)
+                        {
+                            gameTile = new cTile(tileID, TileType.EMPTY);
+
+                            // does not matter, because we just skip the drwaing of empty tiles...
+                            gameTile.PosOnTexture = new cAABB(0, 0, Constants.TILE_SIZE, Constants.TILE_SIZE);
+                        }
+                        else
+                        if (int.TryParse(tile_types[typeID].Type, out type))
+                        {
+
+                            gameTile = new cTile(tileID, TileType.EMPTY);
+                            gameTile.PosOnTexture = getTextureRect(typeID, tiles_in_row);
+
+                        }
+
+                        layers[TileLayers.BACKGROUND_1].Add(gameTile);
+                        tileID++;
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
+
+                }
+            }
+
+        }
+
+        private void loadWalls(TmxMap map, Dictionary<int, TmxTilesetTile> tile_types, int first_gid, int tiles_in_row)
+        {
+            TmxLayerTile[] tmxTiles = map.Layers["walls"].Tiles.ToArray();
+
+            layers[TileLayers.WALLS] = new List<cTile>();
+
             int tileID = 0;
             foreach (var tmxTile in tmxTiles)
             {
                 int gid = tmxTile.Gid;
-                uint type;
+                int type;
 
-                int typeID = gid - firstGid;
+                int typeID = gid - first_gid;
 
                 cTile gameTile = null;
 
-                if (typeID < 0)
+                try
                 {
-                    gameTile = new cTile(tileID, TileType.EMPTY);
-                    //gameTile.PosOnTexture
-                }
-                else
-                if ( uint.TryParse(tileSetTiles[typeID].Type, out type) )
-                {
-                    gameTile = new cTile(tileID, (TileType)type);
-                    
-                }
+                    if (typeID < 0)
+                    {
+                        gameTile = new cTile(tileID, TileType.EMPTY);
 
-                m_Tiles.Add(gameTile);
-                tileID++;
+                        // does not matter, because we just skip the drwaing of empty tiles...
+                        gameTile.PosOnTexture = new cAABB(0, 0, Constants.TILE_SIZE, Constants.TILE_SIZE);
+                    }
+                    else
+                    if (int.TryParse(tile_types[typeID].Type, out type))
+                    {
+
+                        gameTile = new cTile(tileID, (TileType)type);
+                        gameTile.PosOnTexture = getTextureRect(typeID, tiles_in_row);
+
+
+                    #if DEBUG
+                            System.Diagnostics.Debug.WriteLine(
+                                string.Format("{0} : {1}", gameTile.PosOnTexture.topLeft.X, gameTile.PosOnTexture.topLeft.Y));
+                        }
+                    #endif
+
+
+                    layers[TileLayers.WALLS].Add(gameTile);
+                    tileID++;
+                }
+                catch (Exception e)
+                {
+
+                }
 
             }
         }
+
+        public void LoadFromTMX(string tmx_file_name)
+        {
+            var map = new TmxMap(tmx_file_name);
+            var tileSet = map.Tilesets[0];
+            var tileTypes = tileSet.Tiles;
+
+            width = map.Width;
+            height = map.Height;
+            numOfTiles = width * height;
+
+            tilesetTexture = cAssetManager.LoadAndReturnTexture(tileSet.Image.Source);
+
+            int firstGid = map.Tilesets[0].FirstGid;
+            int imgWidth = (int)tileSet.Image.Width;
+            int imgHeight = (int)tileSet.Image.Height;
+
+            Constants.TILE_SIZE = tileSet.TileWidth; // suppose width and heigt are equals
+
+            int tilesInRow = imgWidth / Constants.TILE_SIZE;
+
+            loadWalls(map, tileTypes, firstGid, tilesInRow);
+            //loadBackgrounds(map, tileTypes, firstGid, tilesInRow);
+
+            TmxObject startObject = map.ObjectGroups["SpawnPoints"].Objects["LevelStart"];
+            TmxObject endObject = map.ObjectGroups["SpawnPoints"].Objects["LevelEnd"];
+
+            this.levelStartRegion = new cAABB(new Vector2f((float)startObject.X, (float)startObject.Y),
+                                              new Vector2f((float)startObject.Width, (float)startObject.Height));
+
+            this.levelEndRegion = new cAABB(new Vector2f((float)endObject.X, (float)endObject.Y),
+                                              new Vector2f((float)endObject.Width, (float)endObject.Height));
+        }
+
+
         /// <summary>
         /// Fájlból is betudja olvasni a pályát
         /// 1. sor: pálya szélessége (x ~ width ~ oszlopok száma)
@@ -174,13 +346,13 @@ namespace platformerGame.Map
         /// <param name="file_name">A fájl neve</param>
         public void LoadFromFile(string file_name)
         {
-            m_Tiles.Clear();
+            layers.Clear();
 
             StreamReader sr = new StreamReader(file_name);
 
-            m_Width = int.Parse(sr.ReadLine());
-            m_Height = int.Parse(sr.ReadLine());
-            m_NumOfTiles = m_Width * m_Height;
+            width = int.Parse(sr.ReadLine());
+            height = int.Parse(sr.ReadLine());
+            numOfTiles = width * height;
             int sor = 0;
 
             while (!sr.EndOfStream)
@@ -190,7 +362,7 @@ namespace platformerGame.Map
                 for(int i = 0; i < splitted.Length; i++)
                 {
                     TileType typeCode = (TileType)int.Parse(splitted[i]);
-                    m_Tiles.Add( new cTile(sor * m_Height + i, typeCode) );
+                    layers[TileLayers.WALLS].Add( new cTile(sor * height + i, typeCode) );
                 }
 
                 sor++;

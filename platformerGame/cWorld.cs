@@ -94,7 +94,9 @@ namespace platformerGame
 
         Sprite tempSprite;
         cGameScene pScene;
-        
+
+        VertexArray tileMapVertices;
+        RenderStates tileMapRenderStates;
         public cWorld(cGameScene p_scene, Vector2u window_size)
         {
             pScene = p_scene;
@@ -103,12 +105,12 @@ namespace platformerGame
 
             m_Level1 = new cMapData();
             //m_Level1.Create(100, 100);
-            this.LoadLevel("levels/level1.txt");  //("levels/level1.txt");
+            this.LoadLevel("levels/third.tmx"); //("levels/level1.txt");
 
             m_TextureOfTiles = new RenderTexture((uint)m_WorldBounds.dims.X, (uint)m_WorldBounds.dims.Y); //(windowSize.X, windowSize.Y);
             m_TextureOfTiles.SetActive(true);
 
-            m_TileSetTexture = cAssetManager.GetTexture("tileSet_16");
+            m_TileSetTexture = this.GetCurrentLevel().TilesetTexture; //cAssetManager.GetTexture("tileSet_16");
             m_TileSetTexture.Smooth = true;
 
             m_BGtexture = cAssetManager.GetTexture(Constants.BG_TEXTURE);
@@ -119,16 +121,22 @@ namespace platformerGame
             background.TextureRect = new IntRect(0, 0, (int)m_WorldBounds.dims.X, (int)m_WorldBounds.dims.Y); // (int)m_TextureOfTiles.Size.X, (int)m_TextureOfTiles.Size.Y);
             background.Color = Constants.BACKGROUND_COLOR;
 
-            tempSprite = new Sprite(m_TileSetTexture);
+
+            tileMapVertices = new VertexArray(PrimitiveType.Quads);
+            tileMapRenderStates = new RenderStates(BlendMode.Alpha);
+            tileMapRenderStates.Texture = m_TileSetTexture;
         }
 
         public void LoadLevel(string file_name)
         {
-            m_Level1.LoadFromFile(file_name);
+            //m_Level1.LoadFromFile(file_name);
+            m_Level1.LoadFromTMX(file_name);
 
             m_WorldBounds = new cAABB(0.0f, 0.0f, m_Level1.Width * Constants.TILE_SIZE, m_Level1.Height * Constants.TILE_SIZE);
 
-            initTileSprites();
+            levelStartRegion = GetCurrentLevel().LevelStartRegion;
+            levelEndRegion = GetCurrentLevel().LevelEndRegion;
+            //initTileSprites();
         }
         public cAABB LevelStartRegion
         {
@@ -141,7 +149,7 @@ namespace platformerGame
         }
 
         /// <summary>
-        /// Négyzetes mintájú vízeket azonosítja
+        /// Detecting water blocks located as a square in the tile map.
         /// </summary>
         /// <returns></returns>
         public List<cWaterBlock> GetWaterBlocks()
@@ -260,255 +268,76 @@ namespace platformerGame
             return returner;
         }
 
-        /// <summary>
-        /// Itt választjuk ki és állítjuk be előre a kirjazoláshoz, hogy melyik csempéhez milyen al-textúra tartozik (több féle fal van, attól függ, hol és hány másik fal kapcsolódik az adott falhoz)
-        /// </summary>
-    private void initTileSprites()
-        {
-            cTile tempTile = null;
-            Vector2i tilePos = new Vector2i();
-            Vector2f tileCenterTop = new Vector2f();
-
-            for (int y = 0; y < m_Level1.Height; y++)
-            {
-                for (int x = 0; x < m_Level1.Width; x++)
-                {
-                    tempTile = m_Level1.GetTileAtXY(x, y);
-                    tilePos.X = x;
-                    tilePos.Y = y;
-
-                    tileCenterTop = this.ToWorldPos(tilePos);
-                    tileCenterTop.X += Constants.TILE_SIZE_HALF;
-                    tileCenterTop.Y += Constants.TILE_SIZE_HALF;
-
-                    tempTile.PosOnTexture = TileMask.NONE;
-
-                    if (tempTile.Type == TileType.WALL)
-                    {
-                        NeighInfo info = getNumOfLinearNeighsByCode(m_Level1, tilePos, TileType.WALL);
-                        
-                        if(info.NumNeighs == 1)
-                        {
-                           /* cLight l = cLightSystem.GetEnvironLight(tileCenterTop, 32.0f, Color.White);
-                            l.Bleed = 1.6f;
-                            l.LinearizeFactor = 0.4f;
-                            l.Color = new Color(246, 205, 105, 255);
-                            pScene.LightMap.AddStaticLight(l);*/
-                        }
-
-                        if (info.isAlone())
-                        {
-                            tempTile.PosOnTexture = TileMask.ALONE_BOT_WITH_TOP; // alone;
-
-                           /* cLight l = cLightSystem.GetEnvironLight(tileCenterTop, 32.0f, Color.White);
-                            l.Bleed = 1.6f;
-                            l.LinearizeFactor = 0.4f;
-                            l.Color = new Color(246, 205, 105, 255);
-                            pScene.LightMap.AddStaticLight(l);*/
-                        }
-                        else
-                        {
-                            //egyedül van-e
-
-                            if (!info.HasTop)
-                            {
-                                if (!info.HasBottom)
-                                {
-                                    if (!info.HasLeft)
-                                        tempTile.PosOnTexture = TileMask.NO_TOPBOT_LEFT;
-                                    else
-                                    if (!info.HasRight)
-                                        tempTile.PosOnTexture = TileMask.NO_TOPBOT_RIGHT;
-                                    else
-                                        tempTile.PosOnTexture = TileMask.NO_TOPBOT_MIDDLE;
-                                }
-                                else
-                                {
-                                    if (info.HasLeft)
-                                    {
-                                        if (info.HasRight)
-                                            tempTile.PosOnTexture = TileMask.TOP_MIDDLE;
-                                        else
-                                            tempTile.PosOnTexture = TileMask.TOP_RIGHT;
-                                    }
-                                    else
-                                    {
-                                        if (info.HasRight)
-                                            tempTile.PosOnTexture = TileMask.TOP_LEFT;
-                                        else
-                                            tempTile.PosOnTexture = TileMask.ALONE_TOP_WITH_BOT;
-                                    }
-
-                                }
-                            }
-                            else
-                            if (!info.HasBottom)
-                            {
-                                if (info.HasLeft)
-                                {
-                                    if (info.HasRight)
-                                        tempTile.PosOnTexture = TileMask.BOTTOM_MIDDLE;
-                                    else
-                                        tempTile.PosOnTexture = TileMask.BOTTOM_RIGHT;
-                                }
-                                else
-                                {
-                                    if (info.HasRight)
-                                        tempTile.PosOnTexture = TileMask.BOTTOM_LEFT;
-                                    else
-                                        tempTile.PosOnTexture = TileMask.ALONE_BOT_WITH_TOP;
-                                }
-                            }
-                            else
-                            if (!info.HasLeft)
-                            {
-                                if (info.HasRight)
-                                    tempTile.PosOnTexture = TileMask.MIDDLE_LEFT;
-                                else
-                                    tempTile.PosOnTexture = TileMask.ALONE;
-                            }
-                            else
-                            if (!info.HasRight)
-                            {
-                                tempTile.PosOnTexture = TileMask.MIDDLE_RIGHT;
-
-                            }
-                            else
-                            {
-                                tempTile.PosOnTexture = TileMask.MIDDLE_CENTRE;
-                                //tempTile.PosOnTexture = TileMask.EMPTY; //looks weird
-                            }
-                        }
-                        
-                    }
-                    else
-                    if(tempTile.Type == TileType.EMPTY)
-                    {
-                       
-                    }
-                    else
-                    if (tempTile.Type == TileType.ONEWAY_PLATFORM)
-                    {
-                        tempTile.PosOnTexture = TileMask.ONE_WAY_PLATFORM;
-                        /*
-                        cLight l = cLightSystem.GetEnvironLight(tileCenterTop, 32.0f, Color.White);
-                        l.Bleed = 2.6f;
-                        l.LinearizeFactor = 0.3f;
-                        pScene.LightMap.AddStaticLight(l);*/
-
-                        //pScene.LightMap.AddStaticLight(cLightSystem.GetEnvironLight(this.ToWorldPos(tilePos), 50.0f, Color.Yellow));
-
-                    }
-                    else
-                    if (tempTile.Type == TileType.LEVEL_START)
-                    {
-                        //top-left
-                        Vector2f levelStartGroundPos = this.ToWorldPos(new Vector2i(x, y));
-                        
-                        Texture t = cAssetManager.GetTexture("door1_sm");
-
-                        Vector2f textureSize = new Vector2f(t.Size.X, t.Size.Y);
-
-                        cAABB bounds = pScene.WolrdEnv.CalcBBOnGroundByTexture(levelStartGroundPos, textureSize);
-                        Vector2f texturePos = bounds.topLeft;
-
-                        bounds.Scale(new Vector2f(0.8f, 0.8f), new Vector2f(bounds.center.X, bounds.rightBottom.Y));
-
-                        levelStartRegion = bounds;
-
-                        pScene.WolrdEnv.PlaceOnGround(texturePos, t, bounds);
-                        
-                        
-        
-                        pScene.LightMap.AddStaticLight( cLightSystem.GetEnvironLight(bounds.center, bounds.halfDims.X * 3.0f, Color.Green) );
-
-                    }
-                    else
-                    if (tempTile.Type == TileType.LEVEL_END)
-                    {
-                        
-                        //top-left
-                        Vector2f levelEndGroundPos = this.ToWorldPos(new Vector2i(x, y));
-
-                        Texture t = cAssetManager.GetTexture("door1_sm");
-
-                        Vector2f textureSize = new Vector2f(t.Size.X, t.Size.Y);
-
-                        cAABB bounds = pScene.WolrdEnv.CalcBBOnGroundByTexture(levelEndGroundPos, textureSize);
-                        Vector2f texturePos = bounds.topLeft;
-
-                        bounds.Scale(new Vector2f(0.8f, 0.8f), new Vector2f(bounds.center.X, bounds.rightBottom.Y));
-
-                        levelEndRegion = bounds;
-
-                        pScene.WolrdEnv.PlaceOnGround(texturePos, t, bounds);
-
-
-                        pScene.LightMap.AddStaticLight(cLightSystem.GetEnvironLight(bounds.center, bounds.halfDims.X * 3.0f, Color.Red));
-                    }
-
-                }
-
-            }
-        }
 
         public void DrawBackground(RenderTarget destination)
         {
-            destination.Draw(background);
+            //destination.Draw(background);
         }
         private void renderTilesToTexture(RenderTarget destination)
         {
            
             //m_TextureOfTiles.Clear(Color.Black);
 
-            
-
-            cTile tempTile = null;
+            //cTile tempTile = null;
             Vector2f drawPos = new Vector2f();
 
-            const uint spaceOffset = 0;
+            const int spaceOffset = 0;
 
-            
-           
-
-            const int subTILE_SIZE = 32; //40
-                                         //const int diff = (TILE_SIZE > subTILE_SIZE) ? (TILE_SIZE - subTILE_SIZE) : 0;
             int startTileX = (int)drawTileBounds.topLeft.X;
             int startTileY = (int)drawTileBounds.topLeft.Y;
             int endTileX = (int)drawTileBounds.rightBottom.X;
             int endTileY = (int)drawTileBounds.rightBottom.Y;
             //m_TextureOfTiles.Draw(m_BcgrSprite);
-            Vector2f tempSize = new Vector2f(Constants.TILE_SIZE, Constants.TILE_SIZE);
+           // Vector2f tempSize = new Vector2f(Constants.TILE_SIZE, Constants.TILE_SIZE);
 
+            tileMapVertices.Clear();
 
             for (int y = startTileY; y < endTileY; y++)
             {
                 for (int x = startTileX; x < endTileX; x++)
                 {
-                    tempTile = m_Level1.GetTileAtXY(x, y);
+                    //cTile[] tiles = m_Level1.getAllTileAtXY(x, y); 
+                    cTile tempTile = m_Level1.GetTileAtXY(x, y);
 
-                    drawPos.X = (m_WorldBounds.topLeft.X + x * Constants.TILE_SIZE) + spaceOffset;
-                    drawPos.Y = (m_WorldBounds.topLeft.Y + y * Constants.TILE_SIZE) + spaceOffset;
-
-
-                    //tempRS.setPosition(drawPos);
-                    if (tempTile.Type != TileType.EMPTY)
+                    //foreach (var tempTile in tiles)
                     {
-                        if (tempTile.PlayerCollidable)
-                            tempSprite.Color = Color.Red;
-                        else
-                            tempSprite.Color = Color.White;
+                        if (tempTile.Type != TileType.EMPTY)
+                        {
 
-                        tempSprite.Position = drawPos;
-                        tempSprite.TextureRect = tempTile.PosOnTexture;
+                            drawPos.X = (m_WorldBounds.topLeft.X + x * Constants.TILE_SIZE) + spaceOffset;
+                            drawPos.Y = (m_WorldBounds.topLeft.Y + y * Constants.TILE_SIZE) + spaceOffset;
 
-                        destination.Draw(tempSprite);
+                            cAABB tileBounds = this.getAABBFromMapPos(new Vector2i((int)drawPos.X, (int)drawPos.Y));
+
+                            Vertex topLeft = new Vertex(tileBounds.topLeft, Color.White, tempTile.PosOnTexture.topLeft);
+                            Vertex topRight = new Vertex(tileBounds.getTopRight(), Color.White, tempTile.PosOnTexture.getTopRight());
+                            Vertex bottomRight = new Vertex(tileBounds.rightBottom, Color.White, tempTile.PosOnTexture.rightBottom);
+                            Vertex bottomLeft = new Vertex(tileBounds.getLeftBottom(), Color.White, tempTile.PosOnTexture.getLeftBottom());
+
+                            tileMapVertices.Append(topLeft);
+                            tileMapVertices.Append(topRight);
+                            tileMapVertices.Append(bottomRight);
+                            tileMapVertices.Append(bottomLeft);
+                            /*
+                            if (tempTile.PlayerCollidable)
+                                tempSprite.Color = Color.Red;
+                            else
+                                tempSprite.Color = Color.White;
+
+                            tempSprite.Position = drawPos;
+                            tempSprite.TextureRect = tempTile.PosOnTexture;
+
+                            destination.Draw(tempSprite);
+                            */
+
+                        }
                     }
 
                 }
                 
             }
 
+            destination.Draw(tileMapVertices, tileMapRenderStates);
             //m_TextureOfTiles.Display();
         }
 
@@ -650,56 +479,6 @@ namespace platformerGame
                }
              )
            );
-
-           // cAABB aabb = this.getAABBFromWorldPos(intersectionPoint);
-
-           // if (collided)
-           // {
-                /*Vector2f N = cAppMath.Vec2Perp(p.Vel);
-                if(intersectionPoint.Y == aabb.topLeft.Y)
-                {
-                    N = cAppMath.Vec2Perp(new Vector2f(aabb.rightBottom.X, aabb.topLeft.Y) - aabb.topLeft);
-                }
-                else
-                if (intersectionPoint.Y == aabb.rightBottom.Y)
-                {
-                    N = cAppMath.Vec2Perp( - aabb.topLeft);
-                }
-                */
-                //p.Pos = intersectionPoint; // + (-p.Heading);
-                //p.LastPos = p.Pos;
-                //if we want to drag to the wall:
-                //p.Vel.X = 0.0f;
-                //p.Vel.Y = 0.0f;
-                //p.Vel = cCollision.processWorldObjCollision(p.Vel, N);
-           // }
-
-        }
-
-        public void collideParticle(Particle p, float step_time)
-        {
-            Vector2f posA = new Vector2f((int)p.LastPos.X, (int)p.LastPos.Y);
-            Vector2f posB = new Vector2f((int)p.Pos.X, (int)p.Pos.Y);
-            bool collided = false;
-            Vector2f intersectionPoint = new Vector2f(0.0f, 0.0f);
-
-            List<cAABB> blocks = this.getCollidableBlocks(p.getBoundingBox());
-            int i = 0;
-            while(i < blocks.Count && !collided)
-            {
-                collided = cCollision.testLineVsAABB(p.LastPos, p.Pos, blocks[i], ref intersectionPoint);
-                i++;
-            }
-           
-            if(collided)
-            {
-                //Vector2f N = cAppMath.Vec2Perp(p.Vel);
-
-                p.Pos = intersectionPoint; // + (-p.Heading);
-                p.LastPos = p.Pos;
-                p.Vel.X = 0.0f;
-                p.Vel.Y = 0.0f;
-            }
         }
 
         public List<cAABB> getCollidableBlocks(cAABB with)
