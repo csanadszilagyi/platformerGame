@@ -147,7 +147,7 @@ namespace platformerGame.Map
         }
 
         public cTile GetTileAtIndex(int index, int layer = TileLayers.WALLS)
-        {
+        { 
             if (index >= 0 && index < NumOfTiles)
             {
                 return layers[layer][index];
@@ -320,7 +320,7 @@ namespace platformerGame.Map
             int imgWidth = (int)tileSet.Image.Width;
             int imgHeight = (int)tileSet.Image.Height;
 
-            Constants.TILE_SIZE = tileSet.TileWidth; // suppose width and heigt are equals
+            Constants.TILE_SIZE = tileSet.TileWidth; // suppose width and height are equal
 
             int tilesInRow = imgWidth / Constants.TILE_SIZE;
 

@@ -117,6 +117,8 @@ namespace platformerGame
             m_BGtexture.Repeated = true;
             m_BGtexture.Smooth = true;
 
+            tempSprite = new Sprite(m_TileSetTexture);
+
             background = new Sprite(m_BGtexture);
             background.TextureRect = new IntRect(0, 0, (int)m_WorldBounds.dims.X, (int)m_WorldBounds.dims.Y); // (int)m_TextureOfTiles.Size.X, (int)m_TextureOfTiles.Size.Y);
             background.Color = Constants.BACKGROUND_COLOR;
@@ -303,7 +305,7 @@ namespace platformerGame
                     {
                         if (tempTile.Type != TileType.EMPTY)
                         {
-
+                            /*
                             drawPos.X = (m_WorldBounds.topLeft.X + x * Constants.TILE_SIZE) + spaceOffset;
                             drawPos.Y = (m_WorldBounds.topLeft.Y + y * Constants.TILE_SIZE) + spaceOffset;
 
@@ -318,17 +320,18 @@ namespace platformerGame
                             tileMapVertices.Append(topRight);
                             tileMapVertices.Append(bottomRight);
                             tileMapVertices.Append(bottomLeft);
-                            /*
+                            */
+                            
                             if (tempTile.PlayerCollidable)
                                 tempSprite.Color = Color.Red;
                             else
                                 tempSprite.Color = Color.White;
 
                             tempSprite.Position = drawPos;
-                            tempSprite.TextureRect = tempTile.PosOnTexture;
+                            tempSprite.TextureRect = tempTile.PosOnTexture.AsIntRect();
 
                             destination.Draw(tempSprite);
-                            */
+                            
 
                         }
                     }
@@ -337,7 +340,7 @@ namespace platformerGame
                 
             }
 
-            destination.Draw(tileMapVertices, tileMapRenderStates);
+            //destination.Draw(tileMapVertices, tileMapRenderStates);
             //m_TextureOfTiles.Display();
         }
 
