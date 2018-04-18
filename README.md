@@ -6,15 +6,16 @@ platformerGame
 This project is under development.
 
 ### Contains so far:
-*   Scrolling map, centered player in camera
+*   Scrolling map, player centered in camera
 *   Simple light system
-*   Character, bullet and particle collision detection with the map and bullet-monster collision with hit handler
+*   Character, bullet and particle collision detection with the map, and bullet-monster collision with hit handler
 *   Particle system
 *   Wavy water blocks
 *   Simple graphics, animation and sprite state control
-*   Map data loads from file and tiles have different sprites by them positions
+*   Map data is loaded from file and tiles have different sprites according to them positions
+*   .tmx file support is planned
 
-Currently, there is one level loaded with some monsters.
+Currently there is one level available with some monsters.
 
 ![platformer1](https://user-images.githubusercontent.com/23726291/32418121-49bc8faa-c264-11e7-87e5-f8026541107d.gif)
 
