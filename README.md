@@ -21,3 +21,4 @@ Currently there is one level available with some monsters.
 
 ![platformer2](https://user-images.githubusercontent.com/23726291/32418333-1aa4bbd0-c268-11e7-9f57-72cdc3e2b0fc.gif)
 
+All rights reserved.
