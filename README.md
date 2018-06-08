@@ -9,13 +9,16 @@ This project is under development.
 *   Scrolling map, player centered in camera
 *   Simple light system
 *   Character, bullet and particle collision detection with the map, and bullet-monster collision with hit handler
-*   Particle system
+*   Particle systems
 *   Wavy water blocks
 *   Simple graphics, animation and sprite state control
-*   Map data is loaded from file and tiles have different sprites according to them positions
-*   .tmx file support is planned
+*   Levels made by Tiled, loaded from .tmx files
+*   Tile layers added
+*   Monsters can drop "pickup-able" things
 
-Currently there is one level available with some monsters.
+Some gameplay gifs:
+Latest:
+![platformer_b](https://user-images.githubusercontent.com/23726291/41161580-a0b7f006-6b33-11e8-99d9-5c44881ced17.gif)
 
 ![platformer1](https://user-images.githubusercontent.com/23726291/32418121-49bc8faa-c264-11e7-87e5-f8026541107d.gif)
 
