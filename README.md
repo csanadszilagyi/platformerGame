@@ -16,8 +16,6 @@ This project is under development.
 *   Tile layers added
 *   Monsters can drop "pickup-able" things
 
-Some gameplay gifs:
-Latest:
 ![platformer_b](https://user-images.githubusercontent.com/23726291/41161580-a0b7f006-6b33-11e8-99d9-5c44881ced17.gif)
 
 ![platformer1](https://user-images.githubusercontent.com/23726291/32418121-49bc8faa-c264-11e7-87e5-f8026541107d.gif)
