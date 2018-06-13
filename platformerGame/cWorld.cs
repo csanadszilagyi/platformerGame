@@ -10,11 +10,8 @@ using SFML.Graphics;
 using SFML.Window;
 
 using platformerGame.Utilities;
-<<<<<<< HEAD
 using platformerGame.GameObjects;
-=======
 using platformerGame.Map;
->>>>>>> tmxLoader
 
 namespace platformerGame
 {
@@ -344,14 +341,11 @@ namespace platformerGame
         {
             // TODO: make it elegant
             Vector2i map = ToMapPos(world_pos);
-<<<<<<< HEAD
             TileType tt = GetCurrentLevel().GetTypeAtPos(map);
             return tt == TileType.WALL || tt == TileType.ONEWAY_PLATFORM;
             //return !m_Level1.GetTileAtXY(map.X, map.Y).TypeIsWalkAble();
-=======
             cTile t = currentLevel.GetTileAtXY(map.X, map.Y);
             return t != null ? !t.IsWalkAble() : true;
->>>>>>> tmxLoader
         }
 
         public bool IsWallAtPos(Vector2f world_pos)

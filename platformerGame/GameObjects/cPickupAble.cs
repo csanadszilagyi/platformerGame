@@ -73,9 +73,7 @@ namespace platformerGame.GameObjects
         {
             if (false == pulling)
             {
-<<<<<<< HEAD
                 pscene.World.collideSAT(this, step_time);
-=======
                 // check collisions with world
                 List<cAABB> wallsPossibleColliding = world.getCollidableBlocks(Bounds);
 
@@ -105,7 +103,6 @@ namespace platformerGame.GameObjects
 
                     }
                 }
->>>>>>> tmxLoader
             }
         }
 
