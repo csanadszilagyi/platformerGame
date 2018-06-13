@@ -9,6 +9,8 @@ using SFML.System;
 
 using platformerGame.GameObjects;
 using platformerGame.Utilities;
+using platformerGame.Map;
+using tileLoader;
 
 namespace platformerGame
 {
@@ -19,7 +21,8 @@ namespace platformerGame
         List<cMonster> monsters;
 
         cSpatialGrid spatialGrid;
-        // id - pickable object (id is the id of object, generated when statically when created)
+
+        // id - pickable object (id is the id of object, generated statically when created)
         Dictionary<int, cPickupAble> pickups;
 
         //List<cPickupAble> pickups;
@@ -67,12 +70,25 @@ namespace platformerGame
             this.monsters.Add(monster);
         }
 
+        public void InitLevelEntites(cMapData level)
+        {
+            this.monsters.Clear();
+
+            TmxMap map = level.GetTmxMap();
+            TmxList<TmxObject> entityList = map.ObjectGroups["Entities"].Objects;
+            foreach (var tmxEntity in entityList)
+            {
+                cMonster monster = new cMonster(this.pScene, new Vector2f((float)tmxEntity.X, (float)tmxEntity.Y));
+                this.AddMonster(monster);
+            }
+        }
+
         public void Update(float step_time)
         {
 
             spatialGrid.ClearAll();
 
-            // checkPickupsCollisionEachOther(step_time);
+            //checkPickupsCollisionEachOther(step_time);
 
             this.checkBulletVsEntityCollisions(step_time);
             

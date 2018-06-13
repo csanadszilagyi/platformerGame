@@ -149,9 +149,9 @@ namespace platformerGame
 
             this.m_MainWindow.SetView(this.defaultView);
             
-            if (fpsUpdater.isReady())
-                timeText.DisplayedString = /*"Delta: " + delta.ToString() + "  " + */"VSYNC: " + (this.vsync ? "ON" : "OFF"); //entityPool.getNumOfActiveBullets().ToString();
-             
+            //if (fpsUpdater.isReady())
+             //   timeText.DisplayedString = /*"Delta: " + delta.ToString() + "  " + */"VSYNC: " + (this.vsync ? "ON" : "OFF"); //entityPool.getNumOfActiveBullets().ToString();
+            
             this.m_MainWindow.Draw(timeText);
 
 
@@ -292,7 +292,7 @@ namespace platformerGame
             
             float maxDelta = 0.25f; //0.25f
             float acc = 0;
-            float stepTime = 1.0f / 60.0f;
+            float stepTime = Constants.STEP_TIME;
             int loops;
             float alpha = 0.0f;
 

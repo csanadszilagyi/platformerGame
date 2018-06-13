@@ -20,6 +20,7 @@ namespace platformerGame.GameObjects
 
         public cMonster(cGameScene scene, Vector2f pos) : base(scene, pos)
         {
+            
             p_followLight = new cLight();
             p_followLight.Radius = 80.0f;
             p_followLight.LinearizeFactor = 0.9f;
@@ -36,7 +37,7 @@ namespace platformerGame.GameObjects
             eye.Color = new Color(255, 39, 13);
 
             this.Scene.LightMap.AddStaticLight(eye);
-
+            
             locateTime = new cTimer();
 
         }
@@ -176,7 +177,6 @@ namespace platformerGame.GameObjects
         public void Kill(cGameObject by)
         {
             this.Scene.LightMap.remove(this.p_followLight);
-            this.Scene.LightMap.remove(this.p_followLight);
             this.Scene.LightMap.remove(this.eye);
             // this.spriteControl.ChangeState(new cSpriteState(MotionType.LIE, this.spriteControl.getCurrentState().HorizontalFacing));
 
@@ -185,20 +185,35 @@ namespace platformerGame.GameObjects
 
             Vector2f emitDirection = cAppMath.Vec2NormalizeReturn(by.Velocity);
             this.Scene.QueueCommand(
-                () => { pscene.ParticleManager.Explosions.NormalBlood(new Particles.cEmissionInfo(this.Bounds.center, emitDirection)); }
+                () => 
+                    {
+                        //pscene.ParticleManager.Fireworks.NormalExplosion(new Particles.cEmissionInfo(this.Bounds.center, emitDirection));
+                        pscene.ParticleManager.Explosions.NormalBlood(new Particles.cEmissionInfo(this.Bounds.center, emitDirection));
+                    }
                 //new GameCommands.comNormalBloodExplosion(this.Scene, new Particles.cEmissionInfo(this.Bounds.center, emitDirection))
                 );
 
             this.Scene.QueueCommand(
                 () => {
-                    pscene.EntityPool.AddPickup(
-                        new cPickupAble(
-                            this.Scene,
-                            this.Scene.EntityPool.SpatialGrid,
-                            this.Bounds.center,
-                            emitDirection
-                        )
-                   );
+
+                    ProbabilityRoll<int> r = new ProbabilityRoll<int>();
+                    r.add(70, 2);
+                    r.add(30, 3);
+
+                    int num = r.roll();
+                    for (int i = 0; i < num; ++i)
+                    {
+                        pscene.EntityPool.AddPickup(
+                            new cPickupAble(
+                                this.Scene,
+                                this.Scene.EntityPool.SpatialGrid,
+                                this.Bounds.center,
+                                cAppMath.GetRandomUnitVec(), // emitDirection,
+                                PickupInfo.PickupType.COIN_GOLD
+                            )
+                       );
+
+                    }
                 }
                 /*
                 new platformerGame.GameCommands.comPlacePickup(
@@ -233,7 +248,7 @@ namespace platformerGame.GameObjects
                  )
                );
 
-                if (!playerHiddenForMe && sqrDistFromPlayer <= 1000000.0) // 100 unit distance
+                if (!playerHiddenForMe && sqrDistFromPlayer <= 80000.0) // 100 unit distance  1000000.0
                 {
                     //this.wake();
 

@@ -12,8 +12,9 @@ namespace platformerGame
 {
     class cAssetManager
     {
-        private const string TEX_RESOURCE_PATH = "Resources/textures/";
-        private const string FONT_RESOURCE_PATH = "Resources/Fonts/";
+        public const string TEX_RESOURCE_PATH = "Resources/textures/";
+        public const string TILESET_PATH = "tilesets/";
+        public const string FONT_RESOURCE_PATH = "Resources/Fonts/";
 
         private static Dictionary<string, Texture> textures;
         private static Dictionary<string, Font> fonts;

@@ -47,5 +47,11 @@ namespace platformerGame.Utilities
             a = b;
             b = c;
         }
+        //==========================================================================================================
+        public static Color GetSfmlColorFromHex(string hex_color)
+        {
+            System.Drawing.Color c = System.Drawing.ColorTranslator.FromHtml(hex_color);
+            return new Color(c.R, c.G, c.B, c.A);
+        }
     }
 }

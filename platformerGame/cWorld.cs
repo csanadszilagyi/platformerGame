@@ -41,6 +41,19 @@ namespace platformerGame
         public static readonly IntRect EMPTY = new IntRect(3 * Constants.TILE_SIZE, 3 * Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE);
     }
 
+    class DrawTile
+    {
+        public int Left, Top;
+        public cAABB PosOnTexture;
+
+        public DrawTile(int left, int top, cAABB pos_on_texture)
+        {
+            this.Left = left;
+            this.Top = top;
+            this.PosOnTexture = pos_on_texture;
+        }
+    }
+
     class NeighInfo
     {
         private bool hasLeft, hasTop, hasRight, hasBottom;
@@ -76,15 +89,9 @@ namespace platformerGame
     class cWorld
     {
 
-        cMapData m_Level1;
+        cMapData currentLevel;
         cAABB m_WorldBounds;
         Vector2u windowSize;
-
-        cAABB drawTileBounds;
-
-        RenderTexture m_TextureOfTiles;
-
-        Texture m_TileSetTexture = null;
 
         Sprite background;
         Texture m_BGtexture = null;
@@ -92,49 +99,43 @@ namespace platformerGame
         public cAABB levelStartRegion;
         public cAABB levelEndRegion;
 
-        Sprite tempSprite;
+
         cGameScene pScene;
 
-        VertexArray tileMapVertices;
-        RenderStates tileMapRenderStates;
+
+        cTileMapRenderer mapRenderer;
+
         public cWorld(cGameScene p_scene, Vector2u window_size)
         {
             pScene = p_scene;
             windowSize = window_size;
-            drawTileBounds = new cAABB(0,0,1,1);
 
-            m_Level1 = new cMapData();
+
+            currentLevel = new cMapData();
             //m_Level1.Create(100, 100);
-            this.LoadLevel("levels/third.tmx"); //("levels/level1.txt");
+            this.LoadLevel("levels/map_test2.tmx"); //"levels/Level1.txt"); //
 
-            m_TextureOfTiles = new RenderTexture((uint)m_WorldBounds.dims.X, (uint)m_WorldBounds.dims.Y); //(windowSize.X, windowSize.Y);
-            m_TextureOfTiles.SetActive(true);
-
-            m_TileSetTexture = this.GetCurrentLevel().TilesetTexture; //cAssetManager.GetTexture("tileSet_16");
-            m_TileSetTexture.Smooth = true;
 
             m_BGtexture = cAssetManager.GetTexture(Constants.BG_TEXTURE);
             m_BGtexture.Repeated = true;
             m_BGtexture.Smooth = true;
 
-            tempSprite = new Sprite(m_TileSetTexture);
+            //tempSprite = new Sprite(m_TileSetTexture);
 
             background = new Sprite(m_BGtexture);
             background.TextureRect = new IntRect(0, 0, (int)m_WorldBounds.dims.X, (int)m_WorldBounds.dims.Y); // (int)m_TextureOfTiles.Size.X, (int)m_TextureOfTiles.Size.Y);
             background.Color = Constants.BACKGROUND_COLOR;
 
+            mapRenderer = new cTileMapRenderer(this);
 
-            tileMapVertices = new VertexArray(PrimitiveType.Quads);
-            tileMapRenderStates = new RenderStates(BlendMode.Alpha);
-            tileMapRenderStates.Texture = m_TileSetTexture;
         }
 
         public void LoadLevel(string file_name)
         {
-            //m_Level1.LoadFromFile(file_name);
-            m_Level1.LoadFromTMX(file_name);
+            // m_Level1.LoadFromFile(file_name);
+            currentLevel.LoadFromTMX(file_name);
 
-            m_WorldBounds = new cAABB(0.0f, 0.0f, m_Level1.Width * Constants.TILE_SIZE, m_Level1.Height * Constants.TILE_SIZE);
+            m_WorldBounds = new cAABB(0.0f, 0.0f, currentLevel.Width * Constants.TILE_SIZE, currentLevel.Height * Constants.TILE_SIZE);
 
             levelStartRegion = GetCurrentLevel().LevelStartRegion;
             levelEndRegion = GetCurrentLevel().LevelEndRegion;
@@ -171,10 +172,10 @@ namespace platformerGame
                 bool wasWater = false;
                 int w = 0;
 
-                while (h < m_Level1.Height)
+                while (h < currentLevel.Height)
                 {
 
-                    cTile currentTile = m_Level1.GetTileAtXY(w, h);
+                    cTile currentTile = currentLevel.GetTileAtXY(w, h);
                     if (currentTile.Type == TileType.WATER && !currentTile.IsCheckedWater)
                     {
                         if (!wasWater)
@@ -192,7 +193,7 @@ namespace platformerGame
                         cTile tile = null;
                         while (water)
                         {
-                            tile = m_Level1.GetTileAtXY(w, h + heightOffset);
+                            tile = currentLevel.GetTileAtXY(w, h + heightOffset);
                             if (tile.Type == TileType.WATER)
                             {
                                 tile.IsCheckedWater = true;
@@ -223,7 +224,7 @@ namespace platformerGame
 
                     w++;
 
-                    if (w >= m_Level1.Width)
+                    if (w >= currentLevel.Width)
                     {
                         w = 0;
 
@@ -273,98 +274,25 @@ namespace platformerGame
 
         public void DrawBackground(RenderTarget destination)
         {
-            //destination.Draw(background);
+            destination.Draw(background);
         }
-        private void renderTilesToTexture(RenderTarget destination)
+
+        
+
+        public void PreRender(cAABB view_rect)
         {
-           
-            //m_TextureOfTiles.Clear(Color.Black);
-
-            //cTile tempTile = null;
-            Vector2f drawPos = new Vector2f();
-
-            const int spaceOffset = 0;
-
-            int startTileX = (int)drawTileBounds.topLeft.X;
-            int startTileY = (int)drawTileBounds.topLeft.Y;
-            int endTileX = (int)drawTileBounds.rightBottom.X;
-            int endTileY = (int)drawTileBounds.rightBottom.Y;
-            //m_TextureOfTiles.Draw(m_BcgrSprite);
-           // Vector2f tempSize = new Vector2f(Constants.TILE_SIZE, Constants.TILE_SIZE);
-
-            tileMapVertices.Clear();
-
-            for (int y = startTileY; y < endTileY; y++)
-            {
-                for (int x = startTileX; x < endTileX; x++)
-                {
-                    //cTile[] tiles = m_Level1.getAllTileAtXY(x, y); 
-                    cTile tempTile = m_Level1.GetTileAtXY(x, y);
-
-                    //foreach (var tempTile in tiles)
-                    {
-                        if (tempTile.Type != TileType.EMPTY)
-                        {
-                            /*
-                            drawPos.X = (m_WorldBounds.topLeft.X + x * Constants.TILE_SIZE) + spaceOffset;
-                            drawPos.Y = (m_WorldBounds.topLeft.Y + y * Constants.TILE_SIZE) + spaceOffset;
-
-                            cAABB tileBounds = this.getAABBFromMapPos(new Vector2i((int)drawPos.X, (int)drawPos.Y));
-
-                            Vertex topLeft = new Vertex(tileBounds.topLeft, Color.White, tempTile.PosOnTexture.topLeft);
-                            Vertex topRight = new Vertex(tileBounds.getTopRight(), Color.White, tempTile.PosOnTexture.getTopRight());
-                            Vertex bottomRight = new Vertex(tileBounds.rightBottom, Color.White, tempTile.PosOnTexture.rightBottom);
-                            Vertex bottomLeft = new Vertex(tileBounds.getLeftBottom(), Color.White, tempTile.PosOnTexture.getLeftBottom());
-
-                            tileMapVertices.Append(topLeft);
-                            tileMapVertices.Append(topRight);
-                            tileMapVertices.Append(bottomRight);
-                            tileMapVertices.Append(bottomLeft);
-                            */
-                            
-                            if (tempTile.PlayerCollidable)
-                                tempSprite.Color = Color.Red;
-                            else
-                                tempSprite.Color = Color.White;
-
-                            tempSprite.Position = drawPos;
-                            tempSprite.TextureRect = tempTile.PosOnTexture.AsIntRect();
-
-                            destination.Draw(tempSprite);
-                            
-
-                        }
-                    }
-
-                }
-                
-            }
-
-            //destination.Draw(tileMapVertices, tileMapRenderStates);
-            //m_TextureOfTiles.Display();
-        }
-
-        private void recalculateDrawBounds(cAABB viewRect)
-        {
-            drawTileBounds = viewRect.ShallowCopy();
-            
-            drawTileBounds.topLeft.X = (float)Math.Floor((drawTileBounds.topLeft.X / Constants.TILE_SIZE)-1);
-            drawTileBounds.topLeft.Y = (float)Math.Floor((drawTileBounds.topLeft.Y / Constants.TILE_SIZE)-1);
-
-            drawTileBounds.rightBottom.X = (float)Math.Ceiling((drawTileBounds.rightBottom.X / Constants.TILE_SIZE)+1);
-            drawTileBounds.rightBottom.Y = (float)Math.Ceiling((drawTileBounds.rightBottom.Y / Constants.TILE_SIZE)+1);
-
-            drawTileBounds.topLeft.X = Math.Max(drawTileBounds.topLeft.X, 0.0f);
-            drawTileBounds.topLeft.Y = Math.Max(drawTileBounds.topLeft.Y, 0.0f);
-            drawTileBounds.rightBottom.X = Math.Min(drawTileBounds.rightBottom.X, m_Level1.Width);
-            drawTileBounds.rightBottom.Y = Math.Min(drawTileBounds.rightBottom.Y, m_Level1.Height);
+            mapRenderer.RecalculateDrawBounds(view_rect);
 
         }
+
         public void Render(RenderTarget destination, cAABB view_rect)
         {
-            recalculateDrawBounds(view_rect);
+            //recalculateDrawBounds(view_rect);
+           // DrawBackground(destination);
 
-            renderTilesToTexture(destination);
+            mapRenderer.Render(destination, view_rect);
+
+            //renderTilesToTexture(destination);
             /*
             FloatRect ft = view_rect.AsFloatRect();
             Vector2f pos = new Vector2f(ft.Left, ft.Top);
@@ -398,17 +326,27 @@ namespace platformerGame
         public TileType GetTileTypeAtPos(Vector2f world_pos)
         {
             Vector2i map = ToMapPos(world_pos);
-            return m_Level1.GetTileAtXY(map.X, map.Y).Type;
+            return currentLevel.GetTileAtXY(map.X, map.Y).Type;
         }
-        public bool IsObastacleAtPos(Vector2f world_pos)
+
+        public bool isWallOrPlatform(Vector2f world_pos)
         {
             Vector2i map = ToMapPos(world_pos);
-            return !m_Level1.GetTileAtXY(map.X, map.Y).IsWalkAble();
+            cTile t = currentLevel.GetTileAtXY(map.X, map.Y);
+            return t != null ? t.Type == TileType.WALL || t.Type == TileType.ONEWAY_PLATFORM : true;
+        }
+
+        public bool IsObastacleAtPos(Vector2f world_pos)
+        {
+            // TODO: make it elegant
+            Vector2i map = ToMapPos(world_pos);
+            cTile t = currentLevel.GetTileAtXY(map.X, map.Y);
+            return t != null ? !t.IsWalkAble() : true;
         }
         public cTile GetTileByWorldPos(Vector2f world_pos)
         {
             Vector2i map = ToMapPos(world_pos);
-            return m_Level1.GetTileAtXY(map.X, map.Y);
+            return currentLevel.GetTileAtXY(map.X, map.Y);
         }
 
         public cAABB getAABBFromMapPos(Vector2i mapPos)
@@ -431,7 +369,7 @@ namespace platformerGame
 
         public cMapData GetCurrentLevel()
         {
-            return m_Level1;
+            return currentLevel;
         }
 
         public bool isRectOnWall(float left, float top, float width, float height)
@@ -441,15 +379,15 @@ namespace platformerGame
             Vector2i bottomRight = this.ToMapPos(new Vector2f(left + width, top+height));
             Vector2i bottomLeft = this.ToMapPos(new Vector2f(left, top+height));
 
-            return ( m_Level1.IsObstacleAtPos(topLeft) ||
-                     m_Level1.IsObstacleAtPos(topRight) ||
-                     m_Level1.IsObstacleAtPos(bottomRight) ||
-                     m_Level1.IsObstacleAtPos(bottomLeft));
+            return ( currentLevel.IsObstacleAtPos(topLeft) ||
+                     currentLevel.IsObstacleAtPos(topRight) ||
+                     currentLevel.IsObstacleAtPos(bottomRight) ||
+                     currentLevel.IsObstacleAtPos(bottomLeft));
         }
 
         public void ClearAll()
         {
-            m_Level1.Clear();
+            currentLevel.Clear();
         }
 
         public void collideParticleRayTrace(Particle p, float step_time)
@@ -500,7 +438,7 @@ namespace platformerGame
             {
                 for (int x = minTile.X - offset; x <= maxTile.X + offset; x++)
                 {
-                    if ( y >= 0 && x >= 0 && y < this.m_Level1.Height && x < this.m_Level1.Width )
+                    if ( y >= 0 && x >= 0 && y < this.currentLevel.Height && x < this.currentLevel.Width )
                     {
                         cTile tile = this.GetCurrentLevel().GetTileAtXY(x, y);
                         

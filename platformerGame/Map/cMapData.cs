@@ -14,11 +14,12 @@ using System.Text.RegularExpressions;
 
 namespace platformerGame.Map
 {
-    class TileLayers
+    class TileLayerTypes
     {
-        public const int   WALLS = 0,
-                              BACKGROUND_1 = 1,
-                              BACKGROUND_2 = 2;
+        public const int    BACKGROUND_1    = 0,
+                            BACKGROUND_2    = 1,
+                            WALLS           = 2;
+                            
     }
 
     class cMapData
@@ -32,6 +33,9 @@ namespace platformerGame.Map
         Texture tilesetTexture;
         cAABB levelStartRegion;
         cAABB levelEndRegion;
+
+
+        TmxMap map;
 
         public cMapData()
         {
@@ -47,7 +51,7 @@ namespace platformerGame.Map
         }
         public List<cTile> Tiles
         {
-            get { return layers[TileLayers.WALLS]; }
+            get { return layers[TileLayerTypes.WALLS]; }
         }
         public int NumOfTiles
         {
@@ -90,17 +94,17 @@ namespace platformerGame.Map
 
         public bool IsObstacleAtPos(int x, int y)
         {
-            return !layers[TileLayers.WALLS][GetIndexByXY(x, y)].IsWalkAble();
+            return !layers[TileLayerTypes.WALLS][GetIndexByXY(x, y)].IsWalkAble();
         }
 
         public bool IsObstacleAtPos(Vector2i pos)
         {
-            return !layers[TileLayers.WALLS][GetIndexByXY(pos.X, pos.Y)].IsWalkAble();
+            return !layers[TileLayerTypes.WALLS][GetIndexByXY(pos.X, pos.Y)].IsWalkAble();
         }
 
         public TileType GetTypeAtPos(Vector2i pos)
         {
-            return layers[TileLayers.WALLS][GetIndexByXY(pos.X, pos.Y)].Type;
+            return layers[TileLayerTypes.WALLS][GetIndexByXY(pos.X, pos.Y)].Type;
         }
         public int GetIndexByXY(int x, int y)
         {
@@ -108,9 +112,10 @@ namespace platformerGame.Map
             return index;
         }
 
-        public cTile[] getAllTileAtXY(int x, int y)
+        public cTile[] getDrawAbleTiles(int x, int y)
         {
             int index = GetIndexByXY(x, y);
+            //this.layers[TileLayers.WALLS].Where(t => t.Type != TileType.EMPTY).ToList();
 
             List<cTile> ret = new List<cTile>();
 
@@ -121,7 +126,7 @@ namespace platformerGame.Map
                         ret.Add(layerTiles.Value[index]);
                 }
 
-                ret.Reverse();
+                //ret.Reverse();
                 return ret.ToArray();
                 
             }
@@ -129,7 +134,7 @@ namespace platformerGame.Map
             return null;
         }
 
-        public cTile GetTileAtXY(int x, int y, int layer = TileLayers.WALLS)
+        public cTile GetTileAtXY(int x, int y, int layer = TileLayerTypes.WALLS)
         {
             int index = GetIndexByXY(x, y);
             //return m_Tiles[index];
@@ -146,7 +151,7 @@ namespace platformerGame.Map
             }
         }
 
-        public cTile GetTileAtIndex(int index, int layer = TileLayers.WALLS)
+        public cTile GetTileAtIndex(int index, int layer = TileLayerTypes.WALLS)
         { 
             if (index >= 0 && index < NumOfTiles)
             {
@@ -173,22 +178,22 @@ namespace platformerGame.Map
             width = w;
             height = h;
             numOfTiles = width * height;
-            layers[TileLayers.WALLS] = new List<cTile>();
+            layers[TileLayerTypes.WALLS] = new List<cTile>();
             for (int i = 0; i < numOfTiles; i++)
             {
                /* if(cAppRandom.GetRandomFloat() < 0.4f)
                     m_Tiles.Add(new cTile(i + 1, TileType.WALL));
                 else*/
-                    layers[TileLayers.WALLS].Add(new cTile(i + 1, TileType.EMPTY));
+                    layers[TileLayerTypes.WALLS].Add(new cTile(i + 1, TileType.EMPTY));
             }
 
 
         }
 
-        private cAABB getTextureRect(int type_id, int tiles_in_row)
+        private cAABB getTextureRect(int index, int tiles_in_row)
         {
-            int posY = type_id / tiles_in_row; //or: index / m_Height;
-            int posX = type_id % tiles_in_row; //or: index -  (pos.y * m_Width);
+            int posY = index / tiles_in_row; //or: index / m_Height;
+            int posX = index % tiles_in_row; //or: index -  (pos.y * m_Width);
 
             return new cAABB(posX* Constants.TILE_SIZE, posY* Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE);
         }
@@ -240,7 +245,7 @@ namespace platformerGame.Map
 
                         }
 
-                        layers[TileLayers.BACKGROUND_1].Add(gameTile);
+                        layers[TileLayerTypes.BACKGROUND_1].Add(gameTile);
                         tileID++;
                     }
                     catch (Exception e)
@@ -253,48 +258,48 @@ namespace platformerGame.Map
 
         }
 
-        private void loadWalls(TmxMap map, Dictionary<int, TmxTilesetTile> tile_types, int first_gid, int tiles_in_row)
+        private void loadLayer(Dictionary<int, TmxTilesetTile> tile_types, string tmx_layer, int into_layer, int first_gid, int tiles_in_row)
         {
-            TmxLayerTile[] tmxTiles = map.Layers["walls"].Tiles.ToArray();
+            TmxLayerTile[] tmxTiles = this.map.Layers[tmx_layer].Tiles.ToArray();
 
-            layers[TileLayers.WALLS] = new List<cTile>();
+            layers[into_layer] = new List<cTile>();
 
             int tileID = 0;
             foreach (var tmxTile in tmxTiles)
             {
-                int gid = tmxTile.Gid;
-                int type;
-
-                int typeID = gid - first_gid;
+               
+                int globalID = tmxTile.Gid;
 
                 cTile gameTile = null;
-
                 try
                 {
-                    if (typeID < 0)
+                    if (globalID <= 0)
                     {
+                        // do nothing, it is an empty tile
                         gameTile = new cTile(tileID, TileType.EMPTY);
-
-                        // does not matter, because we just skip the drwaing of empty tiles...
-                        gameTile.PosOnTexture = new cAABB(0, 0, Constants.TILE_SIZE, Constants.TILE_SIZE);
                     }
                     else
-                    if (int.TryParse(tile_types[typeID].Type, out type))
                     {
+                        int frameTile = globalID - 1; // substract one is very important!
 
+                        int type = Convert.ToInt32(tile_types[frameTile].Type);
                         gameTile = new cTile(tileID, (TileType)type);
-                        gameTile.PosOnTexture = getTextureRect(typeID, tiles_in_row);
+                        gameTile.GlobalId = globalID;
 
+                        gameTile.PosOnTexture = getTextureRect(frameTile, tiles_in_row);
+                       
 
-                    #if DEBUG
+                        #if DEBUG
                             System.Diagnostics.Debug.WriteLine(
-                                string.Format("{0} : {1}", gameTile.PosOnTexture.topLeft.X, gameTile.PosOnTexture.topLeft.Y));
-                        }
-                    #endif
+                                    string.Format("{0} : {1}", gameTile.PosOnTexture.topLeft.X, gameTile.PosOnTexture.topLeft.Y));
+                        #endif
+                    }
 
-
-                    layers[TileLayers.WALLS].Add(gameTile);
+                    layers[into_layer].Add(gameTile);
+                    //simple tile id counting...
                     tileID++;
+
+
                 }
                 catch (Exception e)
                 {
@@ -304,9 +309,14 @@ namespace platformerGame.Map
             }
         }
 
+        public TmxMap GetTmxMap()
+        {
+            return this.map;
+        }
+
         public void LoadFromTMX(string tmx_file_name)
         {
-            var map = new TmxMap(tmx_file_name);
+            this.map = new TmxMap(tmx_file_name);
             var tileSet = map.Tilesets[0];
             var tileTypes = tileSet.Tiles;
 
@@ -314,18 +324,34 @@ namespace platformerGame.Map
             height = map.Height;
             numOfTiles = width * height;
 
-            tilesetTexture = cAssetManager.LoadAndReturnTexture(tileSet.Image.Source);
+            // works also
+            string fileName = cAssetManager.TEX_RESOURCE_PATH + cAssetManager.TILESET_PATH + tileSet.Image.Source.Split('\\').Last();
+            
+            this.tilesetTexture = cAssetManager.LoadAndReturnTexture(tileSet.Image.Source); // fileName);
+
+#if DEBUG
+
+            System.Diagnostics.Debug.WriteLine(
+                string.Format("splitted fileName: {0}", fileName));
+
+            System.Diagnostics.Debug.WriteLine(
+                string.Format("tmx directory: {0}", tileSet.TmxDirectory));
+            System.Diagnostics.Debug.WriteLine(
+               string.Format("tileset texture: {0}", tileSet.Image.Source));
+
+#endif
 
             int firstGid = map.Tilesets[0].FirstGid;
             int imgWidth = (int)tileSet.Image.Width;
             int imgHeight = (int)tileSet.Image.Height;
 
-            Constants.TILE_SIZE = tileSet.TileWidth; // suppose width and height are equal
+            Constants.TILE_SIZE = tileSet.TileWidth; // suppose width and height are equals
 
             int tilesInRow = imgWidth / Constants.TILE_SIZE;
 
-            loadWalls(map, tileTypes, firstGid, tilesInRow);
-            //loadBackgrounds(map, tileTypes, firstGid, tilesInRow);
+            loadLayer(tileTypes, "walls", TileLayerTypes.WALLS, firstGid, tilesInRow);
+            loadLayer(tileTypes, "background1", TileLayerTypes.BACKGROUND_1, firstGid, tilesInRow);
+            loadLayer(tileTypes, "background2", TileLayerTypes.BACKGROUND_2, firstGid, tilesInRow);
 
             TmxObject startObject = map.ObjectGroups["SpawnPoints"].Objects["LevelStart"];
             TmxObject endObject = map.ObjectGroups["SpawnPoints"].Objects["LevelEnd"];
@@ -339,7 +365,7 @@ namespace platformerGame.Map
 
 
         /// <summary>
-        /// Fájlból is betudja olvasni a pályát
+        /// Fájlból is be tudja olvasni a pályát
         /// 1. sor: pálya szélessége (x ~ width ~ oszlopok száma)
         /// 2. sor: pálya magassága (y ~ height ~ sorok száma)
         /// </summary>
@@ -355,6 +381,8 @@ namespace platformerGame.Map
             numOfTiles = width * height;
             int sor = 0;
 
+            layers[TileLayerTypes.WALLS] = new List<cTile>();
+
             while (!sr.EndOfStream)
             {
                 string[] splitted = sr.ReadLine().Split(' ');
@@ -362,7 +390,7 @@ namespace platformerGame.Map
                 for(int i = 0; i < splitted.Length; i++)
                 {
                     TileType typeCode = (TileType)int.Parse(splitted[i]);
-                    layers[TileLayers.WALLS].Add( new cTile(sor * height + i, typeCode) );
+                    layers[TileLayerTypes.WALLS].Add( new cTile(sor * height + i, typeCode) );
                 }
 
                 sor++;

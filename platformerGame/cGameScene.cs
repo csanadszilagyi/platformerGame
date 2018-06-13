@@ -8,6 +8,7 @@ using SFML.Window;
 using platformerGame.GameObjects;
 using platformerGame.Particles;
 using platformerGame.Utilities;
+using platformerGame.Rendering;
 
 namespace platformerGame
 {
@@ -17,9 +18,9 @@ namespace platformerGame
     /// </summary>
     class cGameScene : cGameState
     {
-        cWorld m_World;
+        cWorld gameWorld;
 
-        cPlayer m_Player;
+        cPlayer player;
 
         cEnvironment worldEnvironment;
 
@@ -45,13 +46,14 @@ namespace platformerGame
        
         public override void Enter()
         {
+            cAnimationAssets.LoadAnimations();
+
             Vector2f worldSize = new Vector2f(m_AppController.MainWindow.Size.X, m_AppController.MainWindow.Size.Y);
             m_View.Size = new Vector2f(worldSize.X, worldSize.Y);
             m_View.Center = new Vector2f(worldSize.X / 2.0f, worldSize.Y / 2.0f);
             m_View.Viewport = new FloatRect(0.0f, 0.0f, 1.0f, 1.0f);
             m_View.Zoom(0.6f); //0.6f
             m_AppController.MainWindow.SetView(m_View);
-
             viewRect = new cAABB();
             viewRect.SetDims(m_View.Size);
 
@@ -59,24 +61,27 @@ namespace platformerGame
 
             // Constants.LIGHTMAP_COLOR
             lightMap = new cLightSystem(Constants.LIGHTMAP_COLOR); //((uint)m_World.WorldBounds.dims.X, (uint)m_World.WorldBounds.dims.Y, Constants.LIGHTMAP_COLOR);
-            m_World = new cWorld(this, m_AppController.MainWindow.Size);
+            gameWorld = new cWorld(this, m_AppController.MainWindow.Size);
 
             //lightMap.Create((uint)m_World.WorldBounds.dims.X, (uint)m_World.WorldBounds.dims.Y);
             lightMap.Create(m_AppController.MainWindow.Size.X, m_AppController.MainWindow.Size.Y);
 
-            this.staticTexture = new RenderTexture((uint)m_World.WorldBounds.dims.X, (uint)m_World.WorldBounds.dims.Y);
+            lightMap.loadLightsFromTmxMap(gameWorld.GetCurrentLevel().GetTmxMap());
+
+            this.staticTexture = new RenderTexture((uint)gameWorld.WorldBounds.dims.X, (uint)gameWorld.WorldBounds.dims.Y);
             this.staticTexture.SetActive(true);
             this.staticTexture.Clear(new Color(0,0,0,0));
             //this.staticTexture.SetView(m_View);
             
 
-            Vector2f playerStart = new Vector2f(m_World.LevelStartRegion.center.X, m_World.LevelStartRegion.rightBottom.Y);
+            Vector2f playerStart = new Vector2f(gameWorld.LevelStartRegion.center.X, gameWorld.LevelStartRegion.rightBottom.Y);
             playerStart.X -= Constants.CHAR_FRAME_WIDTH / 2.0f;
             playerStart.Y -= Constants.CHAR_FRAME_HEIGHT;
 
-            m_Player = new cPlayer(this, playerStart);
+            player = new cPlayer(this, playerStart);
 
-            entityPool = new cEntityPool(this, m_World.WorldBounds.dims, m_Player);
+            entityPool = new cEntityPool(this, gameWorld.WorldBounds.dims, player);
+            entityPool.InitLevelEntites(World.GetCurrentLevel());
 
             //vizekhez adunk fényt
             /*
@@ -124,9 +129,9 @@ namespace platformerGame
             }
 
             entityPool.Update(step_time);
-            m_Player.Update(step_time);
+            player.Update(step_time);
 
-            if (cCollision.IsPointInsideBox(m_Player.Position, m_World.LevelEndRegion))
+            if (cCollision.IsPointInsideBox(player.Position, gameWorld.LevelEndRegion))
             {
                 //vége a pályának
                 
@@ -144,9 +149,9 @@ namespace platformerGame
 
         private void PreRender(RenderTarget destination, float alpha)
         {
-            m_Player.CalculateViewPos(alpha);
+            player.CalculateViewPos(alpha);
 
-            Vector2f pcenter = m_Player.GetCenterViewPos();
+            Vector2f pcenter = player.GetCenterViewPos();
             m_View.Center = pcenter;
 
             //játékoshoz viszonyított view rect
@@ -155,21 +160,23 @@ namespace platformerGame
             viewRect.SetPosByCenter(m_View.Center);
 
             if (viewRect.topLeft.X < 0.0f)
-                m_View.Center = new Vector2f(m_World.WorldBounds.topLeft.X + m_View.Size.X / 2.0f, m_View.Center.Y);
+                m_View.Center = new Vector2f(gameWorld.WorldBounds.topLeft.X + m_View.Size.X / 2.0f, m_View.Center.Y);
             else
-            if (viewRect.rightBottom.X > m_World.WorldBounds.rightBottom.X)
-                m_View.Center = new Vector2f(m_World.WorldBounds.rightBottom.X - m_View.Size.X / 2.0f, m_View.Center.Y);
+            if (viewRect.rightBottom.X > gameWorld.WorldBounds.rightBottom.X)
+                m_View.Center = new Vector2f(gameWorld.WorldBounds.rightBottom.X - m_View.Size.X / 2.0f, m_View.Center.Y);
 
 
             if (viewRect.topLeft.Y < 0.0f)
-                m_View.Center = new Vector2f(m_View.Center.X, m_World.WorldBounds.topLeft.Y + m_View.Size.Y / 2.0f);
+                m_View.Center = new Vector2f(m_View.Center.X, gameWorld.WorldBounds.topLeft.Y + m_View.Size.Y / 2.0f);
             else
-             if (viewRect.rightBottom.Y > m_World.WorldBounds.rightBottom.Y)
-                m_View.Center = new Vector2f(m_View.Center.X, m_World.WorldBounds.rightBottom.Y - m_View.Size.Y / 2.0f);
+             if (viewRect.rightBottom.Y > gameWorld.WorldBounds.rightBottom.Y)
+                m_View.Center = new Vector2f(m_View.Center.X, gameWorld.WorldBounds.rightBottom.Y - m_View.Size.Y / 2.0f);
 
             viewRect.SetPosByCenter(m_View.Center);
 
             destination.SetView(m_View);
+
+            gameWorld.PreRender(viewRect);
 
             this.lightMap.separateVisibleLights(viewRect);
 
@@ -183,13 +190,13 @@ namespace platformerGame
 
             this.staticTexture.Display();
 
-            m_World.DrawBackground(destination);
+            gameWorld.DrawBackground(destination);
 
             //worldEnvironment.RenderEnvironment(destination);
 
-            m_World.Render(destination, viewRect);
+            gameWorld.Render(destination, viewRect);
 
-            m_Player.Render(destination);
+            player.Render(destination);
 
             //worldEnvironment.RenderWaterBlocks(destination);
 
@@ -230,7 +237,7 @@ namespace platformerGame
 
         public override void Exit()
         {
-            m_World.ClearAll();
+            gameWorld.ClearAll();
             lightMap.RemoveAll();
         }
 
@@ -240,48 +247,48 @@ namespace platformerGame
 
             if (Mouse.IsButtonPressed(Mouse.Button.Left))
             {
-                m_Player.CurrentWeapon.fire(mouse);
+                player.CurrentWeapon.fire(mouse);
                 // m_Player.Position = this.GetMousePos();
             }
 
             //player movement
-            if (Keyboard.IsKeyPressed(Keyboard.Key.W))
+            if (Keyboard.IsKeyPressed(Keyboard.Key.Space))
             {
-                m_Player.StartJumping();
+                player.StartJumping();
             }
             else
-                m_Player.StopJumping();
+                player.StopJumping();
 
             if (Keyboard.IsKeyPressed(Keyboard.Key.S))
             {
-                if(m_Player.IsOnOneWayPlatform)
-                    m_Player.Move(0.0f, 1.0f);
+                if(player.IsOnOneWayPlatform)
+                    player.Move(0.0f, 1.0f);
                 //m_Player.IsOnOneWayPlatform = false;
             }
 
 
             if (Keyboard.IsKeyPressed(Keyboard.Key.A) && Keyboard.IsKeyPressed(Keyboard.Key.D))
             {
-                m_Player.StopMoving();//stop m_Player moving
+                player.StopMoving();//stop m_Player moving
             }
             else
             if (Keyboard.IsKeyPressed(Keyboard.Key.A))
             {
-                if (m_Player.Velocity.X > 0.0f)
-                    m_Player.StopMovingX();
+                if (player.Velocity.X > 0.0f)
+                    player.StopMovingX();
 
-                m_Player.StartMovingLeft();
+                player.StartMovingLeft();
             }
             else
             if (Keyboard.IsKeyPressed(Keyboard.Key.D))
             {
-                if (m_Player.Velocity.X < 0.0f)
-                    m_Player.StopMovingX();
+                if (player.Velocity.X < 0.0f)
+                    player.StopMovingX();
 
-                m_Player.StartMovingRight();
+                player.StartMovingRight();
             }
             else
-                m_Player.StopMoving();//stop m_Player moving
+                player.StopMoving();//stop m_Player moving
         }
 
         public Vector2f GetMousePosInWindow()
@@ -316,7 +323,7 @@ namespace platformerGame
         }
         public cWorld World
         {
-            get { return m_World; }
+            get { return gameWorld; }
         }
 
         public cEnvironment WolrdEnv
@@ -326,7 +333,7 @@ namespace platformerGame
 
         public cPlayer Player
         {
-            get { return m_Player; }
+            get { return player; }
         }
 
         public cLightSystem LightMap

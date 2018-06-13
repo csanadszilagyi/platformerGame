@@ -5,7 +5,7 @@ using SFML.System;
 using platformerGame.Utilities;
 using platformerGame.GameObjects;
 
-namespace platformerGame.Weapons
+namespace platformerGame.Inventory.Weapons
 {
     class cShotgun : cWeapon
     {

@@ -23,6 +23,7 @@ namespace platformerGame.Map
         /// </summary>
         public int IdCode { get; set; }
 
+        public int GlobalId { get; set; }
         /// <summary>
         /// Minden tile-nak van típusa
         /// </summary>
@@ -36,6 +37,7 @@ namespace platformerGame.Map
         public cTile()
         {
             IdCode = 0;
+            GlobalId = -1;
             Type = TileType.EMPTY;
             PlayerCollidable = false;
             PosOnTexture = new cAABB(0, 0, 1, 1);
@@ -45,6 +47,7 @@ namespace platformerGame.Map
         {
             this.IdCode = id_code;
             this.Type = type;
+            GlobalId = -1;
             PlayerCollidable = false;
             PosOnTexture = new cAABB(0, 0, 1, 1);
             IsCheckedWater = false;
@@ -65,7 +68,6 @@ namespace platformerGame.Map
         {
             return (Type != TileType.WALL);
         }
-
 
     }
 }

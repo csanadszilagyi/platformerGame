@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 using SFML.Graphics;
 using SFML.System;
+using tileLoader;
 
 using platformerGame.Utilities;
+using SFML.Graphics.Glsl;
 
 namespace platformerGame
 {
@@ -16,7 +18,7 @@ namespace platformerGame
         private RenderTexture staticLightTexture;
         private RenderTexture dynamicLightTexture;
 
-        private Shader m_AutenuationShader;
+        private Shader autenuationShader;
 
         private List<cLight> staticLights;
 
@@ -105,8 +107,9 @@ namespace platformerGame
         private void loadShader()
         {
             
-            m_AutenuationShader = new Shader(null, "Resources/lightAttenuationShader.frag");
-            m_AutenuationShader.SetParameter("texture", Shader.CurrentTexture);
+            autenuationShader = new Shader(null, null, "Resources/lightAttenuationShader.frag");
+            //autenuationShader.SetParameter("texture", Shader.CurrentTexture);
+            autenuationShader.SetUniform("texture", Shader.CurrentTexture);
         }
 
         private void renderALight(cLight light, RenderTarget target, cAABB viewRect)
@@ -119,12 +122,13 @@ namespace platformerGame
             */
 
             Vector2f newPos = new Vector2f(light.Pos.X - viewRect.topLeft.X, light.Pos.Y - viewRect.topLeft.Y);
-
-            m_AutenuationShader.SetParameter("lightPos", newPos.X, target.Size.Y - newPos.Y);
-            m_AutenuationShader.SetParameter("lightColor", light.GLcolor.X, light.GLcolor.Y, light.GLcolor.Z);
-            m_AutenuationShader.SetParameter("radius", light.Radius);
-            m_AutenuationShader.SetParameter("bleed", light.Bleed);
-            m_AutenuationShader.SetParameter("linearizeFactor", light.LinearizeFactor);
+          
+            //autenuationShader.SetUniform("lightPos", new Vec2(newPos.X, target.Size.Y - newPos.Y));
+            autenuationShader.SetUniform("lightPos", new Vec2(newPos.X, target.Size.Y - newPos.Y));
+            autenuationShader.SetUniform("lightColor", new Vec3(light.GLcolor.X, light.GLcolor.Y, light.GLcolor.Z));
+            autenuationShader.SetUniform("radius", light.Radius);
+            autenuationShader.SetUniform("bleed", light.Bleed);
+            autenuationShader.SetUniform("linearizeFactor", light.LinearizeFactor);
 
             cRenderFunctions.DrawDirLightByDVec(target,
                                             newPos,
@@ -133,7 +137,7 @@ namespace platformerGame
                                             light.SpreadAngle,
                                             light.Color,
                                             BlendMode.Add,
-                                            m_AutenuationShader);
+                                            autenuationShader);
             
             /*
             Vector2f newPos = new Vector2f();
@@ -229,6 +233,28 @@ namespace platformerGame
                                                    BlendMode.Multiply);
             */
 
+        }
+
+
+        public void loadLightsFromTmxMap(TmxMap map)
+        {
+            foreach(var tmxLight in map.ObjectGroups["Lights"].Objects)
+            {
+                Vector2f pos = new Vector2f();
+                pos.X = (float)(tmxLight.X + tmxLight.Width / 2.0);
+                pos.Y = (float)(tmxLight.Y + tmxLight.Height / 2.0);
+
+                cLight light = new cLight(pos);
+
+                // custom props conversion
+                string hexColor = tmxLight.Properties["color"];
+                light.Color = Utils.GetSfmlColorFromHex(hexColor);
+                light.Radius = float.Parse(tmxLight.Properties["radius"]);
+                light.Bleed = float.Parse(tmxLight.Properties["intensity"]);
+
+                this.AddStaticLight(light);
+            }
+            
         }
     }
 }
