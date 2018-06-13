@@ -8,16 +8,18 @@ using SFML.System;
 
 using platformerGame.Utilities;
 using platformerGame.GameObjects.PickupInfo;
+using platformerGame.Rendering;
 
 namespace platformerGame.GameObjects
 {
     class cPickupAble : cGameObject
     {
-        Sprite sprite;
         cSpatialGrid grid;
 
         cPickupInfo pickup;
         
+        cBaseRenderer renderer;
+
         bool pickedUp;
         bool pulling;
 
@@ -28,50 +30,106 @@ namespace platformerGame.GameObjects
         public cPickupAble() : base()
         { }
 
-        public cPickupAble(cGameScene scene, cSpatialGrid grid, Vector2f pos, Vector2f emit_direction) : base(scene, pos)
+        /// <summary>
+        /// If no pickup type is unknown (not specified), generate one by weights
+        /// </summary>
+        /// <param name="scene"></param>
+        /// <param name="grid"></param>
+        /// <param name="pos"></param>
+        /// <param name="emit_direction"></param>
+        public cPickupAble(cGameScene scene, cSpatialGrid grid, Vector2f pos, Vector2f emit_direction, PickupType type = PickupType.UNKNOWN) : base(scene, pos)
+        {
+            pickup = type == PickupType.UNKNOWN ? PickupEffects.getWeighted() : PickupEffects.get(type); 
+            this.init(grid, pos, emit_direction);
+        }
+
+        private void init(cSpatialGrid grid, Vector2f pos, Vector2f emit_direction)
         {
             this.grid = grid;
             this.pickedUp = pulling = false;
             this.heading = emit_direction;
 
-            this.bounds = new cAABB();
-            this.bounds.SetDims(new Vector2f(16.0f, 22.0f));
-            this.bounds.SetPosByCenter(pos);
-            this.HitCollisionRect = bounds;
+            this.renderer = pickup.Renderer.DeepCopy();
 
-            this.MaxSpeed = EMIT_SPEED*2;
+            this.bounds = new cAABB();
+            this.bounds.SetDims(this.pickup.HitRectSize);
+            this.bounds.SetPosByCenter(pos);
+            this.HitCollisionRect = bounds.ShallowCopy();
+
+            this.MaxSpeed = EMIT_SPEED * 2; //*2
             this.mass = 100.0f;
 
             this.velocity.X = this.heading.X * EMIT_SPEED;
             this.velocity.Y = this.heading.Y * EMIT_SPEED;
             orientation = cAppMath.GetAngleOfVector(heading);
-
-            this.sprite = new Sprite(cAssetManager.GetTexture("pickups"));
-
-            pickup = PickupEffects.getWeighted(); //.get(PickupType.HEALTH);
-
-            this.sprite.TextureRect = pickup.TextureRect;
-            //this.sprite.Scale = new Vector2f(0.5f, 0.5f);
-            //this.sprite.Rotation = (float)cAppMath.RadianToDegress(this.orientation);
-
-            this.sprite.Origin = new Vector2f(12.0f, 12.0f);
         }
 
         public override bool isActive()
         {
-            return !pickedUp;
+            return (false == pickedUp);
         }
 
         protected void checkCollisionWithWorld(float step_time)
         {
             if (false == pulling)
             {
+<<<<<<< HEAD
                 pscene.World.collideSAT(this, step_time);
+=======
+                // check collisions with world
+                List<cAABB> wallsPossibleColliding = world.getCollidableBlocks(Bounds);
+
+                // we must check this, because we need to iterate through the possible
+                // colliding tiles from other direction according to this condition
+                if (velocity.X > 0.0f)
+                {
+                    for (int i = 0; i < wallsPossibleColliding.Count; i++)
+                    {
+                        cGameObject wallObject = cGameObject.MakeWall(wallsPossibleColliding[i]);
+                        if (cSatCollision.checkAndResolve(this, wallObject, step_time, true))
+                        {
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    // we have to iterate from "end" to the "start" in order to have the last colliding block below us
+                    for (int i = wallsPossibleColliding.Count-1; i >= 0; i--)
+                    {
+                        cGameObject wallObject = cGameObject.MakeWall(wallsPossibleColliding[i]);
+                        if (cSatCollision.checkAndResolve(this, wallObject, step_time, true))
+                        {
+                            return;
+                        }
+
+                    }
+                }
+>>>>>>> tmxLoader
             }
         }
 
         public override void Update(float step_time)
         {
+            this.renderer.Update(step_time);
+            cPlayer player = Scene.Player;
+            if (this.pulling)
+            {
+                Vector2f predicted = cAppMath.Vec2NormalizeReturn((player.Bounds.center + (player.Velocity * step_time)) - this.Bounds.center);
+                // pull pickup
+                //Vector2f toPlayer = cAppMath.Vec2NormalizeReturn(player.Bounds.center - this.Bounds.center);
+
+                // G * ((m1*m2) / (d*d))
+                float f = PULL_FORCE * 150f; // * (100000.0f / ( d*d) );
+                this.AddForce(predicted * f);
+            }
+            /*
+            else
+            {
+                this.pulling = false;
+            }
+            */
+
             // applying some gravity
             force.Y += (false == pulling) ? (Constants.GRAVITY * 40.0f * step_time) : 0.0f;
 
@@ -114,10 +172,11 @@ namespace platformerGame.GameObjects
 
         public override void Render(RenderTarget destination)
         {
-            sprite.Position = ViewPosition;
+            //sprite.Position = ViewPosition;
             //sprite.Rotation = (float)cAppMath.RadianToDegress(orientation);
-            destination.Draw(this.sprite, new RenderStates(BlendMode.Alpha));
-
+            //destination.Draw(this.sprite, new RenderStates(BlendMode.Alpha));
+            
+            this.renderer.Draw(destination, ViewPosition);
 
             /*
             RectangleShape rs = new RectangleShape();
@@ -138,20 +197,12 @@ namespace platformerGame.GameObjects
 
             float d = (float)cAppMath.Vec2Distance(player.Bounds.center, this.Bounds.center);
 
-            if (d <= MAX_PULL_DISTANCE)
+            if (!pulling && d <= MAX_PULL_DISTANCE)
             {
-                // pull pickup
-                Vector2f toPlayer = cAppMath.Vec2NormalizeReturn(player.Bounds.center - this.Bounds.center);
                 this.pulling = true;
-                // G * ((m1*m2) / (d*d))
-                float f = PULL_FORCE * (100000.0f / ( d*d) );
-                this.AddForce(toPlayer * f);
             }
-            else
-            {
-                this.pulling = false;
-            }
-                
+
+            
 
             if (!pickedUp && cCollision.OverlapAABB(player.Bounds, this.HitCollisionRect))
             {

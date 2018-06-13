@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using SFML.Graphics;
 
-namespace platformerGame
+namespace platformerGame.Map
 {
     enum TileType
     {
@@ -14,9 +14,7 @@ namespace platformerGame
         WALL = 1,               //Fal - nem járható
         ONEWAY_PLATFORM = 2,    //"Leugrós" platform
         WATER = 3,              //Víz
-        SPIKE = 4,              //Tüske
-        LEVEL_START = 6,        //Pálya kezdő poz
-        LEVEL_END = 5        //Pálya végpont
+        SPIKE = 4             //Tüske
     }
     class cTile
     {
@@ -25,29 +23,33 @@ namespace platformerGame
         /// </summary>
         public int IdCode { get; set; }
 
+        public int GlobalId { get; set; }
         /// <summary>
         /// Minden tile-nak van típusa
         /// </summary>
         public TileType Type { get; set; }
         
-        public IntRect PosOnTexture { get; set; }
+        public cAABB PosOnTexture { get; set; }
         public bool PlayerCollidable { get; set; }
 
         public bool IsCheckedWater { get; set; }
+
         public cTile()
         {
             IdCode = 0;
+            GlobalId = -1;
             Type = TileType.EMPTY;
             PlayerCollidable = false;
-            PosOnTexture = new IntRect(0, 0, 1, 1);
+            PosOnTexture = new cAABB(0, 0, 1, 1);
             IsCheckedWater = false;
         }
         public cTile(int id_code, TileType type)
         {
             this.IdCode = id_code;
             this.Type = type;
+            GlobalId = -1;
             PlayerCollidable = false;
-            PosOnTexture = new IntRect(0, 0, 1, 1);
+            PosOnTexture = new cAABB(0, 0, 1, 1);
             IsCheckedWater = false;
 
         }
@@ -66,7 +68,6 @@ namespace platformerGame
         {
             return (Type != TileType.WALL);
         }
-
 
     }
 }

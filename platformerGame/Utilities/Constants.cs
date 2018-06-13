@@ -15,6 +15,9 @@ namespace platformerGame.Utilities
 {
     class Constants
     {
+        public const float STEP_TIME = 1.0f / 60.0f;
+        public const uint ANIM_FRAME_TIME = 50; //in ms
+
         public static int TILE_SIZE = 16;
         public static int TILE_SIZE_HALF = TILE_SIZE / 2;
 

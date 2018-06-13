@@ -31,7 +31,7 @@ namespace platformerGame.Particles
             this.scene = scene;
 
             explosionTexture = cAssetManager.GetTexture("simple_particle");
-            fireworksTexture = cAssetManager.GetTexture("bullet_light_green");
+            fireworksTexture = cAssetManager.GetTexture("bullet3");
 
             explosions = new cExplosionController(this);
             fireworks = new cFireworksController(this);
@@ -41,7 +41,7 @@ namespace platformerGame.Particles
 
             label.Font = cAssetManager.GetFont("BGOTHL");
             label.CharacterSize = 24;
-            label.Color = Color.White;
+            label.FillColor = Color.White;
             label.Style = Text.Styles.Bold;
 
         }

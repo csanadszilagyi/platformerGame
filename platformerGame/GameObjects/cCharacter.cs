@@ -7,6 +7,7 @@ using SFML.Graphics;
 using SFML.System;
 
 using platformerGame.Utilities;
+using platformerGame.Map;
 
 namespace platformerGame.GameObjects
 {

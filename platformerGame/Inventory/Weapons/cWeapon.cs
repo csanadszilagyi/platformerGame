@@ -9,8 +9,9 @@ using platformerGame.GameObjects;
 
 using platformerGame.Utilities;
 
-namespace platformerGame.Weapons
+namespace platformerGame.Inventory.Weapons
 {
+    // TODO: make inherited from Inventory.cItem
     class cWeapon
     {
         protected cGameObject owner;

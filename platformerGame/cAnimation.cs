@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 
 using SFML.Graphics;
 using SFML.System;
+using platformerGame.Rendering;
 
 namespace platformerGame
 {
     class cAnimation
     {
-	    Texture m_pTexture;
-        List<IntRect> m_Frames;
+	    Texture pTexture;
+        List<IntRect> mFrames;
 
         bool m_FlipHorizontally;
         bool m_FlipVertically;
@@ -24,27 +25,42 @@ namespace platformerGame
         double m_CurrentAnimTime;
         double m_LastAnimTime;
 
-        IntRect m_ViewOffsetRect; //view rect offsets inside animation rect
+        IntRect viewOffsetRect; //view rect offsets inside animation rect
+
+        AnimationInfo animInfo;
+
 	    public cAnimation(Texture sprite_sheet, IntRect view_offset_rect = new IntRect())
         {
-            m_pTexture = sprite_sheet;
-            m_ViewOffsetRect = view_offset_rect;
-            m_Frames = new List<IntRect>();
+            pTexture = sprite_sheet;
+            viewOffsetRect = view_offset_rect;
+            this.mFrames = new List<IntRect>();
+            init();
+        }
+
+        public cAnimation(AnimationInfo info, IntRect view_offset_rect = new IntRect())
+        {
+            this.animInfo = info;
+            pTexture = cAssetManager.GetTexture(info.TextureName);
+            viewOffsetRect = view_offset_rect;
+            this.SetFrames(info.Frames);
+            init();
+        }
+
+        public void init()
+        {
             m_FlipHorizontally = false;
             m_FlipVertically = false;
             m_CurrentFrame = 0;
 
             m_CurrentAnimTime = cGlobalClock.GetTimeInMilliseconds();
-            
+            m_FrameTime = platformerGame.Utilities.Constants.ANIM_FRAME_TIME;
             m_LastAnimTime = m_CurrentAnimTime;
         }
 
         private bool _isReadyForNextFrame()
         {
             m_CurrentAnimTime = cGlobalClock.GetTimeInMilliseconds();
-            float ft = this.GetFrameTime();
-
-            return (m_CurrentAnimTime - m_LastAnimTime >= ft);
+            return (m_CurrentAnimTime - m_LastAnimTime >= m_FrameTime);
         }
 
         public void Update()
@@ -67,15 +83,39 @@ namespace platformerGame
                 m_CurrentFrame = 0;
                 
         }
+
+        public void RenderCentered(RenderTarget destination, Vector2f pos)
+        {
+            IntRect frame = this.GetFrame(m_CurrentFrame);
+
+            frame.Left += viewOffsetRect.Left;
+            frame.Top += viewOffsetRect.Top;
+
+            frame.Width = viewOffsetRect.Width;
+            frame.Height = viewOffsetRect.Height;
+
+            cRenderFunctions.DrawTextureUseCenter(destination,
+                       pos,
+                       this.GetTexture(),
+                       frame,
+                       Color.White,
+                       0.0f,
+                       1.0f, //SCALE_FACTOR,
+                       false, //p_myCurrentAnim->IsFlippedHorizontally(),
+                       false,
+                       BlendMode.Alpha,
+                       null);
+        }
+
         public void Render(RenderTarget destination, Vector2f pos) //IntRect view_rect = new IntRect()
         {
             IntRect frame = this.GetFrame(m_CurrentFrame);
 
-            frame.Left += m_ViewOffsetRect.Left;
-            frame.Top += m_ViewOffsetRect.Top;
+            frame.Left += viewOffsetRect.Left;
+            frame.Top += viewOffsetRect.Top;
 
-            frame.Width = m_ViewOffsetRect.Width;
-            frame.Height = m_ViewOffsetRect.Height;
+            frame.Width = viewOffsetRect.Width;
+            frame.Height = viewOffsetRect.Height;
 
             /*
             cRenderFunctions.DrawTextureSimple( destination,
@@ -87,23 +127,24 @@ namespace platformerGame
                 );
                 */
             
-            cRenderFunctions.DrawTexture(destination,
-                        pos,
-                        this.GetSpriteSheet(),
-                        frame,
-                        Color.White,
-                        0.0f,
-                        1.0f, //SCALE_FACTOR,
-                        false, //p_myCurrentAnim->IsFlippedHorizontally(),
-                        false,
-                        BlendMode.Alpha,
-                        null);
+  
+             cRenderFunctions.DrawTexture(destination,
+                            pos,
+                            this.GetTexture(),
+                            frame,
+                            Color.White,
+                            0.0f,
+                            1.0f, //SCALE_FACTOR,
+                            false, //p_myCurrentAnim->IsFlippedHorizontally(),
+                            false,
+                            BlendMode.Alpha,
+                            null);
             
         }
 
         public void Clear()
         {
-            m_Frames.Clear();
+            this.mFrames.Clear();
         }
 	    public bool FlipHorizontally
         {
@@ -118,7 +159,14 @@ namespace platformerGame
 
         public void AddFrame(IntRect rect)
         {
-            m_Frames.Add(rect);
+            mFrames.Add(rect);
+        }
+
+        public void SetFrames(List<IntRect> frames)
+        {
+            //this.Clear();
+            //this.frames.AddRange(frames);
+            this.mFrames = frames;
         }
 
         /*
@@ -127,13 +175,24 @@ namespace platformerGame
             m_pTexture = texture;
         }
         */
-        public Texture GetSpriteSheet()
+        public Texture GetTexture()
         {
-            return m_pTexture;
+            return pTexture;
         }
+
+        public IntRect GetViewOffsetRect()
+        {
+            return this.viewOffsetRect;
+        }
+
+        public AnimationInfo GetAnimInfo()
+        {
+            return this.animInfo;
+        }
+
         public int GetSize()
         {
-            return m_Frames.Count;
+            return mFrames.Count;
         }
 
         public IntRect GetCurrentFrame()
@@ -150,7 +209,7 @@ namespace platformerGame
             else
                 return new IntRect(0, 0, 32, 32);*/
 
-            return m_Frames.Count > 0 ? m_Frames[n] : new IntRect(0,0,1,1);
+            return mFrames.Count > 0 ? mFrames[n] : new IntRect(0,0,1,1);
         }
 
         public void SetStartFrame(uint start_frame) { m_StartFrame = start_frame; }

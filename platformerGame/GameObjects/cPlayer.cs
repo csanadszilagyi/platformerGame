@@ -1,7 +1,7 @@
 ﻿using SFML.Graphics;
 using SFML.System;
 
-using platformerGame.Weapons;
+using platformerGame.Inventory.Weapons;
 using platformerGame.Utilities;
 using platformerGame.GameObjects.PickupInfo;
 
@@ -19,12 +19,13 @@ namespace platformerGame.GameObjects
             p_followLight.Color = new Color(240, 219, 164);
             this.Scene.LightMap.AddStaticLight(p_followLight);
 
-            this.weapon = new cShotgun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY); // 9
+            this.weapon = new cMachineGun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY);
+                //new cShotgun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY); // 9
 
             healthText = new Text("", cAssetManager.GetFont("pf_tempesta_seven"));
             healthText.Position = new Vector2f(pscene.AppController.MainWindow.DefaultView.Size.X - 500, 30);
             healthText.CharacterSize = 28; // in pixels, not points!
-            healthText.Color = Color.White;
+            healthText.FillColor = Color.White;
             healthText.Style = Text.Styles.Bold;
         }
 

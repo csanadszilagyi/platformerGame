@@ -90,6 +90,11 @@ namespace platformerGame
             return new FloatRect(topLeft, dims);
         }
 
+        public IntRect AsIntRect()
+        {
+            return new IntRect((int)topLeft.X, (int)topLeft.Y, (int)dims.X, (int)dims.Y);
+        }
+
         public cAABB ShallowCopy()
         {
             return (cAABB)this.MemberwiseClone();

@@ -30,7 +30,7 @@ namespace platformerGame.Particles
             particle.Pos = emission.StartPosition;
             particle.LastPos = particle.Pos;
             particle.ViewPos = particle.Pos;
-            particle.MaxSpeed = cAppMath.GetRandomNumber(200, 400); //700, 900 | (400, 600); //3, 8//Math->GetRandomNumber(510, 800); // 2000.0f
+            particle.MaxSpeed = cAppMath.GetRandomNumber(600, 800); //200,400 | 700, 900 | (400, 600); //3, 8//Math->GetRandomNumber(510, 800); // 2000.0f
 
             //------------------------------------------------------------------------------------------------
             float angle = (float)cAppMath.DegressToRadian(cAppMath.GetRandomNumber(0, 360));//sDivisions * m_Angles;
@@ -44,13 +44,14 @@ namespace platformerGame.Particles
                                        //particle.m_SlowDown = (float)Math->GetRandomDoubleInRange(0.55, 0.7); //0.6f;
                                        //phs->AddForce( sf::Vector2f(Math->GetRandomClamped() * phs->MaxSpeed, Math->GetRandomClamped() * phs->MaxSpeed) );
 
-            Vector2u uSize = particleManager.ExplosionTexture.Size;
+            Vector2u uSize = particleManager.FireworksTexture.Size;
 
             particle.Scale = (float)cAppMath.GetRandomDoubleInRange(this.minScale, this.maxScale);
+
             particle.Dims = new Vector2f(uSize.X * particle.Scale, uSize.Y * particle.Scale);
 
             particle.ScaleSpeed = -cAppMath.GetRandomNumber(10, 50);
-            particle.Color = Utils.GetRandomRedColor();
+            particle.Color = Color.White; // Utils.GetRandomRedColor();
             particle.Opacity = 255.0f;
             particle.Life = 1.0f;
             particle.Fade = 60; //Math->GetRandomNumber(100, 240);
@@ -69,7 +70,7 @@ namespace platformerGame.Particles
         {
             minScale = 0.5;
             maxScale = 0.8;
-            loopAddition(emission, 10);
+            loopAddition(emission, 30);
         }
 
         public override void Update(float step_time)
@@ -138,8 +139,8 @@ namespace platformerGame.Particles
             float division = 2.0f;
 
             Vector2u uSize = particleManager.ExplosionTexture.Size;
-            float tsizeX = uSize.X;
-            float tsizeY = uSize.Y;
+            float tSizeX = uSize.X;
+            float tSizeY = uSize.Y;
 
             Vector2f newDims = new Vector2f();
 
@@ -188,21 +189,21 @@ namespace platformerGame.Particles
                 Vertex v1 = new Vertex(
                                    v1Pos,
                                    p.Color,
-                                   new Vector2f(tsizeX, 0.0f)
+                                   new Vector2f(p.Dims.X, 0.0f)
                                    );
 
                 // Bottom-right
                 Vertex v2 = new Vertex(
                                    v2Pos,
                                    p.Color,
-                                   new Vector2f(tsizeX, tsizeY)
+                                   new Vector2f(p.Dims.X, p.Dims.Y)
                                    );
 
                 //Bottom-left
                 Vertex v3 = new Vertex(
                                    v3Pos,
                                    p.Color,
-                                   new Vector2f(0.0f, tsizeY)
+                                   new Vector2f(0.0f, p.Dims.Y)
                                    );
 
                 vertices[vertexIndex + 0] = v0;

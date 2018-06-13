@@ -2,7 +2,7 @@
 
 using platformerGame.GameObjects;
 
-namespace platformerGame.Weapons
+namespace platformerGame.Inventory.Weapons
 {
     class cMachineGun : cWeapon
     {
