@@ -341,9 +341,6 @@ namespace platformerGame
         {
             // TODO: make it elegant
             Vector2i map = ToMapPos(world_pos);
-            TileType tt = GetCurrentLevel().GetTypeAtPos(map);
-            return tt == TileType.WALL || tt == TileType.ONEWAY_PLATFORM;
-            //return !m_Level1.GetTileAtXY(map.X, map.Y).TypeIsWalkAble();
             cTile t = currentLevel.GetTileAtXY(map.X, map.Y);
             return t != null ? !t.IsWalkAble() : true;
         }
