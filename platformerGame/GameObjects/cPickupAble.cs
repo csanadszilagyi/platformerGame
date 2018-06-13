@@ -71,6 +71,8 @@ namespace platformerGame.GameObjects
 
         protected void checkCollisionWithWorld(float step_time)
         {
+            cWorld world = Scene.World;
+
             if (false == pulling)
             {
                 pscene.World.collideSAT(this, step_time);
