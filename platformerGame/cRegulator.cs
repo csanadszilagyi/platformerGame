@@ -14,6 +14,7 @@ namespace platformerGame
         //in milliseconds
         double currentTime = 0.0;
         double lastTime = 0.0;
+
 	    public cRegulator()
         {
             freq = 0.0;

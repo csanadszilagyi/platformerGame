@@ -8,6 +8,6 @@ namespace platformerGame
 {
     interface IPool
     {
-        List<IDrawable> ListVisibles(cAABB visible_region);
+        List<IDrawable> ListVisibles(AABB visible_region);
     }
 }

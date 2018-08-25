@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
+using SFML.Audio;
 
 using platformerGame.GameObjects;
 using platformerGame.Particles;
@@ -28,9 +29,11 @@ namespace platformerGame
 
         cTimer levelTimer;
 
-        cAABB viewRect;
+        // AABB viewRect;
 
-        cEntityPool entityPool;
+        Camera camera;
+
+        EntityPool entityPool;
 
         cParticleManager particleManager;
 
@@ -38,7 +41,7 @@ namespace platformerGame
 
         Queue<Action> gameCommands;
 
-        public cGameScene(cSfmlApp controller) : base(controller)
+        public cGameScene(SfmlApp controller) : base(controller)
         {
             levelTimer = new cTimer();
         }
@@ -47,24 +50,30 @@ namespace platformerGame
         public override void Enter()
         {
             cAnimationAssets.LoadAnimations();
+            camera = new Camera(new View(appController.WindowSize / 2.0f, appController.WindowSize));
+            camera.Zoom = 0.6f;
+            //appController.MainWindow.SetView(camera.View);
 
-            Vector2f worldSize = new Vector2f(m_AppController.MainWindow.Size.X, m_AppController.MainWindow.Size.Y);
-            m_View.Size = new Vector2f(worldSize.X, worldSize.Y);
-            m_View.Center = new Vector2f(worldSize.X / 2.0f, worldSize.Y / 2.0f);
+            /*
+            Vector2f viewSize = new Vector2f(appController.MainWindow.Size.X, appController.MainWindow.Size.Y);
+
+            m_View.Size = new Vector2f(viewSize.X, viewSize.Y);
+            m_View.Center = new Vector2f(viewSize.X / 2.0f, viewSize.Y / 2.0f);
             m_View.Viewport = new FloatRect(0.0f, 0.0f, 1.0f, 1.0f);
             m_View.Zoom(0.6f); //0.6f
-            m_AppController.MainWindow.SetView(m_View);
-            viewRect = new cAABB();
+            
+            viewRect = new AABB();
             viewRect.SetDims(m_View.Size);
-
+            */
+            
             worldEnvironment = new cEnvironment();
 
             // Constants.LIGHTMAP_COLOR
             lightMap = new cLightSystem(Constants.LIGHTMAP_COLOR); //((uint)m_World.WorldBounds.dims.X, (uint)m_World.WorldBounds.dims.Y, Constants.LIGHTMAP_COLOR);
-            gameWorld = new cWorld(this, m_AppController.MainWindow.Size);
+            gameWorld = new cWorld(this, appController.MainWindow.Size);
 
             //lightMap.Create((uint)m_World.WorldBounds.dims.X, (uint)m_World.WorldBounds.dims.Y);
-            lightMap.Create(m_AppController.MainWindow.Size.X, m_AppController.MainWindow.Size.Y);
+            lightMap.Create(appController.MainWindow.Size.X, appController.MainWindow.Size.Y);
 
             lightMap.loadLightsFromTmxMap(gameWorld.GetCurrentLevel().GetTmxMap());
 
@@ -80,7 +89,7 @@ namespace platformerGame
 
             player = new cPlayer(this, playerStart);
 
-            entityPool = new cEntityPool(this, gameWorld.WorldBounds.dims, player);
+            entityPool = new EntityPool(this, gameWorld.WorldBounds.dims, player);
             entityPool.InitLevelEntites(World.GetCurrentLevel());
 
             //vizekhez adunk fényt
@@ -106,6 +115,11 @@ namespace platformerGame
             // lightMap.renderStaticLightsToTexture();
 
             gameCommands = new Queue<Action>(50);
+
+            Listener.GlobalVolume = 80;
+            Listener.Direction = new Vector3f(1.0f, 0.0f, 0.0f);
+
+            ShakeScreen.Init(camera.ActualPosition);
             //Pálya idő start
             levelTimer.Start();
 
@@ -121,6 +135,8 @@ namespace platformerGame
 
         public override void Update(float step_time)
         {
+            Listener.Position = new Vector3f(player.Bounds.center.X, player.Bounds.center.Y, 5.0f);
+
             UpdatePlayerInput();
 
             while (gameCommands.Count > 0)
@@ -128,98 +144,100 @@ namespace platformerGame
                 gameCommands.Dequeue().Invoke();
             }
 
-            entityPool.Update(step_time);
+            ShakeScreen.Update();
+
             player.Update(step_time);
 
+            entityPool.Update(step_time);
+            
+
+            /*
             if (cCollision.IsPointInsideBox(player.Position, gameWorld.LevelEndRegion))
             {
                 //vége a pályának
-                
-                //AppController.PlayerInfo.Time = levelTimer.GetCurrentTime();
-                //AppController.PlayerInfo.Level = AppController.LevelName;
-                //AppController.CloseApp();
             }
+            */
 
             this.particleManager.Update(step_time);
 
-           // worldEnvironment.Update(step_time);
-
-            
+            // Vector2f playerCenter = player.Bounds.center;
+            // camera.Update(playerCenter);
+            // worldEnvironment.Update(step_time);
         }
 
         private void PreRender(RenderTarget destination, float alpha)
         {
             player.CalculateViewPos(alpha);
 
-            Vector2f pcenter = player.GetCenterViewPos();
-            m_View.Center = pcenter;
+            camera.Update(player.ViewPosition);
+            // Vector2f playerCenter = player.GetCenterViewPos();
+            // camera.Position = playerCenter;
 
+            // m_View.Center = playerCenter;
             //játékoshoz viszonyított view rect
-            
             //viewRect.SetDims(m_View.Size);
-            viewRect.SetPosByCenter(m_View.Center);
-
-            if (viewRect.topLeft.X < 0.0f)
-                m_View.Center = new Vector2f(gameWorld.WorldBounds.topLeft.X + m_View.Size.X / 2.0f, m_View.Center.Y);
-            else
-            if (viewRect.rightBottom.X > gameWorld.WorldBounds.rightBottom.X)
-                m_View.Center = new Vector2f(gameWorld.WorldBounds.rightBottom.X - m_View.Size.X / 2.0f, m_View.Center.Y);
+            //viewRect.SetPosByCenter(m_View.Center);
 
 
-            if (viewRect.topLeft.Y < 0.0f)
-                m_View.Center = new Vector2f(m_View.Center.X, gameWorld.WorldBounds.topLeft.Y + m_View.Size.Y / 2.0f);
-            else
-             if (viewRect.rightBottom.Y > gameWorld.WorldBounds.rightBottom.Y)
-                m_View.Center = new Vector2f(m_View.Center.X, gameWorld.WorldBounds.rightBottom.Y - m_View.Size.Y / 2.0f);
+            // camera.Update();
+            camera.Apply(destination, gameWorld.WorldBounds);
+            var cameraBounds = camera.Bounds;
+            //viewRect.SetPosByCenter(m_View.Center);
 
-            viewRect.SetPosByCenter(m_View.Center);
+            //m_View.Move(ShakeScreen.Offset);
 
-            destination.SetView(m_View);
+            // destination.SetView(m_View);
 
-            gameWorld.PreRender(viewRect);
+            gameWorld.PreRender(cameraBounds);
 
-            this.lightMap.separateVisibleLights(viewRect);
+            this.lightMap.separateVisibleLights(cameraBounds);
 
             this.particleManager.PreRender(alpha);
             //TODO: Entity pool PreRender, filter visible objects
         }
+
         public override void Render(RenderTarget destination, float alpha)
         {
 
             this.PreRender(destination, alpha);
 
-            this.staticTexture.Display();
+           
+            AABB cameraBounds = camera.Bounds;
+            //this.staticTexture.Display();
 
             gameWorld.DrawBackground(destination);
 
+
             //worldEnvironment.RenderEnvironment(destination);
 
-            gameWorld.Render(destination, viewRect);
+            gameWorld.Render(destination, cameraBounds);
 
             player.Render(destination);
 
             //worldEnvironment.RenderWaterBlocks(destination);
 
-            this.entityPool.RenderEntities(destination, alpha);
+            this.entityPool.RenderEntities(destination, alpha, cameraBounds);
             
             
 
-            cRenderFunctions.DrawTextureSimple( destination,
-                                                viewRect.topLeft,
+            DrawingBase.DrawTextureSimple( destination,
+                                                cameraBounds.topLeft,
                                                 this.staticTexture.Texture,
-                                                new IntRect((int)viewRect.topLeft.X, (int)viewRect.topLeft.Y,
-                                                            (int)viewRect.dims.X, (int)viewRect.dims.Y),
+                                                new IntRect((int)cameraBounds.topLeft.X, (int)cameraBounds.topLeft.Y,
+                                                            (int)cameraBounds.dims.X, (int)cameraBounds.dims.Y),
                                                 Color.White,
                                                 BlendMode.Add);
 
 
-            this.lightMap.Render(destination, viewRect);
+            this.lightMap.Render(destination, cameraBounds);
 
-            this.entityPool.RenderPickups(destination, alpha);
+            this.entityPool.RenderPickups(destination, alpha, cameraBounds);
 
-            this.entityPool.RenderBullets(destination, alpha);
+            this.entityPool.RenderBullets(destination, alpha, cameraBounds);
 
             this.particleManager.Render(destination, alpha);
+
+          
 
             /*
 #if DEBUG
@@ -293,16 +311,16 @@ namespace platformerGame
 
         public Vector2f GetMousePosInWindow()
         {
-            Vector2i m = SFML.Window.Mouse.GetPosition(m_AppController.MainWindow);
-            Vector2f mf = m_AppController.MainWindow.MapPixelToCoords(m);
+            Vector2i m = SFML.Window.Mouse.GetPosition(appController.MainWindow);
+            Vector2f mf = appController.MainWindow.MapPixelToCoords(m);
 
             return mf; // new Vector2f(m.X, m.Y);
         }
         public Vector2f GetMousePos()
         {
-            Vector2i iMp = SFML.Window.Mouse.GetPosition(m_AppController.MainWindow);
+            Vector2i iMp = SFML.Window.Mouse.GetPosition(appController.MainWindow);
 
-            Vector2f mousePos = m_AppController.MainWindow.MapPixelToCoords(iMp, m_View);
+            Vector2f mousePos = appController.MainWindow.MapPixelToCoords(iMp, camera.View);
             
             return mousePos;
         }
@@ -317,7 +335,7 @@ namespace platformerGame
             }
         }
 
-        public cEntityPool EntityPool
+        public EntityPool EntityPool
         {
             get { return entityPool; }
         }
@@ -351,9 +369,9 @@ namespace platformerGame
             gameCommands.Enqueue(action);
         }
 
-        public bool onScreen(cAABB box)
+        public bool onScreen(AABB box)
         {
-            return cCollision.OverlapAABB(this.viewRect, box);
+            return cCollision.OverlapAABB(this.camera.Bounds, box);
         }
 
     }

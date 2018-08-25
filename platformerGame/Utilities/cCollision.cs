@@ -31,7 +31,7 @@ namespace platformerGame.Utilities
             return (cAppMath.Vec2DistanceSqrt(centreA, centreB) <= R * R);
         }
 
-        public static bool CircleAABBOverlap(Vector2f centre, float radius, cAABB rect)
+        public static bool CircleAABBOverlap(Vector2f centre, float radius, AABB rect)
         {
             return (IsPointInsideBox(centre, rect) ||
                     isPointInsideCircle(centre, radius, rect.topLeft) ||
@@ -40,7 +40,7 @@ namespace platformerGame.Utilities
                     isPointInsideCircle(centre, radius, new Vector2f(rect.topLeft.X, rect.rightBottom.Y)));
         }
 
-        public static bool IsPointInsideBox(Vector2f point, cAABB box)
+        public static bool IsPointInsideBox(Vector2f point, AABB box)
         {
                 if (point.X <= box.topLeft.X)
                     return false;
@@ -54,7 +54,7 @@ namespace platformerGame.Utilities
                 return true;
         }
 
-        public static bool OverlapAABB(cAABB A, cAABB B)
+        public static bool OverlapAABB(AABB A, AABB B)
         {
 	        if(A.rightBottom.Y <= B.topLeft.Y)
               {
@@ -132,7 +132,7 @@ namespace platformerGame.Utilities
             return true;
         }
 
-        public static bool testLineVsAABB(Vector2f line_start, Vector2f line_end, cAABB box, ref Vector2f intersection)
+        public static bool testLineVsAABB(Vector2f line_start, Vector2f line_end, AABB box, ref Vector2f intersection)
         {
            Vector2f topLeft = box.topLeft;
            Vector2f topRight = new Vector2f(box.rightBottom.X, box.topLeft.Y);
@@ -146,7 +146,7 @@ namespace platformerGame.Utilities
                   lineVsLineCollision(line_start, line_end, rightBottom, leftBottom, ref intersection) ||
                   lineVsLineCollision(line_start, line_end, leftBottom, topLeft, ref intersection);
         }
-        public static bool testBulletVsEntity(Vector2f bulPos, Vector2f bulLastPos, cAABB entityBounds, ref Vector2f intersection)
+        public static bool testBulletVsEntity(Vector2f bulPos, Vector2f bulLastPos, AABB entityBounds, ref Vector2f intersection)
         {
             int x0 = (int)bulLastPos.X;
             int y0 = (int)bulLastPos.Y;
@@ -235,7 +235,7 @@ namespace platformerGame.Utilities
             */
         }
         
-        public static Vector2f getNormalOfClosestSide(Vector2f point, cAABB box)
+        public static Vector2f getNormalOfClosestSide(Vector2f point, AABB box)
         {
             /*if (IsPointInsideBox(point, box))
                 return Side.INSIDE;*/

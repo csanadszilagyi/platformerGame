@@ -13,12 +13,12 @@ namespace platformerGame
     /// </summary>
     abstract class cGameState
     {
-        protected cSfmlApp m_AppController = null;
-        protected View m_View;
-        public cGameState(cSfmlApp controller)
+        protected SfmlApp appController = null;
+        //protected View m_View;
+        public cGameState(SfmlApp controller)
         {
-            m_AppController = controller;
-            m_View = new View();
+            appController = controller;
+            //m_View = new View();
         }
         /// <summary>
         /// Az állapot induláskor kell végre hajtani
@@ -36,9 +36,9 @@ namespace platformerGame
         /// </summary>
         public abstract void Exit();
 
-        public cSfmlApp AppController
+        public SfmlApp AppController
         {
-            get { return m_AppController; }
+            get { return appController; }
         }
     }
 }

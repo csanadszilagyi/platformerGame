@@ -7,7 +7,7 @@ namespace platformerGame.GameObjects
 {
     class cGameObject : cQuadTreeOccupant, IDrawable
     {
-        protected int m_ID;
+        protected int id;
         protected static int m_NextValidID;
       
         protected cGameScene pscene;
@@ -36,7 +36,7 @@ namespace platformerGame.GameObjects
 
         protected bool movAble;
 
-        protected cAABB hitCollisionRect;
+        protected AABB hitCollisionRect;
 
         public cGameObject() : base()
         {
@@ -52,8 +52,8 @@ namespace platformerGame.GameObjects
             orientation = 0.0;
             mass = 1.0f;
             movAble = true;
-            hitCollisionRect = new cAABB();
-            m_ID = GetNextValidID();
+            hitCollisionRect = new AABB();
+            id = GetNextValidID();
             
         }
         public cGameObject(cGameScene scene, Vector2f pos) : base()
@@ -69,8 +69,8 @@ namespace platformerGame.GameObjects
             orientation = 0.0;
             mass = 1.0f;
             movAble = true;
-            hitCollisionRect = new cAABB();
-            m_ID = GetNextValidID();
+            hitCollisionRect = new AABB();
+            id = GetNextValidID();
         }
 
         protected static int GetNextValidID()
@@ -84,7 +84,7 @@ namespace platformerGame.GameObjects
             set { viewSize = value; }
         }
         
-        public cAABB HitCollisionRect
+        public AABB HitCollisionRect
         {
             get { return hitCollisionRect; }
             set { hitCollisionRect = value; }
@@ -92,7 +92,7 @@ namespace platformerGame.GameObjects
 
         public int ID
         {
-            get { return m_ID; }
+            get { return id; }
         }
         public cGameScene Scene
         {
@@ -295,7 +295,7 @@ namespace platformerGame.GameObjects
             return go;
         }
 
-        public static cGameObject MakeWall(cAABB box)
+        public static cGameObject MakeWall(AABB box)
         {
             cGameObject go = new cGameObject();
             go.Position = box.center;

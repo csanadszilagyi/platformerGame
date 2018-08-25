@@ -20,7 +20,7 @@ namespace platformerGame
 
         static int numLevels = 0;
         int level;
-        cAABB bounds;
+        AABB bounds;
 
         RectangleShape shape;
         Text label;
@@ -34,7 +34,7 @@ namespace platformerGame
         //sfml text
         //Text m_Text;
 
-        public cQuadTree(int _level, cAABB _bounds)
+        public cQuadTree(int _level, AABB _bounds)
         {
             
             this.level = _level;
@@ -53,7 +53,7 @@ namespace platformerGame
             float xPos = bounds.rightBottom.X - level * 50;
             label.Position = new Vector2f(xPos, bounds.rightBottom.Y - 30);
 
-            label.Font = cAssetManager.GetFont("BGOTHL");
+            label.Font = AssetManager.GetFont("BGOTHL");
             label.CharacterSize = 24;
             label.Color = Color.White;
             label.Style = Text.Styles.Bold;
@@ -61,7 +61,7 @@ namespace platformerGame
             SplitToRects();
         }
 
-        public cAABB Bounds
+        public AABB Bounds
         {
             get { return bounds; }
             //set { bounds = value; }
@@ -81,10 +81,10 @@ namespace platformerGame
             float x = bounds.topLeft.X;
             float y = bounds.topLeft.Y;
 
-            pNW = new cQuadTree<T>(level + 1, new cAABB(new Vector2f(x, y), new Vector2f(subWidth, subHeight)));
-            pNE = new cQuadTree<T>(level + 1, new cAABB(new Vector2f(x + subWidth, y), new Vector2f(subWidth, subHeight)));
-            pSW = new cQuadTree<T>(level + 1, new cAABB(new Vector2f(x, y + subHeight), new Vector2f(subWidth, subHeight)));
-            pSE = new cQuadTree<T>(level + 1, new cAABB(new Vector2f(x + subWidth, y + subHeight), new Vector2f(subWidth, subHeight)));
+            pNW = new cQuadTree<T>(level + 1, new AABB(new Vector2f(x, y), new Vector2f(subWidth, subHeight)));
+            pNE = new cQuadTree<T>(level + 1, new AABB(new Vector2f(x + subWidth, y), new Vector2f(subWidth, subHeight)));
+            pSW = new cQuadTree<T>(level + 1, new AABB(new Vector2f(x, y + subHeight), new Vector2f(subWidth, subHeight)));
+            pSE = new cQuadTree<T>(level + 1, new AABB(new Vector2f(x + subWidth, y + subHeight), new Vector2f(subWidth, subHeight)));
 
         }
 

@@ -51,7 +51,7 @@ namespace platformerGame.GameObjects
 
             this.renderer = pickup.Renderer.DeepCopy();
 
-            this.bounds = new cAABB();
+            this.bounds = new AABB();
             this.bounds.SetDims(this.pickup.HitRectSize);
             this.bounds.SetPosByCenter(pos);
             this.HitCollisionRect = bounds.ShallowCopy();
@@ -77,7 +77,7 @@ namespace platformerGame.GameObjects
             {
                 pscene.World.collideSAT(this, step_time);
                 // check collisions with world
-                List<cAABB> wallsPossibleColliding = world.getCollidableBlocks(Bounds);
+                List<AABB> wallsPossibleColliding = world.getCollidableBlocks(Bounds);
 
                 // we must check this, because we need to iterate through the possible
                 // colliding tiles from other direction according to this condition

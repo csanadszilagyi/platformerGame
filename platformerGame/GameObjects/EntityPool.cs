@@ -14,7 +14,7 @@ using tileLoader;
 
 namespace platformerGame
 {
-    class cEntityPool : IPool
+    class EntityPool
     {
         cGameScene pScene;
         List<cBullet> bullets;
@@ -36,7 +36,7 @@ namespace platformerGame
 
         //Dictionary<int, cGameObject> entityMap;
 
-        public cEntityPool(cGameScene scene, Vector2f world_size, cPlayer p_player)
+        public EntityPool(cGameScene scene, Vector2f world_size, cPlayer p_player)
         {
             this.pScene = scene;
             this.worldSize = world_size;
@@ -81,6 +81,11 @@ namespace platformerGame
                 cMonster monster = new cMonster(this.pScene, new Vector2f((float)tmxEntity.X, (float)tmxEntity.Y));
                 this.AddMonster(monster);
             }
+        }
+
+        public IEnumerable<cMonster> getPossiblePlayerMeleeAttackers()
+        {
+            return treeMonsters.GetEntitiesAtPos(pPlayer.Bounds.center);
         }
 
         public void Update(float step_time)
@@ -132,6 +137,12 @@ namespace platformerGame
                 }
             }
 
+            var meleeEntities = this.getPossiblePlayerMeleeAttackers();
+            foreach (var monster in meleeEntities)
+            {
+                monster.attemptMeleeAttack(pPlayer);
+            }
+
             // update pickups
             List<int> keysToRemove = new List<int>();
             foreach(var item in pickups)
@@ -143,15 +154,19 @@ namespace platformerGame
                 }
                 else
                 {
-                    //pickups.Remove(item.Key);
+                    // can not delete in real-time...
+                    // pickups.Remove(item.Key);
+
                     keysToRemove.Add(item.Key);
                 }
             }
 
+            
             foreach(int key in keysToRemove)
             {
                 pickups.Remove(key);
             }
+            
 
             this.checkPlayerCanUseOrPickupOrInteract();
 
@@ -278,42 +293,55 @@ namespace platformerGame
             return bullets.Count;
         }
 
-        public void RenderBullets(RenderTarget destination, float alpha)
+        public void RenderAll(RenderTarget destination, float alpha, AABB view_region)
+        {
+            foreach (var go in this.ListAllVisibles(view_region))
+            {
+                go.CalculateViewPos(alpha);
+                go.Render(destination);
+            }
+        }
+
+        public void RenderBullets(RenderTarget destination, float alpha, AABB view_region)
         {
             //draw bullets
+            /*
             for (int i = 0; i < bullets.Count; i++)
             {
                 bullets[i].CalculateViewPos(alpha);
                 bullets[i].Render(destination);
+            }*/
+            foreach (var bullet in this.ListVisiblesInList<cBullet>(view_region, bullets))
+            {
+                bullet.CalculateViewPos(alpha);
+                bullet.Render(destination);
             }
         }
 
-        public void RenderEntities(RenderTarget destination, float alpha)
+        public void RenderEntities(RenderTarget destination, float alpha, AABB view_region)
         {
             //draw monsters
-            for (int i = 0; i < monsters.Count; i++)
+            /*for (int i = 0; i < monsters.Count; i++)
             {
                 monsters[i].CalculateViewPos(alpha);
                 monsters[i].Render(destination);
+            }*/
+            foreach (var pickup in this.ListVisiblesInList<cMonster>(view_region, monsters))
+            {
+                pickup.CalculateViewPos(alpha);
+                pickup.Render(destination);
             }
         }
 
 
-        public void RenderPickups(RenderTarget destination, float alpha)
+        public void RenderPickups(RenderTarget destination, float alpha, AABB view_region)
         {
             //draw pickups
-            foreach (var item in pickups)
+            foreach (var pickup in this.ListVisiblesInList<cPickupAble>(view_region, pickups.Values))
             {
-                item.Value.CalculateViewPos(alpha);
-                item.Value.Render(destination);
+                pickup.CalculateViewPos(alpha);
+                pickup.Render(destination);
             }
-            /*
-            for (int i = 0; i < pickups.Count; i++)
-            {
-                pickups[i].CalculateViewPos(alpha);
-                pickups[i].Render(destination);
-            }
-            */
         }
 
         public void RenderQuadtree(RenderTarget destination)
@@ -321,10 +349,30 @@ namespace platformerGame
             this.treeMonsters.DrawBounds(destination);
         }
 
-        public List<IDrawable> ListVisibles(cAABB view_region)
+        public IEnumerable<T> ListVisiblesInList<T>(AABB view_region, IEnumerable<T> objs) where T : cGameObject
         {
-            List<IDrawable> visibleObjects = new List<IDrawable>();
+            foreach (var o in objs)
+            {
+                if (cCollision.OverlapAABB(o.Bounds, view_region))
+                    yield return o;
+            }
+        }
 
+        public IEnumerable<cGameObject> ListAllVisibles(AABB view_region)
+        {
+            List<cGameObject> gos = new List<cGameObject>();
+
+            gos.AddRange(bullets);
+            gos.AddRange(monsters);
+            gos.AddRange(pickups.Values);
+
+            foreach (var g in gos)
+            {
+                if (cCollision.OverlapAABB(g.Bounds, view_region))
+                    yield return g;
+            }
+
+            /*
             for (int i = 0; i < bullets.Count; i++)
             {
                 if (cCollision.OverlapAABB(bullets[i].Bounds, view_region))
@@ -332,6 +380,7 @@ namespace platformerGame
             }
 
             return visibleObjects;
+            */
 
         }
 

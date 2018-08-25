@@ -51,7 +51,7 @@ namespace platformerGame.Particles
             particle.Dims = new Vector2f(uSize.X * particle.Scale, uSize.Y * particle.Scale);
 
             particle.ScaleSpeed = -cAppMath.GetRandomNumber(10, 50);
-            particle.Color = Color.White; // Utils.GetRandomRedColor();
+            particle.Color = Utils.GetRandomRedColor();
             particle.Opacity = 255.0f;
             particle.Life = 1.0f;
             particle.Fade = 60; //Math->GetRandomNumber(100, 240);
@@ -70,7 +70,7 @@ namespace platformerGame.Particles
         {
             minScale = 0.5;
             maxScale = 0.8;
-            loopAddition(emission, 30);
+            loopAddition(emission, 20);
         }
 
         public override void Update(float step_time)
@@ -138,7 +138,7 @@ namespace platformerGame.Particles
 
             float division = 2.0f;
 
-            Vector2u uSize = particleManager.ExplosionTexture.Size;
+            Vector2u uSize = particleManager.FireworksTexture.Size;
             float tSizeX = uSize.X;
             float tSizeY = uSize.Y;
 
@@ -189,21 +189,21 @@ namespace platformerGame.Particles
                 Vertex v1 = new Vertex(
                                    v1Pos,
                                    p.Color,
-                                   new Vector2f(p.Dims.X, 0.0f)
+                                   new Vector2f(tSizeX, 0.0f)
                                    );
 
                 // Bottom-right
                 Vertex v2 = new Vertex(
                                    v2Pos,
                                    p.Color,
-                                   new Vector2f(p.Dims.X, p.Dims.Y)
+                                   new Vector2f(tSizeX, tSizeY)
                                    );
 
                 //Bottom-left
                 Vertex v3 = new Vertex(
                                    v3Pos,
                                    p.Color,
-                                   new Vector2f(0.0f, p.Dims.Y)
+                                   new Vector2f(0.0f, tSizeY)
                                    );
 
                 vertices[vertexIndex + 0] = v0;

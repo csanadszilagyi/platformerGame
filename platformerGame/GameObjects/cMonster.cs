@@ -18,6 +18,9 @@ namespace platformerGame.GameObjects
 
         cTimer locateTime;
 
+        bool attacking;
+        cRegulator attackCharger;
+
         public cMonster(cGameScene scene, Vector2f pos) : base(scene, pos)
         {
             
@@ -39,7 +42,9 @@ namespace platformerGame.GameObjects
             this.Scene.LightMap.AddStaticLight(eye);
             
             locateTime = new cTimer();
-
+            this.attacking = false;
+            this.attackCharger = new cRegulator();
+            this.attackCharger.resetByFrequency(2);
         }
 
         protected override void initSprites()
@@ -49,7 +54,7 @@ namespace platformerGame.GameObjects
             IntRect viewRect = Constants.CHAR_VIEW_RECT;
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.STAND, HorizontalFacing.FACING_LEFT),
-                                         cAssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
@@ -60,7 +65,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.STAND, HorizontalFacing.FACING_RIGHT),
-                                         cAssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
@@ -71,7 +76,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.WALK, HorizontalFacing.FACING_LEFT),
-                                         cAssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
@@ -82,7 +87,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.WALK, HorizontalFacing.FACING_RIGHT),
-                                         cAssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
@@ -93,7 +98,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.JUMP, HorizontalFacing.FACING_LEFT),
-                                         cAssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          1,
@@ -104,7 +109,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.JUMP, HorizontalFacing.FACING_RIGHT),
-                                         cAssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          1,
@@ -116,7 +121,7 @@ namespace platformerGame.GameObjects
 
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.FALL, HorizontalFacing.FACING_LEFT),
-                                         cAssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          6,
@@ -127,7 +132,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.FALL, HorizontalFacing.FACING_RIGHT),
-                                         cAssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          6,
@@ -138,7 +143,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.LIE, HorizontalFacing.FACING_LEFT),
-                             cAssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                             AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                              Constants.CHAR_FRAME_WIDTH,
                              Constants.CHAR_FRAME_HEIGHT,
                              9,
@@ -149,7 +154,7 @@ namespace platformerGame.GameObjects
                              viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.LIE, HorizontalFacing.FACING_RIGHT),
-                             cAssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                             AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                              Constants.CHAR_FRAME_WIDTH,
                              Constants.CHAR_FRAME_HEIGHT,
                              9,
@@ -184,11 +189,16 @@ namespace platformerGame.GameObjects
             this.killed = true;
 
             Vector2f emitDirection = cAppMath.Vec2NormalizeReturn(by.Velocity);
+
+            ShakeScreen.StartShake();
+
             this.Scene.QueueCommand(
                 () => 
                     {
+                        AssetManager.playSound("blood_hit2", 25, this.position );
                         //pscene.ParticleManager.Fireworks.NormalExplosion(new Particles.cEmissionInfo(this.Bounds.center, emitDirection));
                         pscene.ParticleManager.Explosions.NormalBlood(new Particles.cEmissionInfo(this.Bounds.center, emitDirection));
+                        
                     }
                 //new GameCommands.comNormalBloodExplosion(this.Scene, new Particles.cEmissionInfo(this.Bounds.center, emitDirection))
                 );
@@ -214,6 +224,8 @@ namespace platformerGame.GameObjects
                        );
 
                     }
+
+                    AssetManager.playSound("coin_drop1", 20);
                 }
                 /*
                 new platformerGame.GameCommands.comPlacePickup(
@@ -251,23 +263,31 @@ namespace platformerGame.GameObjects
                 if (!playerHiddenForMe && sqrDistFromPlayer <= 80000.0) // 100 unit distance  1000000.0
                 {
                     //this.wake();
-
-                    if (playerCenter.X > this.Position.X)
+                    if (attacking)
                     {
-                        if (velocity.X < 0.0f) this.StopMovingX();
-                        this.StartMovingRight();
+                        this.StopMoving();
                     }
-
-                    if (playerCenter.X < this.Position.X)
-                    {
-                        if (velocity.X > 0.0f) this.StopMovingX();
-                        this.StartMovingLeft();
-                    }
-
-                    if (this.Scene.Player.Bounds.topLeft.Y < this.Bounds.topLeft.Y)
-                        this.StartJumping();
                     else
-                        this.StopJumping();
+                    {
+                        if (playerCenter.X > this.Position.X)
+                        {
+                            if (velocity.X < 0.0f) this.StopMovingX();
+                            this.StartMovingRight();
+                        }
+
+                        if (playerCenter.X < this.Position.X)
+                        {
+                            if (velocity.X > 0.0f) this.StopMovingX();
+                            this.StartMovingLeft();
+                        }
+
+                        /*
+                        if (this.Scene.Player.Bounds.topLeft.Y < this.Bounds.topLeft.Y)
+                            this.StartJumping();
+                        else
+                            this.StopJumping();
+                            */
+                    }
                 }
                 else
                 {
@@ -310,8 +330,29 @@ namespace platformerGame.GameObjects
 
             this.Scene.QueueCommand(
                 () => {
+                    AssetManager.playSound("body_hit1", 8);
                     pscene.ParticleManager.Explosions.LittleBlood(new Particles.cEmissionInfo(this.Bounds.center));
                 });
+        }
+
+        public void attemptMeleeAttack(cPlayer player)
+        {
+            if (cCollision.OverlapAABB(this.hitCollisionRect, player.HitCollisionRect))
+            {
+                if(!attacking)
+                {
+                    this.attacking = true;
+                }
+                else
+                {
+                    if(attackCharger.isReady())
+                    {
+                        player.MeleeHit(1, this);
+                    }
+                }
+            }
+            else
+                this.attacking = false;
         }
 
         public bool IsKilled

@@ -8,18 +8,18 @@ namespace platformerGame
 {
     class cQuadTreeOccupant
     {
-        protected cAABB bounds;
+        protected AABB bounds;
         public cQuadTreeOccupant()
         {
-            bounds = new cAABB(0, 0, 0, 0);
+            bounds = new AABB(0, 0, 0, 0);
         }
 
-        public cQuadTreeOccupant(cAABB _bounds)
+        public cQuadTreeOccupant(AABB _bounds)
         {
             bounds = _bounds.ShallowCopy();
         }
 
-        public cAABB Bounds
+        public AABB Bounds
         {
             get { return bounds; }
             set { bounds = value; }

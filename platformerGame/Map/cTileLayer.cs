@@ -26,7 +26,7 @@ namespace platformerGame.Map
             this.vertices.Clear();
         }
 
-        public void AddTileVertices(cAABB tile_region, cAABB pos_in_tileset)
+        public void AddTileVertices(AABB tile_region, AABB pos_in_tileset)
         {
             vertices.Append(new Vertex(new Vector2f(tile_region.topLeft.X, tile_region.topLeft.Y), Color.White, new Vector2f(pos_in_tileset.topLeft.X, pos_in_tileset.topLeft.Y)));
             vertices.Append(new Vertex(new Vector2f(tile_region.getTopRight().X, tile_region.getTopRight().Y), Color.White, new Vector2f(pos_in_tileset.getTopRight().X, pos_in_tileset.getTopRight().Y)));

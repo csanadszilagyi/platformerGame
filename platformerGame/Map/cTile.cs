@@ -29,7 +29,7 @@ namespace platformerGame.Map
         /// </summary>
         public TileType Type { get; set; }
         
-        public cAABB PosOnTexture { get; set; }
+        public AABB PosOnTexture { get; set; }
         public bool PlayerCollidable { get; set; }
 
         public bool IsCheckedWater { get; set; }
@@ -40,7 +40,7 @@ namespace platformerGame.Map
             GlobalId = -1;
             Type = TileType.EMPTY;
             PlayerCollidable = false;
-            PosOnTexture = new cAABB(0, 0, 1, 1);
+            PosOnTexture = new AABB(0, 0, 1, 1);
             IsCheckedWater = false;
         }
         public cTile(int id_code, TileType type)
@@ -49,7 +49,7 @@ namespace platformerGame.Map
             this.Type = type;
             GlobalId = -1;
             PlayerCollidable = false;
-            PosOnTexture = new cAABB(0, 0, 1, 1);
+            PosOnTexture = new AABB(0, 0, 1, 1);
             IsCheckedWater = false;
 
         }

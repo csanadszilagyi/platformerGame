@@ -40,7 +40,7 @@ namespace platformerGame
         public cAnimation(AnimationInfo info, IntRect view_offset_rect = new IntRect())
         {
             this.animInfo = info;
-            pTexture = cAssetManager.GetTexture(info.TextureName);
+            pTexture = AssetManager.GetTexture(info.TextureName);
             viewOffsetRect = view_offset_rect;
             this.SetFrames(info.Frames);
             init();
@@ -94,7 +94,7 @@ namespace platformerGame
             frame.Width = viewOffsetRect.Width;
             frame.Height = viewOffsetRect.Height;
 
-            cRenderFunctions.DrawTextureUseCenter(destination,
+            DrawingBase.DrawTextureUseCenter(destination,
                        pos,
                        this.GetTexture(),
                        frame,
@@ -128,7 +128,7 @@ namespace platformerGame
                 */
             
   
-             cRenderFunctions.DrawTexture(destination,
+             DrawingBase.DrawTexture(destination,
                             pos,
                             this.GetTexture(),
                             frame,

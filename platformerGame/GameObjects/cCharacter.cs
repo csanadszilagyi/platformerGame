@@ -44,7 +44,7 @@ namespace platformerGame.GameObjects
 
         protected virtual void init()
         {
-            bounds = new cAABB(0,0,1,1);
+            bounds = new AABB(0,0,1,1);
             bounds.SetDims(new Vector2f(Constants.CHAR_COLLISON_RECT.Width, Constants.CHAR_COLLISON_RECT.Height));
             bounds.SetPosByTopLeft(position);
 
@@ -85,6 +85,12 @@ namespace platformerGame.GameObjects
         {
             return viewPosition + bounds.halfDims;
         }
+
+        public Vector2f GetCenterPos()
+        {
+            return position + bounds.halfDims;
+        }
+
         protected virtual void updateX(float step_time, cWorld world)
         {
             acceleration.X = force.X;
@@ -499,6 +505,13 @@ namespace platformerGame.GameObjects
         public virtual void Hit(int amount, cGameObject entity_by)
         {
             this.health -= amount;
+        }
+
+        public virtual void MeleeHit(int amount, cGameObject enity_by)
+        {
+            this.health -= amount;
+            Vector2f towardsMe = cAppMath.Vec2NormalizeReturn(this.HitCollisionRect.center - enity_by.HitCollisionRect.center);
+            this.AddForce(towardsMe * 7000);
         }
 
         public int Health

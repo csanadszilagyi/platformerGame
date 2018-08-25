@@ -45,9 +45,9 @@ namespace platformerGame
     class DrawTile
     {
         public int Left, Top;
-        public cAABB PosOnTexture;
+        public AABB PosOnTexture;
 
-        public DrawTile(int left, int top, cAABB pos_on_texture)
+        public DrawTile(int left, int top, AABB pos_on_texture)
         {
             this.Left = left;
             this.Top = top;
@@ -87,18 +87,19 @@ namespace platformerGame
             HasBottom = bottom;
         }
     }
+
     class cWorld
     {
 
         cMapData currentLevel;
-        cAABB m_WorldBounds;
+        AABB m_WorldBounds;
         Vector2u windowSize;
 
         Sprite background;
         Texture m_BGtexture = null;
 
-        public cAABB levelStartRegion;
-        public cAABB levelEndRegion;
+        public AABB levelStartRegion;
+        public AABB levelEndRegion;
 
 
         cGameScene pScene;
@@ -117,7 +118,7 @@ namespace platformerGame
             this.LoadLevel("levels/map_test2.tmx"); //"levels/Level1.txt"); //
 
 
-            m_BGtexture = cAssetManager.GetTexture(Constants.BG_TEXTURE);
+            m_BGtexture = AssetManager.GetTexture(Constants.BG_TEXTURE);
             m_BGtexture.Repeated = true;
             m_BGtexture.Smooth = true;
 
@@ -136,18 +137,18 @@ namespace platformerGame
             // m_Level1.LoadFromFile(file_name);
             currentLevel.LoadFromTMX(file_name);
 
-            m_WorldBounds = new cAABB(0.0f, 0.0f, currentLevel.Width * Constants.TILE_SIZE, currentLevel.Height * Constants.TILE_SIZE);
+            m_WorldBounds = new AABB(0.0f, 0.0f, currentLevel.Width * Constants.TILE_SIZE, currentLevel.Height * Constants.TILE_SIZE);
 
             levelStartRegion = GetCurrentLevel().LevelStartRegion;
             levelEndRegion = GetCurrentLevel().LevelEndRegion;
             //initTileSprites();
         }
-        public cAABB LevelStartRegion
+        public AABB LevelStartRegion
         {
             get { return levelStartRegion; }
         }
 
-        public cAABB LevelEndRegion
+        public AABB LevelEndRegion
         {
             get { return levelEndRegion; }
         }
@@ -217,7 +218,7 @@ namespace platformerGame
                     {
                         if (wasWater)
                         {
-                            waters.Add(new cWaterBlock(new cAABB(topLeft, new Vector2f(Math.Abs(bottomRight.X - topLeft.X), Math.Abs(bottomRight.Y - topLeft.Y)))));
+                            waters.Add(new cWaterBlock(new AABB(topLeft, new Vector2f(Math.Abs(bottomRight.X - topLeft.X), Math.Abs(bottomRight.Y - topLeft.Y)))));
                             wasWater = false;
                             h = lastH;
                         }
@@ -280,13 +281,13 @@ namespace platformerGame
 
         
 
-        public void PreRender(cAABB view_rect)
+        public void PreRender(AABB view_rect)
         {
             mapRenderer.RecalculateDrawBounds(view_rect);
 
         }
 
-        public void Render(RenderTarget destination, cAABB view_rect)
+        public void Render(RenderTarget destination, AABB view_rect)
         {
             //recalculateDrawBounds(view_rect);
            // DrawBackground(destination);
@@ -358,20 +359,20 @@ namespace platformerGame
             return currentLevel.GetTileAtXY(map.X, map.Y);
         }
 
-        public cAABB getAABBFromMapPos(Vector2i mapPos)
+        public AABB getAABBFromMapPos(Vector2i mapPos)
         {
             Vector2f wp = this.ToWorldPos(mapPos);
-            return new cAABB(wp, new Vector2f(Constants.TILE_SIZE, Constants.TILE_SIZE));
+            return new AABB(wp, new Vector2f(Constants.TILE_SIZE, Constants.TILE_SIZE));
         }
 
-        public cAABB getAABBFromWorldPos(Vector2f worldPos)
+        public AABB getAABBFromWorldPos(Vector2f worldPos)
         {
             Vector2i mp = this.ToMapPos(worldPos);
             Vector2f wp = this.ToWorldPos(mp);
-            return new cAABB(wp, new Vector2f(Constants.TILE_SIZE, Constants.TILE_SIZE));
+            return new AABB(wp, new Vector2f(Constants.TILE_SIZE, Constants.TILE_SIZE));
         }
 
-        public cAABB WorldBounds
+        public AABB WorldBounds
         {
             get { return m_WorldBounds; }
         }
@@ -402,7 +403,7 @@ namespace platformerGame
         public void collideSAT(cGameObject obj, float step_time)
         {
             // check collisions with world
-            List<cAABB> wallsPossibleColliding = this.getCollidableBlocks(obj.Bounds);
+            List<AABB> wallsPossibleColliding = this.getCollidableBlocks(obj.Bounds);
 
             // we must check this, because we need to iterate through the possible
             // colliding tiles from other direction according to this condition
@@ -472,9 +473,9 @@ namespace platformerGame
            );
         }
 
-        public List<cAABB> getCollidableBlocks(cAABB with)
+        public List<AABB> getCollidableBlocks(AABB with)
         {
-            List<cAABB> boxes = new List<cAABB>();
+            List<AABB> boxes = new List<AABB>();
 
             const int offset = 1; //def: 1
 

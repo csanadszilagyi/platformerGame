@@ -22,7 +22,8 @@ namespace platformerGame.GameObjects
             this.weapon = new cMachineGun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY);
                 //new cShotgun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY); // 9
 
-            healthText = new Text("", cAssetManager.GetFont("pf_tempesta_seven"));
+            this.health = 50;
+            healthText = new Text("", AssetManager.GetFont("pf_tempesta_seven"));
             healthText.Position = new Vector2f(pscene.AppController.MainWindow.DefaultView.Size.X - 500, 30);
             healthText.CharacterSize = 28; // in pixels, not points!
             healthText.FillColor = Color.White;
@@ -36,7 +37,7 @@ namespace platformerGame.GameObjects
             IntRect viewRect = Constants.CHAR_VIEW_RECT;
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.STAND, HorizontalFacing.FACING_LEFT),
-                                         cAssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
@@ -47,7 +48,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.STAND, HorizontalFacing.FACING_RIGHT),
-                                         cAssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
@@ -58,7 +59,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.WALK, HorizontalFacing.FACING_LEFT),
-                                         cAssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
@@ -69,7 +70,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.WALK, HorizontalFacing.FACING_RIGHT),
-                                         cAssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
@@ -80,7 +81,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.JUMP, HorizontalFacing.FACING_LEFT),
-                                         cAssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          1,
@@ -91,7 +92,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.JUMP, HorizontalFacing.FACING_RIGHT),
-                                         cAssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          1,
@@ -103,7 +104,7 @@ namespace platformerGame.GameObjects
 
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.FALL, HorizontalFacing.FACING_LEFT),
-                                         cAssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          6,
@@ -114,7 +115,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.FALL, HorizontalFacing.FACING_RIGHT),
-                                         cAssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          6,
@@ -149,8 +150,8 @@ namespace platformerGame.GameObjects
             shape.Position = viewPosition; // - (viewSize / 2.0f);
             destination.Draw(shape);
             */
-            //healthText.DisplayedString = health.ToString();
-            //destination.Draw(healthText);
+            healthText.DisplayedString = health.ToString();
+            destination.Draw(healthText);
 
         }
 

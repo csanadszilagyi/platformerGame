@@ -31,8 +31,8 @@ namespace platformerGame.Map
         int height;
 
         Texture tilesetTexture;
-        cAABB levelStartRegion;
-        cAABB levelEndRegion;
+        AABB levelStartRegion;
+        AABB levelEndRegion;
 
 
         TmxMap map;
@@ -41,8 +41,8 @@ namespace platformerGame.Map
         {
             layers = new Dictionary<int, List<cTile>>();
             tilesetTexture = null;
-            levelStartRegion = new cAABB();
-            levelEndRegion = new cAABB();
+            levelStartRegion = new AABB();
+            levelEndRegion = new AABB();
         }
 
         public void Clear()
@@ -76,7 +76,7 @@ namespace platformerGame.Map
             }
         }
 
-        public cAABB LevelStartRegion
+        public AABB LevelStartRegion
         {
             get
             {
@@ -84,7 +84,7 @@ namespace platformerGame.Map
             }
         }
 
-        public cAABB LevelEndRegion
+        public AABB LevelEndRegion
         {
             get
             {
@@ -190,12 +190,12 @@ namespace platformerGame.Map
 
         }
 
-        private cAABB getTextureRect(int index, int tiles_in_row)
+        private AABB getTextureRect(int index, int tiles_in_row)
         {
             int posY = index / tiles_in_row; //or: index / m_Height;
             int posX = index % tiles_in_row; //or: index -  (pos.y * m_Width);
 
-            return new cAABB(posX* Constants.TILE_SIZE, posY* Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE);
+            return new AABB(posX* Constants.TILE_SIZE, posY* Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE);
         }
 
         private void loadBackgrounds(TmxMap map, Dictionary<int, TmxTilesetTile> tile_types, int first_gid, int tiles_in_row)
@@ -234,7 +234,7 @@ namespace platformerGame.Map
                             gameTile = new cTile(tileID, TileType.EMPTY);
 
                             // does not matter, because we just skip the drwaing of empty tiles...
-                            gameTile.PosOnTexture = new cAABB(0, 0, Constants.TILE_SIZE, Constants.TILE_SIZE);
+                            gameTile.PosOnTexture = new AABB(0, 0, Constants.TILE_SIZE, Constants.TILE_SIZE);
                         }
                         else
                         if (int.TryParse(tile_types[typeID].Type, out type))
@@ -325,9 +325,9 @@ namespace platformerGame.Map
             numOfTiles = width * height;
 
             // works also
-            string fileName = cAssetManager.TEX_RESOURCE_PATH + cAssetManager.TILESET_PATH + tileSet.Image.Source.Split('\\').Last();
+            string fileName = AssetManager.TEX_RESOURCE_PATH + AssetManager.TILESET_PATH + tileSet.Image.Source.Split('\\').Last();
             
-            this.tilesetTexture = cAssetManager.LoadAndReturnTexture(tileSet.Image.Source); // fileName);
+            this.tilesetTexture = AssetManager.LoadAndReturnTexture(tileSet.Image.Source); // fileName);
 
 #if DEBUG
 
@@ -356,10 +356,10 @@ namespace platformerGame.Map
             TmxObject startObject = map.ObjectGroups["SpawnPoints"].Objects["LevelStart"];
             TmxObject endObject = map.ObjectGroups["SpawnPoints"].Objects["LevelEnd"];
 
-            this.levelStartRegion = new cAABB(new Vector2f((float)startObject.X, (float)startObject.Y),
+            this.levelStartRegion = new AABB(new Vector2f((float)startObject.X, (float)startObject.Y),
                                               new Vector2f((float)startObject.Width, (float)startObject.Height));
 
-            this.levelEndRegion = new cAABB(new Vector2f((float)endObject.X, (float)endObject.Y),
+            this.levelEndRegion = new AABB(new Vector2f((float)endObject.X, (float)endObject.Y),
                                               new Vector2f((float)endObject.Width, (float)endObject.Height));
         }
 

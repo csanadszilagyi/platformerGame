@@ -17,6 +17,9 @@ namespace platformerGame.Particles
         double minScale = 0.3;
         double maxScale = 0.6;
 
+        int minSpeed = 200;
+        int maxSpeed = 400;
+
         public cExplosionController(cParticleManager manager, uint max_particles = 300) : base(manager, max_particles)
         {
             this.renderStates.Texture = manager.ExplosionTexture;
@@ -30,7 +33,7 @@ namespace platformerGame.Particles
             particle.Pos = emission.StartPosition;
             particle.LastPos = particle.Pos;
             particle.ViewPos = particle.Pos;
-            particle.MaxSpeed = cAppMath.GetRandomNumber(200, 400); //700, 900 | (400, 600); //3, 8//Math->GetRandomNumber(510, 800); // 2000.0f
+            particle.MaxSpeed = cAppMath.GetRandomNumber(minSpeed, maxSpeed); //700, 900 | (400, 600); //3, 8//Math->GetRandomNumber(510, 800); // 2000.0f
 
             if( !cAppMath.Vec2IsZero(emission.EmitDirection))
             {
@@ -76,6 +79,8 @@ namespace platformerGame.Particles
         {
             minScale = 0.2;
             maxScale = 0.4;
+            minSpeed = 200;
+            maxSpeed = 400;
             loopAddition(emission, 3);
         }
 
@@ -83,7 +88,9 @@ namespace platformerGame.Particles
         {
             minScale = 0.5;
             maxScale = 0.8;
-            loopAddition(emission, 20);
+            minSpeed = 200;
+            maxSpeed = 400;
+            loopAddition(emission, 25);
         }
 
         public override void Update(float step_time)
@@ -113,8 +120,8 @@ namespace platformerGame.Particles
 
                     //p.Heading = cAppMath.Vec2NormalizeReturn(p.Vel);
                     p.LastPos = p.Pos;
-                    p.Pos.X += p.Vel.X * step_time;
-                    p.Pos.Y += p.Vel.Y * step_time;
+                    p.Pos.X += p.Vel.X * step_time*1.5f;
+                    p.Pos.Y += p.Vel.Y * step_time*1.5f;
 
 
 

@@ -13,10 +13,10 @@ using platformerGame.Utilities;
 
 namespace platformerGame
 {
-    class cSfmlApp
+    class SfmlApp
     {
-        RenderWindow    m_MainWindow;
-        Vector2u        m_WindowSize;
+        RenderWindow    mainWindow;
+        Vector2f        windowSize;
         cTimer          m_Timer;
         bool            m_AppRunning;
 
@@ -32,8 +32,6 @@ namespace platformerGame
 
         Color clearColor;
 
-        cPlayerInfo playerInfo;
-
         cRegulator fpsUpdater;
         Text timeText;
 
@@ -41,41 +39,33 @@ namespace platformerGame
 
         bool vsync = false;
 
-        public string LevelName { get; set; }
-        public cSfmlApp()
+        public SfmlApp()
         {
             Constants.Load();
-            playerInfo = new cPlayerInfo();
-        }
-
-        public cSfmlApp(string level_name)
-        {
-            playerInfo = new cPlayerInfo();
-            LevelName = level_name;
         }
 
         private void _setUpSFML()
         {
-            m_WindowSize = new Vector2u(1280, 720);
+            windowSize = new Vector2f(1280.0f, 720.0f);
             
             //if WPF: m_MainWindow = new RenderWindow(formHandle);
-            m_MainWindow = new RenderWindow(new VideoMode(m_WindowSize.X, m_WindowSize.Y, 32), "Platformer", Styles.Close);
-            m_MainWindow.SetVisible(true);
+            mainWindow = new RenderWindow(new VideoMode((uint)windowSize.X, (uint)windowSize.Y, 32), "Platformer", Styles.Close);
+            mainWindow.SetVisible(true);
             activateVSYNC();
-            m_MainWindow.SetFramerateLimit(0);
-            m_MainWindow.SetKeyRepeatEnabled(false);
+            mainWindow.SetFramerateLimit(0);
+            mainWindow.SetKeyRepeatEnabled(false);
 
-            m_MainWindow.Closed += new EventHandler(OnClosed);
-            m_MainWindow.KeyPressed += new EventHandler<KeyEventArgs>(OnKeyPressed);
-            m_MainWindow.Resized += new EventHandler<SizeEventArgs>(OnResized);
-            m_MainWindow.MouseButtonPressed += new EventHandler<MouseButtonEventArgs>(OnMouseButtonPressed);
+            mainWindow.Closed += new EventHandler(OnClosed);
+            mainWindow.KeyPressed += new EventHandler<KeyEventArgs>(OnKeyPressed);
+            mainWindow.Resized += new EventHandler<SizeEventArgs>(OnResized);
+            mainWindow.MouseButtonPressed += new EventHandler<MouseButtonEventArgs>(OnMouseButtonPressed);
             
             
             clearColor = new Color(0, 0, 0, 255);
 
-            this.defaultView = m_MainWindow.DefaultView;
+            this.defaultView = mainWindow.DefaultView;
             //resource-ok betöltése (font-ok és textúrák, képek a játékhoz)
-            cAssetManager.LoadResources();
+            AssetManager.LoadResources();
         }
 
         private void _init()
@@ -97,10 +87,10 @@ namespace platformerGame
 
 
             //Idő szöveg
-            timeText = new Text("", cAssetManager.GetFont("pf_tempesta_seven"));
+            timeText = new Text("", AssetManager.GetFont("pf_tempesta_seven"));
             timeText.Position = new Vector2f(this.defaultView.Size.X-500, 30);
             timeText.CharacterSize = 28; // in pixels, not points!
-            timeText.Color = Color.White;
+            timeText.FillColor = Color.White;
             timeText.Style = Text.Styles.Bold;
 
             cGlobalClock.Start();
@@ -120,13 +110,13 @@ namespace platformerGame
         private void activateVSYNC()
         {
             this.vsync = true;
-            m_MainWindow.SetVerticalSyncEnabled(true);
+            mainWindow.SetVerticalSyncEnabled(true);
         }
 
         private void deactivateVSYNC()
         {
             this.vsync = false;
-            m_MainWindow.SetVerticalSyncEnabled(false);
+            mainWindow.SetVerticalSyncEnabled(false);
         }
 
         private void _beforeUpdate()
@@ -141,21 +131,21 @@ namespace platformerGame
 
         private void _render(float alpha)
         {
-            m_MainWindow.Clear(clearColor);
+            mainWindow.Clear(clearColor);
 
-            m_CurrentState.Render(m_MainWindow, alpha);
+            m_CurrentState.Render(mainWindow, alpha);
 
 
 
-            this.m_MainWindow.SetView(this.defaultView);
+            this.mainWindow.SetView(this.defaultView);
             
             //if (fpsUpdater.isReady())
              //   timeText.DisplayedString = /*"Delta: " + delta.ToString() + "  " + */"VSYNC: " + (this.vsync ? "ON" : "OFF"); //entityPool.getNumOfActiveBullets().ToString();
             
-            this.m_MainWindow.Draw(timeText);
+            this.mainWindow.Draw(timeText);
 
 
-            m_MainWindow.Display();
+            mainWindow.Display();
         }
 
 
@@ -190,7 +180,7 @@ namespace platformerGame
                 if (delta > MAX_DELTA)
                     delta = MAX_DELTA;
 
-                m_MainWindow.DispatchEvents();
+                mainWindow.DispatchEvents();
 
                 _beforeUpdate();
 
@@ -252,7 +242,7 @@ namespace platformerGame
                 
                 curTime = (ulong)gameTime.ElapsedTime.AsMicroseconds();
 
-                m_MainWindow.DispatchEvents();
+                mainWindow.DispatchEvents();
                 _beforeUpdate();
 
 
@@ -303,30 +293,42 @@ namespace platformerGame
                 delta = time - lastTime;
                 lastTime = time;
 
-                m_MainWindow.DispatchEvents();
+                //m_MainWindow.DispatchEvents();
 
                 //m_DeltaTime = m_Timer.GetDeltaTime();
                 //m_FPS = 1.0f / m_DeltaTime;
-
-               if (delta > maxDelta)
+                
+                if (delta > maxDelta)
                     delta = maxDelta;
+                
 
                 acc += delta;
+
+                /*
+                float lagTreshold = MAX_FRAMESKIP * stepTime;
+                if (acc > lagTreshold)
+                {
+                    acc = lagTreshold;
+                }
+                */
 
                 _beforeUpdate();
 
                 loops = 0;
                 while (acc >= stepTime)
                 {
+                    mainWindow.DispatchEvents();
                     _update(stepTime);
                     acc -= stepTime;
 
                     loops++;
+                    
                     if(loops >= MAX_FRAMESKIP)
                     {
                         acc = 0.0f;
                         break;
                     }
+                    
                 }
 
                 alpha = acc / stepTime;
@@ -337,9 +339,9 @@ namespace platformerGame
 
         public void _destroy()
         {
-            cAssetManager.Destroy();
+            AssetManager.Destroy();
             m_CurrentState.Exit();
-            m_MainWindow.Close();
+            mainWindow.Close();
         }
         
         public void Run()
@@ -349,11 +351,6 @@ namespace platformerGame
             _destroy();
         }
 
-        public cPlayerInfo PlayerInfo
-        {
-            get { return playerInfo; }
-            set { playerInfo = value; }
-        }
         /// <summary>
         /// Pl. kilépés menüre gombra kattintanak
         /// </summary>
@@ -379,9 +376,9 @@ namespace platformerGame
 
         private void OnResized(object sender, SizeEventArgs e)
         {
-            var view = m_MainWindow.GetView();
-            view.Size = new Vector2f(m_WindowSize.X, m_WindowSize.Y); // (e.Width, e.Height);
-            m_MainWindow.SetView(view);
+            var view = mainWindow.GetView();
+            view.Size = new Vector2f(windowSize.X, windowSize.Y); // (e.Width, e.Height);
+            mainWindow.SetView(view);
         }
 
         private void OnClosed(object sender, EventArgs e)
@@ -406,7 +403,12 @@ namespace platformerGame
 
         public RenderWindow MainWindow
         {
-            get { return m_MainWindow; }
+            get { return mainWindow; }
+        }
+
+        public Vector2f WindowSize
+        {
+            get { return windowSize; }
         }
     }
 }

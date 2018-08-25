@@ -9,7 +9,7 @@ using SFML.Graphics;
 
 namespace platformerGame
 {
-    class cAABB
+    class AABB
     {
         public Vector2f topLeft;
         public Vector2f rightBottom;
@@ -18,7 +18,7 @@ namespace platformerGame
         public Vector2f halfDims;
 
         
-        public cAABB()
+        public AABB()
         {
             topLeft = new Vector2f();
             rightBottom = new Vector2f();
@@ -27,7 +27,7 @@ namespace platformerGame
             halfDims = new Vector2f(0, 0);
         }
         
-        public cAABB(float left, float top, float width, float height)
+        public AABB(float left, float top, float width, float height)
         {
             topLeft = new Vector2f(left, top);
             dims = new Vector2f(width, height);
@@ -36,13 +36,21 @@ namespace platformerGame
             center = new Vector2f(topLeft.X + halfDims.X, topLeft.Y + halfDims.Y);
         }
 
-        public cAABB(Vector2f top_left, Vector2f dims)
+        public AABB(FloatRect rect) : this(rect.Left, rect.Top, rect.Width, rect.Height) { }
+
+        public AABB(Vector2f top_left, Vector2f dims)
         {
             topLeft = top_left;
             this.dims = dims;
             halfDims = dims / 2.0f;
             rightBottom = new Vector2f(topLeft.X + dims.X, topLeft.Y + dims.Y);
             center = new Vector2f(topLeft.X + halfDims.X, topLeft.Y + halfDims.Y);
+        }
+
+        public AABB(AABB other)
+        {
+            SetDims(other.dims);
+            SetPosByTopLeft(other.topLeft);
         }
 
         public void SetDims(Vector2f dims)
@@ -95,9 +103,14 @@ namespace platformerGame
             return new IntRect((int)topLeft.X, (int)topLeft.Y, (int)dims.X, (int)dims.Y);
         }
 
-        public cAABB ShallowCopy()
+        public AABB ShallowCopy()
         {
-            return (cAABB)this.MemberwiseClone();
+            return (AABB)this.MemberwiseClone();
+        }
+
+        public AABB DeepCopy()
+        {
+            return new AABB(this);
         }
 
         /// <summary>

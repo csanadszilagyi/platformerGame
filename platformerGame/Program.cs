@@ -12,14 +12,14 @@ namespace platformerGame
     {
         static void Main(string[] args)
         {
-            cSfmlApp gameApp;
+            SfmlApp gameApp;
             
             //try
             //{
-                gameApp = new cSfmlApp();
+                gameApp = new SfmlApp();
                 gameApp.Run();
-           // }
-           /* catch (Exception e)
+            //}
+            /*catch (Exception e)
             {
                 StreamWriter sw = new StreamWriter("ErrorLog_" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt");
                 sw.WriteLine("Error created at " + DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss tt")); //yyyy/MM/dd HH:mm:ss:

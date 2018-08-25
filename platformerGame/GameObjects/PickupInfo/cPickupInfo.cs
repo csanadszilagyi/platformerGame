@@ -154,7 +154,7 @@ namespace platformerGame.GameObjects.PickupInfo
 
         private static void AddCoin(cPlayer player)
         {
-
+            AssetManager.playSound("coin_pickup1", 10);
         }
     }
 }

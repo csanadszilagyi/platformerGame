@@ -19,9 +19,10 @@ namespace platformerGame.Inventory.Weapons
         protected int firingFrequency;
         protected float spread; // in radian
 
-        protected int ammo;
+        protected int currentAmmo;
         protected int maxAmmo;
         protected int magazineCapacity;
+        protected int bulletsPerShot;
         protected float timeToReload;
 
         public cWeapon(cGameObject owner, int firing_frequency)
@@ -31,6 +32,7 @@ namespace platformerGame.Inventory.Weapons
             this.regulator = new cRegulator();
             this.regulator.resetByFrequency(firing_frequency);
             this.spread = (float)cAppMath.DegressToRadian(2);
+            this.bulletsPerShot = 1;
         }
 
         protected bool isReadForNextShot()
@@ -47,6 +49,21 @@ namespace platformerGame.Inventory.Weapons
                cBullet b = new cBullet(this.owner, owner.Bounds.center, toSpreadTarget);
                owner.Scene.EntityPool.AddBullet(b);
             }
+        }
+
+        protected void decreaseAmmo()
+        {
+            this.currentAmmo -= bulletsPerShot;
+        }
+
+        public int CurrentAmmo
+        {
+            get { return this.currentAmmo; }
+        }
+
+        public int MaxAmmo
+        {
+            get { return this.maxAmmo; }
         }
 
         public int FiringFrequency

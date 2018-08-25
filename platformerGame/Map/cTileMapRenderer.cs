@@ -16,7 +16,7 @@ namespace platformerGame.Map
 
         List<cTileLayer> drawTileLayers;
 
-        cAABB drawTileBounds;
+        AABB drawTileBounds;
 
         Texture tileSetTexture;
 
@@ -27,7 +27,7 @@ namespace platformerGame.Map
 
             this.tileSetTexture = world.GetCurrentLevel().TilesetTexture;
 
-            drawTileBounds = new cAABB();
+            drawTileBounds = new AABB();
 
             this.setupLayers();
 
@@ -84,7 +84,7 @@ namespace platformerGame.Map
                             drawPos.X = (world.WorldBounds.topLeft.X + x * Constants.TILE_SIZE) + spaceOffset;
                             drawPos.Y = (world.WorldBounds.topLeft.Y + y * Constants.TILE_SIZE) + spaceOffset;
 
-                            cAABB tileBounds = world.getAABBFromWorldPos(drawPos);
+                            AABB tileBounds = world.getAABBFromWorldPos(drawPos);
 
                             drawTileLayers[layer].AddTileVertices(tileBounds, tempTile.PosOnTexture);
                         }
@@ -94,7 +94,7 @@ namespace platformerGame.Map
 
         }
 
-        public void RecalculateDrawBounds(cAABB viewRect)
+        public void RecalculateDrawBounds(AABB viewRect)
         {
             drawTileBounds = viewRect.ShallowCopy();
 
@@ -113,7 +113,7 @@ namespace platformerGame.Map
             filterDrawableTiles();
 
         }
-        public void Render(RenderTarget destination, cAABB view_rect = null)
+        public void Render(RenderTarget destination, AABB view_rect = null)
         {
             foreach (var layer in drawTileLayers)
             {

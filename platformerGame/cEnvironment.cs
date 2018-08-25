@@ -14,19 +14,19 @@ namespace platformerGame
     class cEnvironmentItem
     {
         protected Sprite sprite;
-        protected cAABB bounds; //may differ from drawing bounds
+        protected AABB bounds; //may differ from drawing bounds
         
         public cEnvironmentItem(Texture texture)
         {
             sprite = new Sprite(texture);
-            bounds = new cAABB();
+            bounds = new AABB();
         }
 
-        public cEnvironmentItem(Vector2f pos, Texture texture, cAABB _bounds = null)
+        public cEnvironmentItem(Vector2f pos, Texture texture, AABB _bounds = null)
         {
             sprite = new Sprite(texture);
             sprite.Position = pos;
-            bounds = _bounds ?? new cAABB(pos, new Vector2f(texture.Size.X, texture.Size.Y));
+            bounds = _bounds ?? new AABB(pos, new Vector2f(texture.Size.X, texture.Size.Y));
         }
 
         public Sprite Sprite
@@ -35,7 +35,7 @@ namespace platformerGame
             //set { sprite = value; }
         }
 
-        public cAABB Bounds
+        public AABB Bounds
         {
             get { return bounds; }
             set { bounds = value; }
@@ -81,14 +81,14 @@ namespace platformerGame
         /// <param name="on_ground_pos"></param>
         /// <param name="texture_size"></param>
         /// <returns></returns>
-        public cAABB CalcBBOnGroundByTexture(Vector2f on_ground_pos, Vector2f texture_size)
+        public AABB CalcBBOnGroundByTexture(Vector2f on_ground_pos, Vector2f texture_size)
         {
             float x = on_ground_pos.X - texture_size.X / 2.0f;
             float y = on_ground_pos.Y + Constants.TILE_SIZE - texture_size.Y;
 
-            return new cAABB(x, y, texture_size.X, texture_size.Y);
+            return new AABB(x, y, texture_size.X, texture_size.Y);
         }
-        public void PlaceOnGround(Vector2f texture_pos, Texture texture, cAABB bounding_rect)
+        public void PlaceOnGround(Vector2f texture_pos, Texture texture, AABB bounding_rect)
         {
 
             cEnvironmentItem item = new cEnvironmentItem(texture_pos, texture, bounding_rect);

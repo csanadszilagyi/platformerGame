@@ -53,7 +53,7 @@ namespace platformerGame
             dynamicLights = new List<cLight>();
             m_ClearColor = clear_color;
 
-            lightTexture = new Texture(cAssetManager.GetTexture("light1"));
+            lightTexture = new Texture(AssetManager.GetTexture("light1"));
             lightTexture.Smooth = true;
             lightSprite = new Sprite(this.lightTexture);
             lightSprite.Origin = new Vector2f(lightTexture.Size.X / 2.0f, lightTexture.Size.Y / 2.0f);
@@ -112,7 +112,7 @@ namespace platformerGame
             autenuationShader.SetUniform("texture", Shader.CurrentTexture);
         }
 
-        private void renderALight(cLight light, RenderTarget target, cAABB viewRect)
+        private void renderALight(cLight light, RenderTarget target, AABB viewRect)
         {
             /*
             Vector3f glColor = new Vector3f(0, 0, 0);
@@ -130,7 +130,7 @@ namespace platformerGame
             autenuationShader.SetUniform("bleed", light.Bleed);
             autenuationShader.SetUniform("linearizeFactor", light.LinearizeFactor);
 
-            cRenderFunctions.DrawDirLightByDVec(target,
+            DrawingBase.DrawDirLightByDVec(target,
                                             newPos,
                                             light.Radius,
                                             light.Dir,
@@ -159,7 +159,7 @@ namespace platformerGame
 
         }
 
-        public void separateVisibleLights(cAABB viewRect)
+        public void separateVisibleLights(AABB viewRect)
         {
             visibleLights.Clear();
 
@@ -173,7 +173,7 @@ namespace platformerGame
                 }
             }
         }
-        public void renderStaticLightsToTexture(cAABB viewRect)
+        public void renderStaticLightsToTexture(AABB viewRect)
         {
            staticLightTexture.Clear(m_ClearColor);
 
@@ -199,7 +199,7 @@ namespace platformerGame
 
         }
         */
-        public void Render(RenderTarget destination, cAABB viewRect)
+        public void Render(RenderTarget destination, AABB viewRect)
         {
 
             //destination.Draw(this.lightMapDarkShape, new RenderStates(BlendMode.Multiply));
@@ -212,7 +212,7 @@ namespace platformerGame
 
             //cRenderFunctions.DrawTextureSimple(destination, new Vector2f(), m_LightTexture.Texture, new IntRect(0,0, (int)m_LightTexture.Size.X, (int)m_LightTexture.Size.Y),Color.White, BlendMode.Multiply);
 
-            cRenderFunctions.DrawTextureSimple( destination, 
+            DrawingBase.DrawTextureSimple( destination, 
                                                 viewRect.topLeft, 
                                                 staticLightTexture.Texture, 
                                                 new IntRect(0, 0, (int)this.staticLightTexture.Size.X, (int)this.staticLightTexture.Size.Y),

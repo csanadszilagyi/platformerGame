@@ -13,11 +13,11 @@ using platformerGame.Utilities;
 
 namespace platformerGame
 {
-    class cRenderFunctions
+    class DrawingBase
     {
         //private static Sprite sprite = new Sprite();
         private static Sprite sprite = new Sprite();
-        static cRenderFunctions()
+        static DrawingBase()
         {
 
         }
@@ -401,7 +401,7 @@ namespace platformerGame
 }
 
         public static void DrawRectangleShape(RenderTarget destination,
-                                              cAABB bounds,
+                                              AABB bounds,
                                               Color color,
                                               BlendMode blend_mode,
                                               double orientation = 0.0)

@@ -52,9 +52,9 @@ namespace platformerGame
             Intersects = false;
         }
 
-        public cAABB getBoundingBox()
+        public AABB getBoundingBox()
         {
-            cAABB b = new cAABB();
+            AABB b = new AABB();
             b.SetDims(Dims);
             b.SetPosByCenter(Pos);
             return b;
