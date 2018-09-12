@@ -60,6 +60,17 @@ namespace platformerGame
             halfDims.Y = dims.Y / 2.0f;
         }
 
+        public void SetPosByRightBottom(Vector2f new_right_bottom)
+        {
+            this.rightBottom = new_right_bottom;
+
+            this.topLeft.X = new_right_bottom.X - dims.X;
+            this.topLeft.Y = new_right_bottom.Y - dims.Y;
+
+            this.center.X = new_right_bottom.X - halfDims.X;
+            this.center.Y = new_right_bottom.Y - halfDims.Y;
+        }
+
         public void SetPosByTopLeft(Vector2f top_left)
         {
             topLeft.X = top_left.X;

@@ -10,6 +10,11 @@ using platformerGame.Utilities;
 
 namespace platformerGame
 {
+    class MyCamera
+    {
+
+    }
+
     class Camera
     {
         /// <summary>
@@ -20,7 +25,7 @@ namespace platformerGame
         /// <summary>
         /// Toggle for smooth camera transition
         /// </summary>
-        public bool Smooth = false;
+        public bool Smooth = true;
 
         /// <summary>
         /// Smoothness determines how quickly the transition will take place. Higher smoothness will reach the target position faster.
@@ -68,22 +73,27 @@ namespace platformerGame
             ActualPosition = Target;
         }
 
-        public void Update(Vector2f target)
+        public void Move(Vector2f offset)
+        {
+            ActualPosition += offset;
+        }
+
+        public void Update(Vector2f target, AABB region_bounds, float step_time = Constants.STEP_TIME)
         {
             this.Target = target;
-           // ActualPosition = Target;
             
             if (Smooth)
             {
                 var dir = cAppMath.Vec2NormalizeReturn(Target - ActualPosition);
                 float len = (float)cAppMath.Vec2Distance(ActualPosition, Target);
-                ActualPosition += dir * (len * Smoothness);
+                ActualPosition += dir * (len * step_time * 5.0f);
             }
             else
             {
                 ActualPosition = Target;
             }
-            
+
+            checkBounds(region_bounds);
         }
 
         /*
@@ -107,9 +117,9 @@ namespace platformerGame
             target.SetView(View);
         }
         */
-        public void Apply(RenderTarget target, AABB region_bounds)
-        {
 
+        public void checkBounds(AABB region_bounds)
+        {
             var cameraBounds = this.Bounds;
             /*
             if (RoundPosition)
@@ -120,22 +130,26 @@ namespace platformerGame
             }
             */
 
-            
-            if (cameraBounds.topLeft.X < 0.0f)
-                ActualPosition = new Vector2f(region_bounds.topLeft.X + cameraBounds.halfDims.X, cameraBounds.center.Y);
+
+            if (cameraBounds.topLeft.X < region_bounds.topLeft.X)
+                ActualPosition = new Vector2f(region_bounds.topLeft.X + cameraBounds.halfDims.X, ActualPosition.Y);
             else
             if (cameraBounds.rightBottom.X > region_bounds.rightBottom.X)
-                ActualPosition = new Vector2f(region_bounds.rightBottom.X - cameraBounds.halfDims.X, cameraBounds.center.Y);
+                ActualPosition = new Vector2f(region_bounds.rightBottom.X - cameraBounds.halfDims.X, ActualPosition.Y);
 
 
-            if (cameraBounds.topLeft.Y < 0.0f)
-                ActualPosition = new Vector2f(cameraBounds.center.X, region_bounds.topLeft.Y + cameraBounds.halfDims.Y);
+            if (cameraBounds.topLeft.Y < region_bounds.topLeft.Y)
+                ActualPosition = new Vector2f(ActualPosition.X, region_bounds.topLeft.Y + cameraBounds.halfDims.Y);
             else
              if (cameraBounds.rightBottom.Y > region_bounds.rightBottom.Y)
-                ActualPosition = new Vector2f(cameraBounds.center.X, region_bounds.rightBottom.Y - cameraBounds.halfDims.Y);
+                ActualPosition = new Vector2f(ActualPosition.X, region_bounds.rightBottom.Y - cameraBounds.halfDims.Y);
 
+           // cameraBounds.SetPosByCenter(ActualPosition);
+        }
+
+        public void DeployOn(RenderTarget target, AABB region_bounds = null)
+        {
             
-
             /*
             // offset fixes texture coord rounding
             var offset = 0.25f * Zoom;
@@ -144,8 +158,8 @@ namespace platformerGame
             */
             //Target = center;
             //ActualPosition = center;
-            View.Center = ActualPosition;
-            target.SetView(View);
+            this.View.Center = ActualPosition;
+            target.SetView(this.View);
         }
     }
 }

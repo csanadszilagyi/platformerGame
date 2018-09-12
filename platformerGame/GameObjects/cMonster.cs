@@ -192,7 +192,7 @@ namespace platformerGame.GameObjects
 
             ShakeScreen.StartShake();
 
-            this.Scene.QueueCommand(
+            this.Scene.QueueAction(
                 () => 
                     {
                         AssetManager.playSound("blood_hit2", 25, this.position );
@@ -203,14 +203,16 @@ namespace platformerGame.GameObjects
                 //new GameCommands.comNormalBloodExplosion(this.Scene, new Particles.cEmissionInfo(this.Bounds.center, emitDirection))
                 );
 
-            this.Scene.QueueCommand(
+            this.Scene.QueueAction(
                 () => {
 
-                    ProbabilityRoll<int> r = new ProbabilityRoll<int>();
-                    r.add(70, 2);
-                    r.add(30, 3);
+                    AssetManager.playSound("coin_drop1", 20);
 
-                    int num = r.roll();
+                    ProbabilityRoll<int> numPickables = new ProbabilityRoll<int>();
+                    numPickables.add(70, 2);
+                    numPickables.add(30, 3);
+
+                    int num = numPickables.roll();
                     for (int i = 0; i < num; ++i)
                     {
                         pscene.EntityPool.AddPickup(
@@ -224,8 +226,6 @@ namespace platformerGame.GameObjects
                        );
 
                     }
-
-                    AssetManager.playSound("coin_drop1", 20);
                 }
                 /*
                 new platformerGame.GameCommands.comPlacePickup(
@@ -328,7 +328,7 @@ namespace platformerGame.GameObjects
             //this.spriteControl.ChangeState(new cSpriteState(MotionType.FALL, this.spriteControl.getCurrentState().HorizontalFacing));
             //this.Scene.ParticleManager.AddLittleBloodExplosion(this.Bounds.center, 3);
 
-            this.Scene.QueueCommand(
+            this.Scene.QueueAction(
                 () => {
                     AssetManager.playSound("body_hit1", 8);
                     pscene.ParticleManager.Explosions.LittleBlood(new Particles.cEmissionInfo(this.Bounds.center));

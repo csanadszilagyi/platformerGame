@@ -194,14 +194,9 @@ namespace platformerGame.GameObjects
         {
             cPlayer player = Scene.Player;
 
-            float d = (float)cAppMath.Vec2Distance(player.Bounds.center, this.Bounds.center);
+            float d = (float)cAppMath.Vec2DistanceSqrt(player.Bounds.center, this.Bounds.center);
 
-            if (!pulling && d <= MAX_PULL_DISTANCE)
-            {
-                this.pulling = true;
-            }
-
-            
+            this.pulling = !this.pulling && d <= MAX_PULL_DISTANCE * MAX_PULL_DISTANCE;
 
             if (!pickedUp && cCollision.OverlapAABB(player.Bounds, this.HitCollisionRect))
             {

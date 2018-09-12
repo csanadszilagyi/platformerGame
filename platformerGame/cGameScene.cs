@@ -39,7 +39,7 @@ namespace platformerGame
 
         RenderTexture staticTexture;
 
-        Queue<Action> gameCommands;
+        Queue<Action> gameActions;
 
         public cGameScene(SfmlApp controller) : base(controller)
         {
@@ -50,9 +50,9 @@ namespace platformerGame
         public override void Enter()
         {
             cAnimationAssets.LoadAnimations();
-            camera = new Camera(new View(appController.WindowSize / 2.0f, appController.WindowSize));
+            camera = new Camera(new View(new Vector2f(appController.WindowSize.X / 2.0f, appController.WindowSize.Y / 2.0f), appController.WindowSize));
             camera.Zoom = 0.6f;
-            //appController.MainWindow.SetView(camera.View);
+            appController.MainWindow.SetView(camera.View);
 
             /*
             Vector2f viewSize = new Vector2f(appController.MainWindow.Size.X, appController.MainWindow.Size.Y);
@@ -114,7 +114,7 @@ namespace platformerGame
             this.particleManager = new cParticleManager(this);
             // lightMap.renderStaticLightsToTexture();
 
-            gameCommands = new Queue<Action>(50);
+            gameActions = new Queue<Action>(50);
 
             Listener.GlobalVolume = 80;
             Listener.Direction = new Vector3f(1.0f, 0.0f, 0.0f);
@@ -139,9 +139,9 @@ namespace platformerGame
 
             UpdatePlayerInput();
 
-            while (gameCommands.Count > 0)
+            while (gameActions.Count > 0)
             {
-                gameCommands.Dequeue().Invoke();
+                gameActions.Dequeue().Invoke();
             }
 
             ShakeScreen.Update();
@@ -160,16 +160,16 @@ namespace platformerGame
 
             this.particleManager.Update(step_time);
 
-            // Vector2f playerCenter = player.Bounds.center;
-            // camera.Update(playerCenter);
+            Vector2f playerCenter = player.Bounds.center;
+            this.camera.Update(playerCenter, gameWorld.WorldBounds);
             // worldEnvironment.Update(step_time);
         }
 
         private void PreRender(RenderTarget destination, float alpha)
         {
-            player.CalculateViewPos(alpha);
+            this.player.CalculateViewPos(alpha);
 
-            camera.Update(player.ViewPosition);
+            //camera.Update(player.ViewPosition);
             // Vector2f playerCenter = player.GetCenterViewPos();
             // camera.Position = playerCenter;
 
@@ -180,15 +180,15 @@ namespace platformerGame
 
 
             // camera.Update();
-            camera.Apply(destination, gameWorld.WorldBounds);
+            this.camera.DeployOn(destination);
             var cameraBounds = camera.Bounds;
             //viewRect.SetPosByCenter(m_View.Center);
 
-            //m_View.Move(ShakeScreen.Offset);
+            destination.GetView().Move(ShakeScreen.Offset);
 
             // destination.SetView(m_View);
 
-            gameWorld.PreRender(cameraBounds);
+            this.gameWorld.PreRender(cameraBounds);
 
             this.lightMap.separateVisibleLights(cameraBounds);
 
@@ -364,9 +364,9 @@ namespace platformerGame
             get { return this.particleManager; }
         }
 
-        public void QueueCommand(Action action)
+        public void QueueAction(Action action)
         {
-            gameCommands.Enqueue(action);
+            gameActions.Enqueue(action);
         }
 
         public bool onScreen(AABB box)
