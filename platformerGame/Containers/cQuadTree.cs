@@ -9,7 +9,7 @@ using SFML.System;
 
 using platformerGame.Utilities;
 
-namespace platformerGame
+namespace platformerGame.Containers
 {
     class cQuadTree<T> where T : cQuadTreeOccupant
     {

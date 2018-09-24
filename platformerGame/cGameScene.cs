@@ -33,7 +33,7 @@ namespace platformerGame
 
         Camera camera;
 
-        EntityPool entityPool;
+        EntityManager entityPool;
 
         cParticleManager particleManager;
 
@@ -89,7 +89,7 @@ namespace platformerGame
 
             player = new cPlayer(this, playerStart);
 
-            entityPool = new EntityPool(this, gameWorld.WorldBounds.dims, player);
+            entityPool = new EntityManager(this, gameWorld.WorldBounds.dims, player);
             entityPool.InitLevelEntites(World.GetCurrentLevel());
 
             //vizekhez adunk fényt
@@ -196,6 +196,8 @@ namespace platformerGame
             this.lightMap.separateVisibleLights(cameraBounds);
 
             this.particleManager.PreRender(alpha);
+
+            this.entityPool.PreRender(alpha, cameraBounds);
             //TODO: Entity pool PreRender, filter visible objects
         }
 
@@ -219,7 +221,7 @@ namespace platformerGame
 
             //worldEnvironment.RenderWaterBlocks(destination);
 
-            this.entityPool.RenderEntities(destination, alpha, cameraBounds);
+            this.entityPool.Render(destination);
             
             
 
@@ -234,9 +236,9 @@ namespace platformerGame
 
             this.lightMap.Render(destination, cameraBounds);
 
-            this.entityPool.RenderPickups(destination, alpha, cameraBounds);
+            this.entityPool.RenderPickups(destination);
 
-            this.entityPool.RenderBullets(destination, alpha, cameraBounds);
+            this.entityPool.RenderBullets(destination);
 
             this.particleManager.Render(destination, alpha);
 
@@ -338,7 +340,7 @@ namespace platformerGame
             }
         }
 
-        public EntityPool EntityPool
+        public EntityManager EntityPool
         {
             get { return entityPool; }
         }

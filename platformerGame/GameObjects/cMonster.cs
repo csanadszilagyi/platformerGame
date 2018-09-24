@@ -219,7 +219,6 @@ namespace platformerGame.GameObjects
                         pscene.EntityPool.AddPickup(
                             new cPickupAble(
                                 this.Scene,
-                                this.Scene.EntityPool.SpatialGrid,
                                 this.Bounds.center,
                                 cAppMath.GetRandomUnitVec(), // emitDirection,
                                 PickupInfo.PickupType.COIN_GOLD

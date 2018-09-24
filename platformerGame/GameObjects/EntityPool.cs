@@ -10,6 +10,7 @@ using SFML.System;
 using platformerGame.GameObjects;
 using platformerGame.Utilities;
 using platformerGame.Map;
+using platformerGame.Containers;
 using tileLoader;
 
 namespace platformerGame
@@ -49,6 +50,7 @@ namespace platformerGame
             this.spatialGrid = new cSpatialGrid(worldSize);
             //this.treeBullets = new cQuadTree<cBullet>(1, scene.World.WorldBounds);
         }
+
         public void AddBullet(cGameObject owner, Vector2f pos, Vector2f direction)
         {
             cBullet bullet = new cBullet(owner, pos, direction);
@@ -174,7 +176,7 @@ namespace platformerGame
            
             
 
-            this.checkPlayerCanUseOrPickupOrInteract();
+            this.checkNearbyObjectsForPlayer();
 
             /*
             int pickupCount = pickups.Count;
@@ -238,7 +240,10 @@ namespace platformerGame
             }
         }
 
-        public void checkPlayerCanUseOrPickupOrInteract()
+        /// <summary>
+        /// Player's pull distance must be smaller then cell_size in the spatial grid.
+        /// </summary>
+        public void checkNearbyObjectsForPlayer()
         {
             int[] ids = spatialGrid.getPossibleCollidableObjectsWithAdjacents(pScene.Player.Bounds.center);
 

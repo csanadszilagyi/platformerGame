@@ -9,12 +9,12 @@ using SFML.System;
 using platformerGame.Utilities;
 using platformerGame.GameObjects.PickupInfo;
 using platformerGame.Rendering;
+using platformerGame.Containers;
 
 namespace platformerGame.GameObjects
 {
     class cPickupAble : cGameObject
     {
-        cSpatialGrid grid;
 
         cPickupInfo pickup;
         
@@ -37,15 +37,14 @@ namespace platformerGame.GameObjects
         /// <param name="grid"></param>
         /// <param name="pos"></param>
         /// <param name="emit_direction"></param>
-        public cPickupAble(cGameScene scene, cSpatialGrid grid, Vector2f pos, Vector2f emit_direction, PickupType type = PickupType.UNKNOWN) : base(scene, pos)
+        public cPickupAble(cGameScene scene, Vector2f pos, Vector2f emit_direction, PickupType type = PickupType.UNKNOWN) : base(scene, pos)
         {
             pickup = type == PickupType.UNKNOWN ? PickupEffects.getWeighted() : PickupEffects.get(type); 
-            this.init(grid, pos, emit_direction);
+            this.init(pos, emit_direction);
         }
 
-        private void init(cSpatialGrid grid, Vector2f pos, Vector2f emit_direction)
+        private void init(Vector2f pos, Vector2f emit_direction)
         {
-            this.grid = grid;
             this.pickedUp = pulling = false;
             this.heading = emit_direction;
 
@@ -157,8 +156,6 @@ namespace platformerGame.GameObjects
 
             Bounds.SetPosByCenter(position);
             this.hitCollisionRect = bounds;
-
-            grid.HandleObject(this.ID, bounds);
 
             if (!cAppMath.Vec2IsZero(velocity))
             {

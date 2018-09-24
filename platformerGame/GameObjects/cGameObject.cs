@@ -2,6 +2,7 @@
 using SFML.Graphics;
 
 using platformerGame.Utilities;
+using platformerGame.Containers;
 
 namespace platformerGame.GameObjects
 {
@@ -15,6 +16,8 @@ namespace platformerGame.GameObjects
         protected Vector2f position;
         protected Vector2f lastPosition;
         protected Vector2f viewPosition; // interpolációhoz
+
+        protected Vector2i gridCoordinate;
 
         protected Vector2f velocity;
         protected Vector2f acceleration;
@@ -41,9 +44,12 @@ namespace platformerGame.GameObjects
         public cGameObject() : base()
         {
             pscene = null;
-            position = new Vector2f(0.0f, 0.0f); ;
-            lastPosition = new Vector2f(0.0f, 0.0f); ;
-            viewPosition = new Vector2f(0.0f, 0.0f); ;
+            position = new Vector2f(0.0f, 0.0f);
+            lastPosition = new Vector2f(0.0f, 0.0f);
+            viewPosition = new Vector2f(0.0f, 0.0f);
+
+            gridCoordinate = new Vector2i(0, 0);
+
             velocity = new Vector2f(0.0f, 0.0f);
             acceleration = new Vector2f(0.0f, 0.0f);
             force = new Vector2f(0.0f, 0.0f);
@@ -62,6 +68,8 @@ namespace platformerGame.GameObjects
             position = pos;
             lastPosition = pos;
             viewPosition = pos;
+
+            gridCoordinate = new Vector2i(0, 0);
 
             velocity = new Vector2f(0.0f, 0.0f);
             acceleration = new Vector2f(0.0f, 0.0f);
@@ -136,6 +144,12 @@ namespace platformerGame.GameObjects
             {
                 viewPosition = value;
             }
+        }
+        
+        public Vector2i GridCoordinate
+        {
+            get { return this.gridCoordinate; }
+            set { this.gridCoordinate = value; }
         }
 
         public Vector2f Velocity

@@ -5,13 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using SFML.System;
 
-namespace platformerGame
+namespace platformerGame.Containers
 {
     class cSpatialGrid
     {
         const int CELL_SIZE = 128; // 128 X 128 square
 
         cSpatialCell[] grid;
+
+        Dictionary<Vector2i, List<int>> cells;
+
         int height;
         int width;
         int numCells;
