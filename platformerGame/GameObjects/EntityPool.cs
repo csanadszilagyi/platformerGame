@@ -7,74 +7,44 @@ using System.Threading.Tasks;
 using SFML.Graphics;
 using SFML.System;
 
-using platformerGame.GameObjects;
+
 using platformerGame.Utilities;
 using platformerGame.Map;
-using platformerGame.Containers;
 using tileLoader;
 
-namespace platformerGame
+namespace platformerGame.GameObjects
 {
     class EntityPool
     {
+        const int ENTITY_GRID_SIZE = 64;
+        const int ENTITY_OVERSCAN = 64;
+
         cGameScene pScene;
-        List<cBullet> bullets;
-        List<cMonster> monsters;
 
-        cSpatialGrid spatialGrid;
+        List<cGameObject> allEntities;
+        List<cGameObject> visibleEntites; // on screen
 
-        // id - pickable object (id is the id of object, generated statically when created)
-        Dictionary<int, cPickupAble> pickups;
-
-        //List<cPickupAble> pickups;
-
-        cQuadTree<cMonster> treeMonsters;
-        //cQuadTree<cBullet> treeBullets;
+        Dictionary<Vector2i, List<cGameObject>> entityGrid;
 
         Vector2f worldSize;
+        cPlayer player;
 
-        cPlayer pPlayer;
+        private float cleanupTimer = 0.0f;
 
-        //Dictionary<int, cGameObject> entityMap;
-
-        public EntityPool(cGameScene scene, Vector2f world_size, cPlayer p_player)
+        public EntityPool(cGameScene scene, Vector2f world_size, cPlayer player)
         {
             this.pScene = scene;
             this.worldSize = world_size;
-            this.pPlayer = p_player;
-            this.bullets = new List<cBullet>();
-            this.monsters = new List<cMonster>();
-
-            this.treeMonsters = new cQuadTree<cMonster>(1, scene.World.WorldBounds);
-            this.pickups = new Dictionary<int, cPickupAble>();
-            this.spatialGrid = new cSpatialGrid(worldSize);
-            //this.treeBullets = new cQuadTree<cBullet>(1, scene.World.WorldBounds);
-        }
-
-        public void AddBullet(cGameObject owner, Vector2f pos, Vector2f direction)
-        {
-            cBullet bullet = new cBullet(owner, pos, direction);
-            bullets.Add(bullet);
-        }
-
-        public void AddPickup(cPickupAble item)
-        {
-            pickups.Add(item.ID, item);
-        }
-
-        public void AddBullet(cBullet bullet)
-        {
-            bullets.Add(bullet);
-        }
-
-        public void AddMonster(cMonster monster)
-        {
-            this.monsters.Add(monster);
+            this.player = player;
+            this.allEntities = new List<cGameObject>();
+            this.visibleEntites = new List<cGameObject>();
+            this.entityGrid = new Dictionary<Vector2i, List<cGameObject>>();
         }
 
         public void InitLevelEntites(cMapData level)
         {
-            this.monsters.Clear();
+            // this.monsters.Clear();
+            // this.allEntities.RemoveAll((cGameObject g) => g is cMonster );
 
             TmxMap map = level.GetTmxMap();
             TmxList<TmxObject> entityList = map.ObjectGroups["Entities"].Objects;
@@ -85,159 +55,284 @@ namespace platformerGame
             }
         }
 
-        public IEnumerable<cMonster> getPossiblePlayerMeleeAttackers()
+        private Vector2i calcGridPos(Vector2f world_pos)
         {
-            return treeMonsters.GetEntitiesAtPos(pPlayer.Bounds.center);
+            int x = (int)world_pos.X / ENTITY_GRID_SIZE;
+            int y = (int)world_pos.Y / ENTITY_GRID_SIZE;
+            return new Vector2i(x, y);
+        }
+
+        private IEnumerable<cGameObject> getInGridRect(int startX, int startY, int endX, int endY)
+        {
+            var pos = new Vector2i();
+
+            List<cGameObject> returner = new List<cGameObject>();
+
+            for (var y = startY; y <= endY; y++)
+            {
+                for (var x = startX; x <= endX; x++)
+                {
+                    pos.X = x;
+                    pos.Y = y;
+
+                    List<cGameObject> list;
+                    if (entityGrid.TryGetValue(pos, out list))
+                    {
+                        returner.AddRange(list);
+                    }
+                }
+            }
+
+            return returner;
+        }
+
+        public IEnumerable<cGameObject> getEntitiesNearby(Vector2f pos)
+        {
+            Vector2i gridPos = this.calcGridPos(pos);
+            return this.getInGridRect(gridPos.X - 1, gridPos.Y - 1, gridPos.X + 1, gridPos.Y + 1);
+        }
+
+        public IEnumerable<cGameObject> getEntitiesInArea(AABB area)
+        {
+            FloatRect rect = area.AsFloatRect();
+
+            var overscan = ENTITY_OVERSCAN;
+            var gridSize = ENTITY_GRID_SIZE;
+
+            rect = new FloatRect(rect.Left - overscan, rect.Top - overscan,
+                                 rect.Width + (overscan * 2), rect.Height + (overscan * 2));
+
+            var startX = (int)rect.Left / gridSize;
+            var startY = (int)rect.Top / gridSize;
+            var width = (int)rect.Width / gridSize + 1;
+            var height = (int)rect.Height / gridSize + 1;
+
+            return this.getInGridRect(startX, startY, startX + width, startY + height);
+        }
+
+        public void AddPickup(cPickupAble p)
+        {
+            this.AddEntity(p);
+        }
+
+        public void AddMonster(cMonster m)
+        {
+            this.AddEntity(m);
+        }
+
+        public void AddBullet(cBullet b)
+        {
+            this.AddEntity(b);
+        }
+
+        public void AddEntity(cGameObject e)
+        {
+            e.GridCoordinate = this.calcGridPos(e.Bounds.center);
+            this.allEntities.Add(e);
+            this.GridAdd(e);
+
+            /*
+             if (e.InputInstance != null)
+                inputEntities.Add(e);
+            */
+        }
+
+        public void RemoveEntity(cGameObject e)
+        {
+            // e.Destroy();
+
+            GridRemove(e);
+            this.allEntities.Remove(e);
+
+            /*
+             if (e.InputInstance != null)
+                inputEntities.Remove(e);
+            */
         }
 
         public void Update(float step_time)
         {
 
-            spatialGrid.ClearAll();
+            // bullet collision checks
+            checkBulletVsEntityCollisions(step_time);
 
-            //checkPickupsCollisionEachOther(step_time);
+            // update all entites
+            Vector2i newGridPos = new Vector2i(0, 0);
 
-            this.checkBulletVsEntityCollisions(step_time);
-            
-
-            treeMonsters.Clear();
-
-            //treeBullets.Clear();
-
-
-            //update bullets
-            int bulletCount = bullets.Count;
-            for (int i = 0; i < bulletCount; i++)
+            int eCount = allEntities.Count;
+            for (int i = 0; i < eCount; ++i)
             {
-                if (bullets[i].isActive())
+                cGameObject e = allEntities[i];
+
+                if (e.isActive())
                 {
-                    bullets[i].Update(step_time);
-                    //treeBullets.AddEntity(bullets[i]);
+                    e.Update(step_time);
+
+                    var bounds = e.Bounds;
+                    newGridPos = this.calcGridPos(bounds.center);
+
+                    if (!e.GridCoordinate.Equals(newGridPos))
+                    {
+                        e.GridCoordinate = newGridPos;
+                        GridAdd(e);
+                    }
                 }
                 else
                 {
-                    bullets.RemoveAt(i);
+                    allEntities.RemoveAt(i);
                     i--;
-                    bulletCount = bullets.Count;
+                    eCount = allEntities.Count;
                 }
+
             }
 
-            //update monsters
-            int monsterCount = monsters.Count;
-            for (int i = 0; i < monsterCount; i++)
-            {
-                if (monsters[i].isActive())
-                {
-                    monsters[i].Update(step_time);
-                    treeMonsters.AddEntity(monsters[i]);
-                }
-                else
-                {
-                    monsters.RemoveAt(i);
-                    i--;
-                    monsterCount = monsters.Count;
-                }
-            }
+            // check if can interact / use / pickup
+            this.checkNearbyObjectsForPlayer();
 
+            // melee attacj handling
             var meleeEntities = this.getPossiblePlayerMeleeAttackers();
             foreach (var monster in meleeEntities)
             {
-                monster.attemptMeleeAttack(pPlayer);
+                monster.attemptMeleeAttack(player);
             }
 
-            // update pickups
-            List<int> keysToRemove = new List<int>();
-            foreach(var item in pickups)
+            // cleanup grid
+            cleanupTimer += step_time;
+            if (cleanupTimer >= 60.0f)
             {
-                cPickupAble pickup = item.Value;
-                if (pickup.isActive())
-                {
-                    pickup.Update(step_time);
-                }
-                else
-                {
-                    // can not delete in real-time...
-                    // pickups.Remove(item.Key);
-
-                    keysToRemove.Add(item.Key);
-                }
+                entityGrid.RemoveAll(kv => kv.Value.Count == 0);
+                cleanupTimer = 0;
             }
-
-            if (keysToRemove.Count > 0)
-            {
-                this.pScene.QueueAction(() =>
-                {
-                    foreach (int key in keysToRemove)
-                    {
-                        pickups.Remove(key);
-                    }
-                });
-            }
-           
-            
-
-            this.checkNearbyObjectsForPlayer();
-
-            /*
-            int pickupCount = pickups.Count;
-            for (int i = 0; i < pickupCount; i++)
-            {
-                if (pickups[i].isActive())
-                {
-                    pickups[i].Update(step_time);
-                }
-                else
-                {
-                    pickups.RemoveAt(i);
-                    i--;
-                    pickupCount = pickups.Count;
-                }
-            }
-            */
         }
 
-        private int getIndexOfClosestMonsterColliding(List<cMonster> mons, cBullet bul, Vector2f pos_by, float time)
+        public void GridAdd(cGameObject e)
         {
-            int index = -1;
+            List<cGameObject> list;
+
+            if (!entityGrid.TryGetValue(e.GridCoordinate, out list))
+            {
+                list = new List<cGameObject>();
+                list.Add(e);
+                entityGrid.Add(e.GridCoordinate, list);
+                return;
+            }
+
+            list.Add(e);
+        }
+
+        public bool GridRemove(cGameObject e)
+        {
+            List<cGameObject> list;
+
+            if (entityGrid.TryGetValue(e.GridCoordinate, out list))
+                return list.Remove(e);
+
+            return false;
+        }
+
+        /// <summary>
+        /// Filters visible entites and performs view position calculation for the visible ones.
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerable<cGameObject> filterVisibles(float alpha, AABB view_region)
+        {
+            foreach (var e in allEntities)
+            {
+                if (cCollision.OverlapAABB(e.Bounds, view_region))
+                {
+                    e.CalculateViewPos(alpha);
+                    yield return e;
+                }
+
+            }
+        }
+
+        public void PreRender(float alpha, AABB view_region)
+        {
+            this.visibleEntites = this.filterVisibles(alpha, view_region).ToList<cGameObject>();
+        }
+
+        public void RenderBullets(RenderTarget target)
+        {
+            foreach (var b in this.visibleEntites.OfType<cBullet>())
+            {
+                b.Render(target);
+            }
+        }
+
+        public void RenderPickups(RenderTarget target)
+        {
+            foreach (var p in this.visibleEntites.OfType<cPickupAble>())
+            {
+                p.Render(target);
+            }
+        }
+
+        public void Render(RenderTarget target)
+        {
+            foreach (var m in this.visibleEntites.OfType<cMonster>())
+            {
+                m.Render(target);
+            }
+        }
+
+
+
+        private cMonster getclosestMonsterColliding(IEnumerable<cMonster> possibleColliders, cBullet bul, Vector2f pos_by, float time)
+        {
+            // int index = -1;
             double prevDist = Double.MaxValue;
             double newDist = 0.0;
-            for(int i = 0; i < mons.Count; i++)
+            cMonster returner = null;
+            foreach (var mon in possibleColliders)
             {
-                if (mons[i].IsKilled)
+                if (mon.IsKilled)
                     continue;
 
                 // order by distance to find the closest
-                if (cSatCollision.checkAndResolve(bul, mons[i], time, false))
+                if (cSatCollision.checkAndResolve(bul, mon, time, false))
                 {
-                    newDist = cAppMath.Vec2DistanceSqrt(mons[i].Bounds.center, pos_by);
+                    newDist = cAppMath.Vec2DistanceSqrt(mon.Bounds.center, pos_by);
 
                     if (newDist < prevDist)
                     {
                         prevDist = newDist;
-                        index = i;
+                        returner = mon;
                     }
                 }
-                
+
             }
 
-            return index;
+            return returner;
         }
 
 
-        private void checkPickupsCollisionEachOther(float step_time)
+        public void checkBulletVsEntityCollisions(float step_time)
         {
-            KeyValuePair<int, cPickupAble>[] pics = pickups.ToArray();
+            // List<cMonster> collisionMonsters = new List<cMonster>();
+            var bullets = this.allEntities.OfType<cBullet>();
 
-            for(int i = 0; i<pics.Length-1; i++)
+            foreach (var bullet in bullets)
             {
-                for (int j = i+1; j < pics.Length; j++)
+
+                Vector2f intersection = new Vector2f(0.0f, 0.0f);
+
+                var collisionMonsters = this.getEntitiesNearby(bullet.Position).OfType<cMonster>(); //treeMonsters.GetEntitiesAtPos(bullets[b].Position);
+
+
+                cMonster monster = getclosestMonsterColliding(collisionMonsters, bullet, bullet.Position, step_time);
+
+                if (monster != null)
                 {
-                    if(j != i)
-                    {
-                        cSatCollision.checkAndResolve(pics[i].Value, pics[j].Value, step_time, true);
-                    }
+                    cCollision.resolveMonsterVsBullet(monster, bullet, intersection);
                 }
+
             }
+        }
+
+        public IEnumerable<cMonster> getPossiblePlayerMeleeAttackers()
+        {
+            return this.getEntitiesNearby(player.Bounds.center).OfType<cMonster>();
         }
 
         /// <summary>
@@ -245,159 +340,12 @@ namespace platformerGame
         /// </summary>
         public void checkNearbyObjectsForPlayer()
         {
-            int[] ids = spatialGrid.getPossibleCollidableObjectsWithAdjacents(pScene.Player.Bounds.center);
+            var pickups = this.getEntitiesNearby(this.player.Bounds.center).OfType<cPickupAble>();
 
-            foreach (var id in ids)
+            foreach (var p in pickups)
             {
-                pickups[id].checkContactWithPlayer();
+                p.checkContactWithPlayer();
             }
-        }
-
-        public void checkBulletVsEntityCollisions(float step_time)
-        {
-            List<cMonster> collisionMonsters = new List<cMonster>();
-
-            for (int b = 0; b < bullets.Count; b++)
-            {
-                
-                Vector2f intersection = new Vector2f(0.0f, 0.0f);
-
-                collisionMonsters = treeMonsters.GetEntitiesAtPos(bullets[b].Position);
-
-                
-                int monster = getIndexOfClosestMonsterColliding(collisionMonsters, bullets[b], bullets[b].Position, step_time);
-                
-                if(monster > -1)
-                {
-                    cCollision.resolveMonsterVsBullet(collisionMonsters[monster], bullets[b], intersection);
-                }
-
-
-                /*
-                int m = 0;
-                while (m < collisionMonsters.Count
-                        // && !cSatCollision.checkAndResolve(bullets[b], collisionMonsters[m], step_time, false)
-                        //!cCollision.testBulletVsEntity(bullets[b].Position, bullets[b].LastPosition, collisionMonsters[m].Bounds, ref intersection)
-                        )
-                {
-                    if (bullets[b].Alive == false) break;
-
-                    if (!collisionMonsters[m].Disabled && cSatCollision.checkAndResolve(bullets[b], collisionMonsters[m], step_time, false))
-                    {
-                        cCollision.resolveMonsterVsBullet(collisionMonsters[m], bullets[b], intersection);
-                    }
-                    m++;
-                }
-                */
-
-                /*
-                if (m < collisionMonsters.Count)
-                {
-                    cCollision.resolveMonsterVsBullet(collisionMonsters[m], bullets[b], intersection);
-                }
-                */
-            }
-        }
-        
-        public int getNumOfActiveBullets()
-        {
-            return bullets.Count;
-        }
-
-        public void RenderAll(RenderTarget destination, float alpha, AABB view_region)
-        {
-            foreach (var go in this.ListAllVisibles(view_region))
-            {
-                go.CalculateViewPos(alpha);
-                go.Render(destination);
-            }
-        }
-
-        public void RenderBullets(RenderTarget destination, float alpha, AABB view_region)
-        {
-            //draw bullets
-            /*
-            for (int i = 0; i < bullets.Count; i++)
-            {
-                bullets[i].CalculateViewPos(alpha);
-                bullets[i].Render(destination);
-            }*/
-            foreach (var bullet in this.ListVisiblesInList<cBullet>(view_region, bullets))
-            {
-                bullet.CalculateViewPos(alpha);
-                bullet.Render(destination);
-            }
-        }
-
-        public void RenderEntities(RenderTarget destination, float alpha, AABB view_region)
-        {
-            //draw monsters
-            /*for (int i = 0; i < monsters.Count; i++)
-            {
-                monsters[i].CalculateViewPos(alpha);
-                monsters[i].Render(destination);
-            }*/
-            foreach (var pickup in this.ListVisiblesInList<cMonster>(view_region, monsters))
-            {
-                pickup.CalculateViewPos(alpha);
-                pickup.Render(destination);
-            }
-        }
-
-
-        public void RenderPickups(RenderTarget destination, float alpha, AABB view_region)
-        {
-            //draw pickups
-            foreach (var pickup in this.ListVisiblesInList<cPickupAble>(view_region, pickups.Values))
-            {
-                pickup.CalculateViewPos(alpha);
-                pickup.Render(destination);
-            }
-        }
-
-        public void RenderQuadtree(RenderTarget destination)
-        {
-            this.treeMonsters.DrawBounds(destination);
-        }
-
-        public IEnumerable<T> ListVisiblesInList<T>(AABB view_region, IEnumerable<T> objs) where T : cGameObject
-        {
-            foreach (var o in objs)
-            {
-                if (cCollision.OverlapAABB(o.Bounds, view_region))
-                    yield return o;
-            }
-        }
-
-        public IEnumerable<cGameObject> ListAllVisibles(AABB view_region)
-        {
-            List<cGameObject> gos = new List<cGameObject>();
-
-            gos.AddRange(bullets);
-            gos.AddRange(monsters);
-            gos.AddRange(pickups.Values);
-
-            foreach (var g in gos)
-            {
-                if (cCollision.OverlapAABB(g.Bounds, view_region))
-                    yield return g;
-            }
-
-            /*
-            for (int i = 0; i < bullets.Count; i++)
-            {
-                if (cCollision.OverlapAABB(bullets[i].Bounds, view_region))
-                    visibleObjects.Add(bullets[i]);
-            }
-
-            return visibleObjects;
-            */
-
-        }
-
-        public cSpatialGrid SpatialGrid
-        {
-            get { return spatialGrid; }
         }
     }
 }

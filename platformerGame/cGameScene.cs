@@ -33,7 +33,7 @@ namespace platformerGame
 
         Camera camera;
 
-        EntityManager entityPool;
+        EntityPool entityPool;
 
         cParticleManager particleManager;
 
@@ -89,7 +89,7 @@ namespace platformerGame
 
             player = new cPlayer(this, playerStart);
 
-            entityPool = new EntityManager(this, gameWorld.WorldBounds.dims, player);
+            entityPool = new EntityPool(this, gameWorld.WorldBounds.dims, player);
             entityPool.InitLevelEntites(World.GetCurrentLevel());
 
             //vizekhez adunk fényt
@@ -340,7 +340,7 @@ namespace platformerGame
             }
         }
 
-        public EntityManager EntityPool
+        public EntityPool EntityPool
         {
             get { return entityPool; }
         }

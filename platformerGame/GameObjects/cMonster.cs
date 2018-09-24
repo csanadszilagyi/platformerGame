@@ -205,28 +205,28 @@ namespace platformerGame.GameObjects
                 );
 
             this.Scene.QueueAction(
-                () => {
+(Action)(() => {
 
-                    AssetManager.playSound("coin_drop1", 20);
+    AssetManager.playSound("coin_drop1", 20);
 
-                    ProbabilityRoll<int> numPickables = new ProbabilityRoll<int>();
+    ProbabilityRoll<int> numPickables = new ProbabilityRoll<int>();
                     numPickables.add(70, 2);
                     numPickables.add(30, 3);
 
                     int num = numPickables.roll();
                     for (int i = 0; i < num; ++i)
                     {
-                        pscene.EntityPool.AddPickup(
-                            new cPickupAble(
-                                this.Scene,
-                                this.Bounds.center,
-                                cAppMath.GetRandomUnitVec(), // emitDirection,
-                                PickupInfo.PickupType.COIN_GOLD
+        pscene.EntityPool.AddPickup(
+(cPickupAble)new cPickupAble(
+(cGameScene)this.Scene,
+(Vector2f)this.Bounds.center,
+(Vector2f)cAppMath.GetRandomUnitVec(), // emitDirection,
+(PickupInfo.PickupType)PickupInfo.PickupType.COIN_GOLD
                             )
                        );
 
                     }
-                }
+                })
                 /*
                 new platformerGame.GameCommands.comPlacePickup(
                     this.Scene,
