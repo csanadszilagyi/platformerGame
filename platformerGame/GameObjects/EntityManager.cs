@@ -90,7 +90,7 @@ namespace platformerGame.GameObjects
         public IEnumerable<cGameObject> getEntitiesNearby(Vector2f pos)
         {
             Vector2i gridPos = this.calcGridPos(pos);
-            return this.getInGridRect(gridPos.X-1, gridPos.Y-1, gridPos.X+1, gridPos.Y+1);
+            return this.getInGridRect(gridPos.X - 1, gridPos.Y - 1, gridPos.X + 1, gridPos.Y + 1);
         }
 
         public IEnumerable<cGameObject> getEntitiesInArea(AABB area)
@@ -153,7 +153,7 @@ namespace platformerGame.GameObjects
 
         public void Update(float step_time)
         {
-            
+
             // bullet collision checks
             checkBulletVsEntityCollisions(step_time);
 
@@ -165,7 +165,7 @@ namespace platformerGame.GameObjects
             {
                 cGameObject e = allEntities[i];
 
-                if(e.isActive())
+                if (e.isActive())
                 {
                     e.Update(step_time);
 
@@ -184,7 +184,7 @@ namespace platformerGame.GameObjects
                     i--;
                     eCount = allEntities.Count;
                 }
-                
+
             }
 
             // check if can interact / use / pickup
@@ -198,7 +198,7 @@ namespace platformerGame.GameObjects
                 cleanupTimer = 0;
             }
         }
-        
+
         public void GridAdd(cGameObject e)
         {
             List<cGameObject> list;
@@ -237,7 +237,7 @@ namespace platformerGame.GameObjects
                     e.CalculateViewPos(alpha);
                     yield return e;
                 }
-                        
+
             }
         }
 
@@ -248,7 +248,7 @@ namespace platformerGame.GameObjects
 
         public void RenderBullets(RenderTarget target)
         {
-            foreach(var b in this.visibleEntites.OfType<cBullet>())
+            foreach (var b in this.visibleEntites.OfType<cBullet>())
             {
                 b.Render(target);
             }
@@ -284,7 +284,7 @@ namespace platformerGame.GameObjects
                     continue;
 
                 // order by distance to find the closest
-                if (cSatCollision.checkAndResolve(bul,mon, time, false))
+                if (cSatCollision.checkAndResolve(bul, mon, time, false))
                 {
                     newDist = cAppMath.Vec2DistanceSqrt(mon.Bounds.center, pos_by);
 
@@ -306,7 +306,7 @@ namespace platformerGame.GameObjects
             // List<cMonster> collisionMonsters = new List<cMonster>();
             var bullets = this.allEntities.OfType<cBullet>();
 
-            foreach(var bullet in bullets)
+            foreach (var bullet in bullets)
             {
 
                 Vector2f intersection = new Vector2f(0.0f, 0.0f);
