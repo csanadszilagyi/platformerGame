@@ -145,6 +145,8 @@ namespace platformerGame
 
         public int[] getObjectsAtGridPos(int grid_x, int grid_y)
         {
+            Dictionary<int, int> gx;
+            
             return GetCellAtXY(grid_x, grid_y)?.getAll();
         }
 

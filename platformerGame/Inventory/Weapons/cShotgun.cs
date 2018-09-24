@@ -12,7 +12,7 @@ namespace platformerGame.Inventory.Weapons
 
         public cShotgun(cGameObject owner, int firing_frequency) : base(owner, firing_frequency)
         { 
-            this.spread = (float)cAppMath.DegressToRadian(4);
+            this.spread = (float)cAppMath.DegressToRadian(2);
             this.bulletsPerShot = 4;
         }
 

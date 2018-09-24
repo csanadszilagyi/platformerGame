@@ -161,11 +161,17 @@ namespace platformerGame
                 }
             }
 
-            
-            foreach(int key in keysToRemove)
+            if (keysToRemove.Count > 0)
             {
-                pickups.Remove(key);
+                this.pScene.QueueAction(() =>
+                {
+                    foreach (int key in keysToRemove)
+                    {
+                        pickups.Remove(key);
+                    }
+                });
             }
+           
             
 
             this.checkPlayerCanUseOrPickupOrInteract();
