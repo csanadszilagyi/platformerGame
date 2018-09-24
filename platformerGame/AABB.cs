@@ -102,8 +102,8 @@ namespace platformerGame
             FloatRect result = t.TransformRect(this.AsFloatRect());
             this.SetDims(new Vector2f(result.Width, result.Height));
             this.SetPosByTopLeft( new Vector2f(result.Left, result.Top));
-           
         }
+
         public FloatRect AsFloatRect()
         {
             return new FloatRect(topLeft, dims);

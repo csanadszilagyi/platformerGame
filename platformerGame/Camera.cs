@@ -23,9 +23,14 @@ namespace platformerGame
         public Vector2f Target;
 
         /// <summary>
+        /// If we want to move by offset, we can set here
+        /// </summary>
+        private Vector2f offset;
+
+        /// <summary>
         /// Toggle for smooth camera transition
         /// </summary>
-        public bool Smooth = true;
+        public bool Smooth = false;
 
         /// <summary>
         /// Smoothness determines how quickly the transition will take place. Higher smoothness will reach the target position faster.
@@ -73,9 +78,21 @@ namespace platformerGame
             ActualPosition = Target;
         }
 
+        public void SetOffset(Vector2f offset)
+        {
+            this.offset = offset;
+        }
+
+        /*
         public void Move(Vector2f offset)
         {
             ActualPosition += offset;
+        }
+        */
+
+        public static Vector2f nullVec()
+        {
+            return new Vector2f(0.0f, 0.0f);
         }
 
         public void Update(Vector2f target, AABB region_bounds, float step_time = Constants.STEP_TIME)
@@ -86,11 +103,11 @@ namespace platformerGame
             {
                 var dir = cAppMath.Vec2NormalizeReturn(Target - ActualPosition);
                 float len = (float)cAppMath.Vec2Distance(ActualPosition, Target);
-                ActualPosition += dir * (len * step_time * 5.0f);
+                ActualPosition += dir * (len * Smoothness);
             }
             else
             {
-                ActualPosition = Target;
+                ActualPosition = Target + ShakeScreen.Offset;
             }
 
             checkBounds(region_bounds);

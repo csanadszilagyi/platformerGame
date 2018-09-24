@@ -34,7 +34,7 @@ namespace platformerGame.Inventory.Weapons
                     owner.Scene.EntityPool.AddBullet(b);
                 }
                 
-                AssetManager.playSound("pistol", 3);
+                AssetManager.playSound("shotgun", 3);
 
             }
         }

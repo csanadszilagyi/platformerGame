@@ -144,6 +144,7 @@ namespace platformerGame
                 gameActions.Dequeue().Invoke();
             }
 
+           
             ShakeScreen.Update();
 
             player.Update(step_time);
@@ -159,8 +160,9 @@ namespace platformerGame
             */
 
             this.particleManager.Update(step_time);
-
+ 
             Vector2f playerCenter = player.Bounds.center;
+ 
             this.camera.Update(playerCenter, gameWorld.WorldBounds);
             // worldEnvironment.Update(step_time);
         }
@@ -184,7 +186,8 @@ namespace platformerGame
             var cameraBounds = camera.Bounds;
             //viewRect.SetPosByCenter(m_View.Center);
 
-            destination.GetView().Move(ShakeScreen.Offset);
+            
+            //destination.GetView().Move(ShakeScreen.Offset);
 
             // destination.SetView(m_View);
 
@@ -374,5 +377,9 @@ namespace platformerGame
             return cCollision.OverlapAABB(this.camera.Bounds, box);
         }
 
+        public Camera Camera
+        {
+            get { return this.camera; }
+        }
     }
 }
