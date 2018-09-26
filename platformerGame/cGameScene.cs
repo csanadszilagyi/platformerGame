@@ -340,6 +340,19 @@ namespace platformerGame
             }
         }
 
+        public override void HandleKeyPress(KeyEventArgs e)
+        {
+            if (e.Code == Keyboard.Key.P)
+            {
+                var spray = this.particleManager["sprays"] as cSprayController;
+                this.QueueAction(() =>
+                {
+                    spray.Emit(new EmissionInfo(this.GetMousePos()));
+                });
+                
+            }
+        }
+
         public EntityPool EntityPool
         {
             get { return entityPool; }

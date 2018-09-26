@@ -71,6 +71,7 @@ namespace platformerGame.Rendering
 
         public static AnimationInfo Get(string id)
         {
+            // @TODO: tryGetValue
             return framesContainer[id];
         }
     }

@@ -441,7 +441,7 @@ namespace platformerGame
             particle.Vel = obj.Velocity;
         }
 
-        public void collideParticleRayTrace(Particle p, float step_time)
+        public void collideParticleRayTrace(Particle p, float step_time, bool drag = true, bool killZero = true)
         {
             Vector2i posA = new Vector2i((int)p.LastPos.X, (int)p.LastPos.Y);
             Vector2i posB = new Vector2i((int)p.Pos.X, (int)p.Pos.Y);
@@ -460,11 +460,16 @@ namespace platformerGame
                        p.Pos = intersectionPoint;
                        p.LastPos = p.Pos;
                        //if we want to drag to the wall:
-                       p.Vel.X = 0.0f;
-                       p.Vel.Y = 0.0f;
+
+                       if(drag)
+                       {
+                           p.Vel.X = 0.0f;
+                           p.Vel.Y = 0.0f;
+                       }
 
                        p.Intersects = true;
-                       p.Life = 0.0f;
+
+                       p.Life = killZero ? 0.0f : p.Life;
                    }
 
                    return collided;

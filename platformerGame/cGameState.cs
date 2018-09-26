@@ -31,6 +31,9 @@ namespace platformerGame
         public abstract void Render(RenderTarget destination, float alpha);
 
         public abstract void HandleSingleMouseClick(SFML.Window.MouseButtonEventArgs e);
+
+        public abstract void HandleKeyPress(SFML.Window.KeyEventArgs e);
+
         /// <summary>
         /// Az állapot kilépésekor kell meghívni
         /// </summary>

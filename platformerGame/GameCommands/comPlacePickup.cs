@@ -16,7 +16,7 @@ namespace platformerGame.GameCommands
 
         public override void Execute()
         {
-            scene.EntityPool.AddPickup(item);
+            //scene.EntityPool.AddPickup(item);
         }
     }
 }

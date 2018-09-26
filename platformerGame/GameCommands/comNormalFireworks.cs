@@ -18,7 +18,7 @@ namespace platformerGame.GameCommands
 
         public override void Execute()
         {
-            scene.ParticleManager.Fireworks.NormalExplosion(new Particles.cEmissionInfo(pos));
+            //scene.ParticleManager.Fireworks.NormalExplosion(new Particles.cEmissionInfo(pos));
         }
     }
 }

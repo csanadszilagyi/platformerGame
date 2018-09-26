@@ -26,7 +26,7 @@ namespace platformerGame.Particles
         }
 
 
-        protected override void initParticle(cEmissionInfo emission)
+        protected override void initParticle(EmissionInfo emission)
         {
             Particle particle = emission.Particle;
 
@@ -56,7 +56,7 @@ namespace platformerGame.Particles
                                        //particle.m_SlowDown = (float)Math->GetRandomDoubleInRange(0.55, 0.7); //0.6f;
                                        //phs->AddForce( sf::Vector2f(Math->GetRandomClamped() * phs->MaxSpeed, Math->GetRandomClamped() * phs->MaxSpeed) );
 
-            Vector2u uSize = particleManager.ExplosionTexture.Size;
+            Vector2u uSize = this.renderStates.Texture.Size;
 
             particle.Scale = (float)cAppMath.GetRandomDoubleInRange(this.minScale, this.maxScale);
             particle.Dims = new Vector2f(uSize.X * particle.Scale, uSize.Y * particle.Scale);
@@ -75,7 +75,7 @@ namespace platformerGame.Particles
         /// </summary>
         /// <param name="position"></param>
         /// <param name="direction">Normalized vector of the emission direction</param>
-        public void LittleBlood(cEmissionInfo emission)
+        public void LittleBlood(EmissionInfo emission)
         {
             minScale = 0.2;
             maxScale = 0.4;
@@ -84,7 +84,7 @@ namespace platformerGame.Particles
             loopAddition(emission, 3);
         }
 
-        public void NormalBlood(cEmissionInfo emission)
+        public void NormalBlood(EmissionInfo emission)
         {
             minScale = 0.5; // 0.5
             maxScale = 0.8; // 0.8
@@ -160,7 +160,7 @@ namespace platformerGame.Particles
 
             float division = 2.0f;
 
-            Vector2u uSize = particleManager.ExplosionTexture.Size;
+            Vector2u uSize = this.renderStates.Texture.Size;
             float tsizeX = uSize.X;
             float tsizeY = uSize.Y;
 

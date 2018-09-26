@@ -385,6 +385,7 @@ namespace platformerGame
         {
             m_AppRunning = false;
         }
+
         private void OnKeyPressed(object sender, KeyEventArgs e)
         {
 
@@ -393,6 +394,9 @@ namespace platformerGame
 
             if (e.Code == Keyboard.Key.V)
                 toggleVSYNC();
+
+            m_CurrentState.HandleKeyPress(e);
+
         }
 
         private void OnMouseButtonPressed(object sender, MouseButtonEventArgs e)

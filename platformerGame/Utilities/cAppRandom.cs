@@ -61,5 +61,10 @@ namespace platformerGame.Utilities
         {
             return random.NextDouble();
         }
+
+        public static double GetRandomClamped()
+        {
+            return GetRandomDouble() - GetRandomDouble();
+        }
     }
 }

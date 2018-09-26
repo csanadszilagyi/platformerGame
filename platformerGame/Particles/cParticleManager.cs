@@ -20,21 +20,25 @@ namespace platformerGame.Particles
 
         readonly Texture explosionTexture;
         readonly Texture fireworksTexture;
+        readonly Texture smokeTexture;
 
-        cExplosionController explosions;
-        cFireworksController fireworks;
+        Dictionary<string, cBaseParticleController> systems;
 
         Text label;
 
         public cParticleManager(cGameScene scene)
         {
             this.scene = scene;
+            this.systems = new Dictionary<string, cBaseParticleController>();
 
+            // must be called before controller additions
             explosionTexture = AssetManager.GetTexture("simple_particle");
             fireworksTexture = AssetManager.GetTexture("bullet3");
+            smokeTexture = AssetManager.GetTexture("smoke_particle");
 
-            explosions = new cExplosionController(this);
-            fireworks = new cFireworksController(this);
+            this.systems.Add("explosions", new cExplosionController(this));
+            this.systems.Add("fireworks", new cFireworksController(this));
+            this.systems.Add("sprays", new cSprayController(this));
 
             label = new Text();
             label.Position = new Vector2f(20, 45);
@@ -48,23 +52,32 @@ namespace platformerGame.Particles
 
         public void Update(float step_time)
         {
-            fireworks.Update(step_time);
-            explosions.Update(step_time);
+            foreach (var item in systems)
+            {
+                cBaseParticleController c = item.Value;
+                c.Update(step_time);
+            }
         }
 
         public void PreRender(float alpha)
         {
             // if we want calculate viewPos before all renderings are started...
-            fireworks.BuildVertexBuffer(alpha);
-            explosions.BuildVertexBuffer(alpha);
+            foreach (var item in systems)
+            {
+                cBaseParticleController c = item.Value;
+                c.BuildVertexBuffer(alpha);
+            }
         }
 
         public void Render(RenderTarget destination, float alpha)
         {
             //label.DisplayedString = "Active explosion particles: " + explosions.NumActive.ToString();
             //destination.Draw(label);
-            fireworks.Render(destination, alpha);
-            explosions.Render(destination, alpha);
+            foreach (var item in systems)
+            {
+                cBaseParticleController c = item.Value;
+                c.Render(destination, alpha);
+            }
         }
 
         public Texture ExplosionTexture
@@ -77,19 +90,23 @@ namespace platformerGame.Particles
             get { return fireworksTexture; }
         }
 
+        public Texture SmokeTexture
+        {
+            get { return smokeTexture; }
+        }
+
         public cGameScene Scene
         {
             get { return scene; }
         }
 
-        public cExplosionController Explosions
+        public cBaseParticleController this[string key]
         {
-            get { return explosions; }
-        }
-
-        public cFireworksController Fireworks
-        {
-            get { return fireworks; }
+            get 
+            {
+                cBaseParticleController s;
+                return this.systems.TryGetValue(key, out s) ? s : null;
+            }
         }
     }
 }

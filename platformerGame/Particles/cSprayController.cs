@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Diagnostics;
 
 using SFML.System;
 using SFML.Graphics;
@@ -12,30 +11,30 @@ using platformerGame.Utilities;
 
 namespace platformerGame.Particles
 {
-    class cFireworksController : cBaseParticleController
+    class cSprayController : cBaseParticleController
     {
         double minScale = 0.3;
         double maxScale = 0.6;
 
-        public cFireworksController(cParticleManager manager, uint max_particles = 300) : base(manager, max_particles)
+        public cSprayController(cParticleManager manager, uint max_particles = 300) : base(manager, max_particles)
         {
-            this.renderStates.Texture = manager.FireworksTexture;
+            this.renderStates.Texture = manager.ExplosionTexture; // smoke
         }
 
-
-        protected override void initParticle(EmissionInfo emission)
+        private void empower(Particle particle)
         {
-            Particle particle = emission.Particle;
-
-            particle.Pos = emission.StartPosition;
+            particle.Pos = particle.StartPos;
             particle.LastPos = particle.Pos;
             particle.ViewPos = particle.Pos;
-            particle.MaxSpeed = cAppMath.GetRandomNumber(600, 800); //200,400 | 700, 900 | (400, 600); //3, 8//Math->GetRandomNumber(510, 800); // 2000.0f
+            particle.MaxSpeed = cAppMath.GetRandomNumber(40, 100); //200,400 | 700, 900 | (400, 600); //3, 8//Math->GetRandomNumber(510, 800); // 2000.0f
 
             //------------------------------------------------------------------------------------------------
             float angle = (float)cAppMath.DegressToRadian(cAppMath.GetRandomNumber(0, 360));//sDivisions * m_Angles;
 
-            particle.Vel = new Vector2f((float)Math.Cos(angle) * particle.MaxSpeed, (float)Math.Sin(angle) * particle.MaxSpeed);
+            Vector2f dirUnit = cAppMath.GetRandomUnitVec();
+                //cAppMath.GetRandomVecBySpread(new Vector2f(0.5f, -1.0f), cAppMath.DegressToRadian(3));
+
+            particle.Vel = dirUnit * particle.MaxSpeed;
             //------------------------------------------------------------------------------------------------
             //------------------------------------------------------------------------------------------------
 
@@ -50,27 +49,37 @@ namespace platformerGame.Particles
 
             particle.Dims = new Vector2f(uSize.X * particle.Scale, uSize.Y * particle.Scale);
 
-            particle.ScaleSpeed = -cAppMath.GetRandomNumber(10, 50);
-            particle.Color = Utils.GetRandomRedColor();
+            particle.ScaleSpeed = -cAppMath.GetRandomNumber(15, 40);
+            particle.Color = Utils.GetRandomColor(250, 250, 1, 160, 0, 0); // GetRandomRedColor();
             particle.Opacity = 255.0f;
-            particle.Life = 1.0f;
-            particle.Fade = 60; //Math->GetRandomNumber(100, 240);
+            particle.Life = 15.0f;
+            particle.Fade = cAppRandom.GetRandomNumber(100, 400);
 
             particle.Intersects = false;
         }
 
-        public void LittleExplosion(EmissionInfo emission)
+        private void reinit(Particle p)
         {
-            minScale = 0.2;
-            maxScale = 0.4;
-            loopAddition(emission, 3);
+            // Life hack..
+            float prevLife = p.Life;
+            this.empower(p);
+            p.Life = prevLife;
         }
 
-        public void NormalExplosion(EmissionInfo emission)
+        protected override void initParticle(EmissionInfo emission)
+        {
+            Particle particle = emission.Particle;
+            particle.StartPos = emission.StartPosition;
+            this.empower(particle);
+            
+        }
+
+        public void Emit(EmissionInfo emission)
         {
             minScale = 0.5;
-            maxScale = 0.8;
-            loopAddition(emission, 20);
+            maxScale = 0.9;
+            
+            loopAddition(emission, 40);
         }
 
         public override void Update(float step_time)
@@ -81,46 +90,42 @@ namespace platformerGame.Particles
             {
                 Particle p = pool.get(i);
 
-                if (!p.Intersects)
+                p.Vel.Y += (Constants.GRAVITY*30 * (step_time * step_time));
+
+                p.Vel.X *= p.SlowDown;
+                p.Vel.Y *= p.SlowDown;
+
+                cAppMath.Vec2Truncate(ref p.Vel, p.MaxSpeed);
+
+                world.collideParticleSAT(p, step_time);
+
+                //p.Heading = cAppMath.Vec2NormalizeReturn(p.Vel);
+                p.LastPos = p.Pos;
+                p.Pos.X += p.Vel.X * step_time;
+                p.Pos.Y += p.Vel.Y * step_time;
+
+
+
+                if (!cAppMath.Vec2IsZero(p.Vel))
                 {
-
-                    /*
-                       p.Dims.Y += p.ScaleSpeed * step_time; //+=
-                       p.Dims.y += p.ScaleSpeed * step_time; //+=
-                    */
-                    cAppMath.Vec2Truncate(ref p.Vel, p.MaxSpeed * 1.5f);
-
-
-                    p.Vel.Y += (Constants.GRAVITY * 40.0f * (step_time * step_time));
-
-                    p.Vel.X *= p.SlowDown;
-                    p.Vel.Y *= p.SlowDown;
-
-                    //p.Heading = cAppMath.Vec2NormalizeReturn(p.Vel);
-                    p.LastPos = p.Pos;
-                    p.Pos.X += p.Vel.X * step_time;
-                    p.Pos.Y += p.Vel.Y * step_time;
-
-
-
-                    if (!cAppMath.Vec2IsZero(p.Vel))
-                    {
-                        p.Heading = cAppMath.Vec2NormalizeReturn(p.Vel);
-                        p.Rotation = (float)cAppMath.GetAngleOfVector(p.Heading);
-                    }
-
-                    world.collideParticleRayTrace(p, step_time);
-
-
+                    p.Heading = cAppMath.Vec2NormalizeReturn(p.Vel);
+                    // p.Rotation = (float)cAppMath.GetAngleOfVector(p.Heading);
                 }
+
+                //world.collideParticleRayTrace(p, step_time, false, false);             
 
                 p.Opacity -= p.Fade * step_time;
 
                 if (p.Opacity <= 0.0f)
                 {
                     p.Opacity = 0.0f;
+                    p.Life -= 1.0f;
 
-                    pool.deactivate(i);
+                    if (p.Life <= 0.0f)
+                        pool.deactivate(i);
+                    else
+                        this.reinit(p);
+                    
 
                 }
 
@@ -166,17 +171,6 @@ namespace platformerGame.Particles
 
                 Vector2f v3Pos = new Vector2f(p.ViewPos.X - newDims.X,
                                               p.ViewPos.Y + newDims.Y);
-
-
-                // if want rotation included:
-                Transform rot = Transform.Identity;
-                rot.Rotate((float)cAppMath.RadianToDegress(p.Rotation), p.ViewPos);
-
-                v0Pos = rot.TransformPoint(v0Pos);
-                v1Pos = rot.TransformPoint(v1Pos);
-                v2Pos = rot.TransformPoint(v2Pos);
-                v3Pos = rot.TransformPoint(v3Pos);
-                // END of rotation code
 
                 // Top-left
                 Vertex v0 = new Vertex(

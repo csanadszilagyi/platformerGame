@@ -25,7 +25,7 @@ namespace platformerGame.Particles
             this.renderStates = new RenderStates(BlendMode.Add);
         }
 
-        protected void loopAddition(cEmissionInfo emission,  uint num_particles)
+        protected void loopAddition(EmissionInfo emission,  uint num_particles)
         {
             uint i = 0;
             while ((emission.Particle = pool.getNew()) != null && i < num_particles)
@@ -40,7 +40,7 @@ namespace platformerGame.Particles
             get { return pool.CountActive; }
         }
 
-        protected abstract void initParticle(cEmissionInfo emission);
+        protected abstract void initParticle(EmissionInfo emission);
 
         public abstract void Update(float step_time);
 
