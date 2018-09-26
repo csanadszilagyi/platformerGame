@@ -55,14 +55,14 @@ namespace platformerGame.GameObjects
             }
         }
 
-        private Vector2i calcGridPos(Vector2f world_pos)
+        public static Vector2i calcGridPos(Vector2f world_pos)
         {
             int x = (int)world_pos.X / ENTITY_GRID_SIZE;
             int y = (int)world_pos.Y / ENTITY_GRID_SIZE;
             return new Vector2i(x, y);
         }
 
-        private IEnumerable<cGameObject> getInGridRect(int startX, int startY, int endX, int endY)
+        private List<cGameObject> getInGridRect(int startX, int startY, int endX, int endY)
         {
             var pos = new Vector2i();
 
@@ -88,19 +88,19 @@ namespace platformerGame.GameObjects
 
         public IEnumerable<cGameObject> getEntitiesNearby(Vector2f pos)
         {
-            Vector2i gridPos = this.calcGridPos(pos);
+            Vector2i gridPos = calcGridPos(pos);
             return this.getInGridRect(gridPos.X - 1, gridPos.Y - 1, gridPos.X + 1, gridPos.Y + 1);
         }
 
-        public IEnumerable<cGameObject> getEntitiesInArea(AABB area)
+        public List<cGameObject> getEntitiesInArea(AABB area)
         {
-            FloatRect rect = area.AsFloatRect();
+            FloatRect areaRect = area.AsFloatRect();
 
             var overscan = ENTITY_OVERSCAN;
             var gridSize = ENTITY_GRID_SIZE;
 
-            rect = new FloatRect(rect.Left - overscan, rect.Top - overscan,
-                                 rect.Width + (overscan * 2), rect.Height + (overscan * 2));
+            FloatRect rect = new FloatRect(areaRect.Left - overscan, areaRect.Top - overscan,
+                                 areaRect.Width + (overscan * 2), areaRect.Height + (overscan * 2));
 
             var startX = (int)rect.Left / gridSize;
             var startY = (int)rect.Top / gridSize;
@@ -127,7 +127,7 @@ namespace platformerGame.GameObjects
 
         public void AddEntity(cGameObject e)
         {
-            e.GridCoordinate = this.calcGridPos(e.Bounds.center);
+            e.Create();
             this.allEntities.Add(e);
             this.GridAdd(e);
 
@@ -169,30 +169,35 @@ namespace platformerGame.GameObjects
                     e.Update(step_time);
 
                     var bounds = e.Bounds;
-                    newGridPos = this.calcGridPos(bounds.center);
+                    newGridPos = calcGridPos(bounds.center);
 
                     if (!e.GridCoordinate.Equals(newGridPos))
                     {
+                        GridRemove(e);
                         e.GridCoordinate = newGridPos;
                         GridAdd(e);
                     }
+
+                    continue;
                 }
-                else
-                {
-                    allEntities.RemoveAt(i);
-                    i--;
-                    eCount = allEntities.Count;
-                }
+
+                GridRemove(e);
+                allEntities.RemoveAt(i);
+                i--;
+                eCount = allEntities.Count;
+                
 
             }
 
             // check if can interact / use / pickup
             this.checkNearbyObjectsForPlayer();
 
-            // melee attacj handling
+            // melee attack handling
             var meleeEntities = this.getPossiblePlayerMeleeAttackers();
+
             foreach (var monster in meleeEntities)
             {
+                monster.Marked = true;
                 monster.attemptMeleeAttack(player);
             }
 
@@ -209,7 +214,7 @@ namespace platformerGame.GameObjects
         {
             List<cGameObject> list;
 
-            if (!entityGrid.TryGetValue(e.GridCoordinate, out list))
+            if (false == entityGrid.TryGetValue(e.GridCoordinate, out list))
             {
                 list = new List<cGameObject>();
                 list.Add(e);
@@ -225,8 +230,15 @@ namespace platformerGame.GameObjects
             List<cGameObject> list;
 
             if (entityGrid.TryGetValue(e.GridCoordinate, out list))
+            {
                 return list.Remove(e);
+            }
+               
 
+            #if DEBUG
+            System.Diagnostics.Debug.WriteLine(
+                    string.Format("Remove - FALSE"));
+            #endif
             return false;
         }
 
@@ -332,7 +344,7 @@ namespace platformerGame.GameObjects
 
         public IEnumerable<cMonster> getPossiblePlayerMeleeAttackers()
         {
-            return this.getEntitiesNearby(player.Bounds.center).OfType<cMonster>();
+            return this.getEntitiesInArea(player.Bounds).OfType<cMonster>();
         }
 
         /// <summary>

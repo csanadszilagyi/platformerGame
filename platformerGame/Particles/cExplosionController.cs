@@ -86,8 +86,8 @@ namespace platformerGame.Particles
 
         public void NormalBlood(cEmissionInfo emission)
         {
-            minScale = 0.5;
-            maxScale = 0.8;
+            minScale = 0.5; // 0.5
+            maxScale = 0.8; // 0.8
             minSpeed = 200;
             maxSpeed = 400;
             loopAddition(emission, 25);

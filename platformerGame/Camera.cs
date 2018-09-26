@@ -30,12 +30,12 @@ namespace platformerGame
         /// <summary>
         /// Toggle for smooth camera transition
         /// </summary>
-        public bool Smooth = false;
+        public bool Smooth = true;
 
         /// <summary>
         /// Smoothness determines how quickly the transition will take place. Higher smoothness will reach the target position faster.
         /// </summary>
-        public float Smoothness = 0.033f;
+        public float Smoothness = 0.166f; //0.033f;
 
         /// <summary>
         /// Toggle for automatic position rounding. Useful if pixel sizes become inconsistent or font blurring occurs.

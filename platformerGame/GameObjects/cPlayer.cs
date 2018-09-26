@@ -20,8 +20,8 @@ namespace platformerGame.GameObjects
             p_followLight.Color = new Color(240, 219, 164);
             this.Scene.LightMap.AddStaticLight(p_followLight);
 
-            this.weapon = // new cMachineGun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY);
-                new cShotgun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY); // 9
+            this.weapon = new cMachineGun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY);
+                // new cShotgun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY); // 9
 
             this.health = 50;
             healthText = new Text("", AssetManager.GetFont("pf_tempesta_seven"));

@@ -31,6 +31,11 @@ namespace platformerGame.GameObjects
         public float MaxSpeed { get; set; }
         public float SlowDown { get; set; }
 
+        /// <summary>
+        /// For Debug purposes.
+        /// </summary>
+        public bool Marked { get; set; }
+
         protected Vector2f viewSize;
         //protected cAABB boundingBox;
         
@@ -59,9 +64,10 @@ namespace platformerGame.GameObjects
             mass = 1.0f;
             movAble = true;
             hitCollisionRect = new AABB();
+            this.Marked = false;
             id = GetNextValidID();
-            
         }
+
         public cGameObject(cGameScene scene, Vector2f pos) : base()
         {
             pscene = scene;
@@ -78,7 +84,13 @@ namespace platformerGame.GameObjects
             mass = 1.0f;
             movAble = true;
             hitCollisionRect = new AABB();
+            this.Marked = false;
             id = GetNextValidID();
+        }
+
+        public void Create()
+        {
+            this.gridCoordinate = EntityPool.calcGridPos(this.Bounds.center);
         }
 
         protected static int GetNextValidID()

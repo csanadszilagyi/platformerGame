@@ -507,11 +507,12 @@ namespace platformerGame.GameObjects
             this.health -= amount;
         }
 
-        public virtual void MeleeHit(int amount, cGameObject enity_by)
+        public virtual void MeleeHit(int amount, cGameObject entity_by)
         {
-            this.health -= amount;
-            Vector2f towardsMe = cAppMath.Vec2NormalizeReturn(this.HitCollisionRect.center - enity_by.HitCollisionRect.center);
-            this.AddForce(towardsMe * 7000);
+            this.Hit(amount, entity_by);
+            Vector2f towardsMe = cAppMath.Vec2NormalizeReturn(this.HitCollisionRect.center - entity_by.HitCollisionRect.center);
+            this.force = towardsMe * 50000;
+            
         }
 
         public int Health
