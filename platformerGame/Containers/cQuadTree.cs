@@ -11,7 +11,7 @@ using platformerGame.Utilities;
 
 namespace platformerGame.Containers
 {
-    class cQuadTree<T> where T : cQuadTreeOccupant
+    class cQuadTree<T> where T : GridOccupant
     {
         public const int MAX_OBJECTS = 10;
         public const int MAX_LEVEL = 4;

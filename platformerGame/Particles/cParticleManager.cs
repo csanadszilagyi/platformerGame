@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using SFML.Graphics;
 using SFML.System;
+using platformerGame.App;
 
 namespace platformerGame.Particles
 {
@@ -16,7 +17,7 @@ namespace platformerGame.Particles
     /// </summary>
     class cParticleManager
     {
-        cGameScene scene;
+        GameScene sceneRef;
 
         readonly Texture explosionTexture;
         readonly Texture fireworksTexture;
@@ -26,9 +27,9 @@ namespace platformerGame.Particles
 
         Text label;
 
-        public cParticleManager(cGameScene scene)
+        public cParticleManager(GameScene scene)
         {
-            this.scene = scene;
+            this.sceneRef = scene;
             this.systems = new Dictionary<string, cBaseParticleController>();
 
             // must be called before controller additions
@@ -95,9 +96,9 @@ namespace platformerGame.Particles
             get { return smokeTexture; }
         }
 
-        public cGameScene Scene
+        public GameScene Scene
         {
-            get { return scene; }
+            get { return sceneRef; }
         }
 
         public cBaseParticleController this[string key]

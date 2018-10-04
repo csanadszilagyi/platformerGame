@@ -9,7 +9,7 @@ using SFML.System;
 using platformerGame.Utilities;
 using platformerGame.GameObjects.PickupInfo;
 using platformerGame.Rendering;
-using platformerGame.Containers;
+using platformerGame.App;
 
 namespace platformerGame.GameObjects
 {
@@ -37,7 +37,7 @@ namespace platformerGame.GameObjects
         /// <param name="grid"></param>
         /// <param name="pos"></param>
         /// <param name="emit_direction"></param>
-        public cPickupAble(cGameScene scene, Vector2f pos, Vector2f emit_direction, PickupType type = PickupType.UNKNOWN) : base(scene, pos)
+        public cPickupAble(GameScene scene, Vector2f pos, Vector2f emit_direction, PickupType type = PickupType.UNKNOWN) : base(scene, pos)
         {
             pickup = type == PickupType.UNKNOWN ? PickupEffects.getWeighted() : PickupEffects.get(type); 
             this.init(pos, emit_direction);

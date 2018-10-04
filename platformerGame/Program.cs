@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
+using platformerGame.App;
 
 namespace platformerGame
 {
@@ -14,12 +15,12 @@ namespace platformerGame
         {
             SfmlApp gameApp;
             
-            //try
-            //{
+            try
+            {
                 gameApp = new SfmlApp();
                 gameApp.Run();
-            //}
-            /*catch (Exception e)
+            }
+            catch (Exception e)
             {
                 StreamWriter sw = new StreamWriter("ErrorLog_" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt");
                 sw.WriteLine("Error created at " + DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss tt")); //yyyy/MM/dd HH:mm:ss:
@@ -28,7 +29,7 @@ namespace platformerGame
 
                 sw.WriteLine(e.StackTrace);
                 sw.Close();
-            }*/
+            }
         }
     }
 }

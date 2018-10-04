@@ -11,7 +11,7 @@ using System.Threading;
 
 using platformerGame.Utilities;
 
-namespace platformerGame
+namespace platformerGame.App
 {
     class SfmlApp
     {
@@ -20,7 +20,7 @@ namespace platformerGame
         cTimer          m_Timer;
         bool            m_AppRunning;
 
-        cGameState      m_CurrentState = null;
+        GameState      currentState = null;
         //cGameState      m_LastState = null;
 
         double m_DeltaTime;
@@ -80,7 +80,7 @@ namespace platformerGame
             m_FPS = 0.0;
 
             m_Timer = new cTimer();
-            //ChangeGameState( new cGameScene(this) );
+            //ChangeGameState( new GameScene(this) );
 
             fpsUpdater = new cRegulator();
             fpsUpdater.resetByPeriodTime(1.0f);
@@ -95,8 +95,10 @@ namespace platformerGame
 
             cGlobalClock.Start();
 
-            m_CurrentState = new cGameScene(this);
-            m_CurrentState.Enter();
+            // currentState = new GameScene(this);
+            // currentState.Enter();
+
+            this.ChangeGameState(new MainMenu(this));
 
             m_AppRunning = true;
 
@@ -121,19 +123,24 @@ namespace platformerGame
 
         private void _beforeUpdate()
         {
-            m_CurrentState.BeforeUpdate();
+            currentState.BeforeUpdate();
         }
 
-        private void _update(float step_time)
+        private void _updateFixed(float step_time)
         {
-            m_CurrentState.Update(step_time);
+            currentState.UpdateFixed(step_time);
+        }
+
+        private void _updateVariable(float step_time  = 1.0f)
+        {
+            currentState.UpdateVariable(step_time);
         }
 
         private void _render(float alpha)
         {
             mainWindow.Clear(clearColor);
 
-            m_CurrentState.Render(mainWindow, alpha);
+            currentState.Render(mainWindow, alpha);
 
 
 
@@ -190,7 +197,7 @@ namespace platformerGame
 
                 while (accu >= STEP)
                 {
-                    _update(FSTEP_TIME);
+                    _updateFixed(FSTEP_TIME);
                     accu -= STEP;
                 }
 
@@ -250,7 +257,7 @@ namespace platformerGame
 
                 while (next_game_tick < curTime && loops < MAX_FRAMESKIP)
                 {
-                    _update(STEP_TIME);
+                    _updateFixed(STEP_TIME);
 
                     next_game_tick += SKIP_TICKS;
                     loops++;
@@ -261,8 +268,6 @@ namespace platformerGame
 
                
                 _render(interpolation);
-                
-                
             }
         }
 
@@ -318,7 +323,7 @@ namespace platformerGame
                 while (acc >= stepTime)
                 {
                     mainWindow.DispatchEvents();
-                    _update(stepTime);
+                    _updateFixed(stepTime);
                     acc -= stepTime;
 
                     loops++;
@@ -331,6 +336,8 @@ namespace platformerGame
                     
                 }
 
+                _updateVariable();
+
                 alpha = acc / stepTime;
                 _render(alpha);
             }
@@ -340,7 +347,7 @@ namespace platformerGame
         public void _destroy()
         {
             AssetManager.Destroy();
-            m_CurrentState.Exit();
+            currentState.Exit();
             mainWindow.Close();
         }
         
@@ -364,14 +371,14 @@ namespace platformerGame
             get { return m_FPS; }
         }
 
-        public void ChangeGameState(cGameScene new_state)
+        public void ChangeGameState(GameState new_state)
         {
-            if(m_CurrentState != null)
-                m_CurrentState.Exit();
+            if(currentState != null)
+                currentState.Exit();
 
             //m_LastState = m_CurrentState;
-            m_CurrentState = new_state;
-            m_CurrentState.Enter();
+            currentState = new_state;
+            currentState.Enter();
         }
 
         private void OnResized(object sender, SizeEventArgs e)
@@ -388,20 +395,21 @@ namespace platformerGame
 
         private void OnKeyPressed(object sender, KeyEventArgs e)
         {
-
+            /*
             if (e.Code == Keyboard.Key.Escape)
                 m_AppRunning = false;
+            */
 
             if (e.Code == Keyboard.Key.V)
                 toggleVSYNC();
 
-            m_CurrentState.HandleKeyPress(e);
+            currentState.HandleKeyPress(e);
 
         }
 
         private void OnMouseButtonPressed(object sender, MouseButtonEventArgs e)
         {
-            m_CurrentState.HandleSingleMouseClick(e);
+            currentState.HandleSingleMouseClick(e);
         }
         
 
@@ -413,6 +421,11 @@ namespace platformerGame
         public Vector2f WindowSize
         {
             get { return windowSize; }
+        }
+
+        public void StartGame()
+        {
+            this.ChangeGameState(new GameScene(this));
         }
     }
 }

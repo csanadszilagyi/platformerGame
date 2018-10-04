@@ -11,13 +11,13 @@ using platformerGame.Particles;
 using platformerGame.Utilities;
 using platformerGame.Rendering;
 
-namespace platformerGame
+namespace platformerGame.App
 {
 
     /// <summary>
     /// Magát a belső játékot összefogó és megvalósító osztály
     /// </summary>
-    class cGameScene : cGameState
+    class GameScene : GameState
     {
         cWorld gameWorld;
 
@@ -29,10 +29,6 @@ namespace platformerGame
 
         cTimer levelTimer;
 
-        // AABB viewRect;
-
-        Camera camera;
-
         EntityPool entityPool;
 
         cParticleManager particleManager;
@@ -41,7 +37,7 @@ namespace platformerGame
 
         Queue<Action> gameActions;
 
-        public cGameScene(SfmlApp controller) : base(controller)
+        public GameScene(SfmlApp controller) : base(controller)
         {
             levelTimer = new cTimer();
         }
@@ -50,9 +46,10 @@ namespace platformerGame
         public override void Enter()
         {
             cAnimationAssets.LoadAnimations();
-            camera = new Camera(new View(new Vector2f(appController.WindowSize.X / 2.0f, appController.WindowSize.Y / 2.0f), appController.WindowSize));
+            camera = new Camera(new View(new Vector2f(appControllerRef.WindowSize.X / 2.0f, appControllerRef.WindowSize.Y / 2.0f), appControllerRef.WindowSize));
             camera.Zoom = 0.6f;
-            appController.MainWindow.SetView(camera.View);
+
+            appControllerRef.MainWindow.SetView(camera.View);
 
             /*
             Vector2f viewSize = new Vector2f(appController.MainWindow.Size.X, appController.MainWindow.Size.Y);
@@ -70,10 +67,10 @@ namespace platformerGame
 
             // Constants.LIGHTMAP_COLOR
             lightMap = new cLightSystem(Constants.LIGHTMAP_COLOR); //((uint)m_World.WorldBounds.dims.X, (uint)m_World.WorldBounds.dims.Y, Constants.LIGHTMAP_COLOR);
-            gameWorld = new cWorld(this, appController.MainWindow.Size);
+            gameWorld = new cWorld(this, appControllerRef.MainWindow.Size);
 
             //lightMap.Create((uint)m_World.WorldBounds.dims.X, (uint)m_World.WorldBounds.dims.Y);
-            lightMap.Create(appController.MainWindow.Size.X, appController.MainWindow.Size.Y);
+            lightMap.Create(appControllerRef.MainWindow.Size.X, appControllerRef.MainWindow.Size.Y);
 
             lightMap.loadLightsFromTmxMap(gameWorld.GetCurrentLevel().GetTmxMap());
 
@@ -133,7 +130,7 @@ namespace platformerGame
           
         }
 
-        public override void Update(float step_time)
+        public override void UpdateFixed(float step_time)
         {
             Listener.Position = new Vector3f(player.Bounds.center.X, player.Bounds.center.Y, 5.0f);
 
@@ -165,6 +162,11 @@ namespace platformerGame
  
             this.camera.Update(playerCenter, gameWorld.WorldBounds);
             // worldEnvironment.Update(step_time);
+        }
+
+        public override void UpdateVariable(float step_time = 1.0f)
+        {
+           
         }
 
         private void PreRender(RenderTarget destination, float alpha)
@@ -260,8 +262,11 @@ namespace platformerGame
 
         public override void Exit()
         {
+            cAnimationAssets.ClearAll();
             gameWorld.ClearAll();
             lightMap.RemoveAll();
+            // TODO: seperate asset loading
+            AssetManager.Destroy();
         }
 
         private void UpdatePlayerInput()
@@ -314,22 +319,6 @@ namespace platformerGame
                 player.StopMoving();//stop m_Player moving
         }
 
-        public Vector2f GetMousePosInWindow()
-        {
-            Vector2i m = SFML.Window.Mouse.GetPosition(appController.MainWindow);
-            Vector2f mf = appController.MainWindow.MapPixelToCoords(m);
-
-            return mf; // new Vector2f(m.X, m.Y);
-        }
-        public Vector2f GetMousePos()
-        {
-            Vector2i iMp = SFML.Window.Mouse.GetPosition(appController.MainWindow);
-
-            Vector2f mousePos = appController.MainWindow.MapPixelToCoords(iMp, camera.View);
-            
-            return mousePos;
-        }
-
         public override void HandleSingleMouseClick(MouseButtonEventArgs e)
         {
             Vector2f mousePos = this.GetMousePos();
@@ -342,6 +331,11 @@ namespace platformerGame
 
         public override void HandleKeyPress(KeyEventArgs e)
         {
+            if (e.Code == Keyboard.Key.Escape)
+            {
+                this.appControllerRef.ChangeGameState(new MainMenu(this.appControllerRef));
+            }
+
             if (e.Code == Keyboard.Key.P)
             {
                 var spray = this.particleManager["sprays"] as cSprayController;
@@ -390,11 +384,6 @@ namespace platformerGame
         public bool onScreen(AABB box)
         {
             return cCollision.OverlapAABB(this.camera.Bounds, box);
-        }
-
-        public Camera Camera
-        {
-            get { return this.camera; }
         }
     }
 }

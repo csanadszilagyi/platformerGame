@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace platformerGame.Containers
 {
-    class cQuadTreeOccupant
+    class GridOccupant
     {
         protected AABB bounds;
-        public cQuadTreeOccupant()
+        public GridOccupant()
         {
             bounds = new AABB(0, 0, 0, 0);
         }
 
-        public cQuadTreeOccupant(AABB _bounds)
+        public GridOccupant(AABB _bounds)
         {
             bounds = _bounds.ShallowCopy();
         }

@@ -3,15 +3,16 @@ using SFML.Graphics;
 
 using platformerGame.Utilities;
 using platformerGame.Containers;
+using platformerGame.App;
 
 namespace platformerGame.GameObjects
 {
-    class cGameObject : cQuadTreeOccupant, IDrawable
+    class cGameObject : GridOccupant, IDrawable
     {
         protected int id;
         protected static int m_NextValidID;
       
-        protected cGameScene pscene;
+        protected GameScene pscene;
 
         protected Vector2f position;
         protected Vector2f lastPosition;
@@ -68,7 +69,7 @@ namespace platformerGame.GameObjects
             id = GetNextValidID();
         }
 
-        public cGameObject(cGameScene scene, Vector2f pos) : base()
+        public cGameObject(GameScene scene, Vector2f pos) : base()
         {
             pscene = scene;
             position = pos;
@@ -114,7 +115,7 @@ namespace platformerGame.GameObjects
         {
             get { return id; }
         }
-        public cGameScene Scene
+        public GameScene Scene
         {
             get { return pscene; }
         }

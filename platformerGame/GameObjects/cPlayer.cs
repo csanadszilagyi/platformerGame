@@ -4,6 +4,7 @@ using SFML.System;
 using platformerGame.Inventory.Weapons;
 using platformerGame.Utilities;
 using platformerGame.GameObjects.PickupInfo;
+using platformerGame.App;
 
 namespace platformerGame.GameObjects
 {
@@ -12,10 +13,10 @@ namespace platformerGame.GameObjects
         cWeapon weapon;
         Text healthText;
 
-        public cPlayer(cGameScene scene, Vector2f pos) : base(scene, pos)
+        public cPlayer(GameScene scene, Vector2f pos) : base(scene, pos)
         {
             p_followLight = new cLight();
-            p_followLight.Radius = 80.0f;
+            p_followLight.Radius = 160.0f;
             p_followLight.LinearizeFactor = 0.9f;
             p_followLight.Color = new Color(240, 219, 164);
             this.Scene.LightMap.AddStaticLight(p_followLight);

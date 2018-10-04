@@ -8,6 +8,7 @@ using SFML.System;
 
 using platformerGame.Utilities;
 using platformerGame.Map;
+using platformerGame.App;
 
 namespace platformerGame.GameObjects
 {
@@ -30,7 +31,7 @@ namespace platformerGame.GameObjects
         protected float maxWalkSpeed;
 
 
-        public cCharacter(cGameScene scene, Vector2f pos) : base(scene, pos)
+        public cCharacter(GameScene scene, Vector2f pos) : base(scene, pos)
         {
             spriteControl = new cSpriteStateController();
             initSprites();

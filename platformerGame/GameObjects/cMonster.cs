@@ -8,6 +8,8 @@ using SFML.System;
 
 using platformerGame.Utilities;
 using platformerGame.Particles;
+using platformerGame.App;
+
 namespace platformerGame.GameObjects
 {
     class cMonster : cCharacter
@@ -21,7 +23,7 @@ namespace platformerGame.GameObjects
         bool attacking;
         cRegulator attackCharger;
 
-        public cMonster(cGameScene scene, Vector2f pos) : base(scene, pos)
+        public cMonster(GameScene scene, Vector2f pos) : base(scene, pos)
         {
 
             p_followLight = new cLight();

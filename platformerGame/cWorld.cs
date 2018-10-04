@@ -12,6 +12,7 @@ using SFML.Window;
 using platformerGame.Utilities;
 using platformerGame.GameObjects;
 using platformerGame.Map;
+using platformerGame.App;
 
 namespace platformerGame
 {
@@ -102,14 +103,14 @@ namespace platformerGame
         public AABB levelEndRegion;
 
 
-        cGameScene pScene;
+        GameScene sceneRef;
 
 
         cTileMapRenderer mapRenderer;
 
-        public cWorld(cGameScene p_scene, Vector2u window_size)
+        public cWorld(GameScene p_scene, Vector2u window_size)
         {
-            pScene = p_scene;
+            sceneRef = p_scene;
             windowSize = window_size;
 
 

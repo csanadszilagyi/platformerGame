@@ -11,6 +11,7 @@ using SFML.System;
 using platformerGame.Utilities;
 using platformerGame.Map;
 using tileLoader;
+using platformerGame.App;
 
 namespace platformerGame.GameObjects
 {
@@ -19,7 +20,7 @@ namespace platformerGame.GameObjects
         const int ENTITY_GRID_SIZE = 64;
         const int ENTITY_OVERSCAN = 64;
 
-        cGameScene pScene;
+        GameScene pScene;
 
         List<cGameObject> allEntities;
         List<cGameObject> visibleEntites; // on screen
@@ -31,7 +32,7 @@ namespace platformerGame.GameObjects
 
         private float cleanupTimer = 0.0f;
 
-        public EntityPool(cGameScene scene, Vector2f world_size, cPlayer player)
+        public EntityPool(GameScene scene, Vector2f world_size, cPlayer player)
         {
             this.pScene = scene;
             this.worldSize = world_size;
