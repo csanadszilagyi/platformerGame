@@ -194,7 +194,7 @@ namespace platformerGame.GameObjects
 
             Vector2f emitDirection = cAppMath.Vec2NormalizeReturn(by.Velocity);
 
-            //ShakeScreen.Init(this.pscene.Camera.ActualPosition);
+            ShakeScreen.Init(this.pscene.Camera.ActualPosition);
             ShakeScreen.StartShake();
 
             this.Scene.QueueAction(() =>

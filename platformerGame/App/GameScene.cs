@@ -166,7 +166,8 @@ namespace platformerGame.App
 
             Vector2f playerCenter = player.Bounds.center;
  
-            this.camera.Update(playerCenter, gameWorld.WorldBounds);
+            this.camera.Update(playerCenter + ShakeScreen.Offset, gameWorld.WorldBounds);
+            
             // worldEnvironment.Update(step_time);
         }
 
