@@ -36,7 +36,7 @@ namespace platformerGame.GameObjects
         {
             base.initSprites();
 
-            IntRect viewRect = Constants.CHAR_VIEW_RECT;
+            MyIntRect viewRect = Constants.CHAR_VIEW_RECT;
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.STAND, HorizontalFacing.FACING_LEFT),
                                          AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),

@@ -107,12 +107,12 @@ namespace platformerGame.GameObjects.PickupInfo
             */
             pickupTypes = new Dictionary<PickupType, cPickupInfo>()
             {
-               [PickupType.HEALTH] = new cPickupInfo(PickupType.HEALTH, new cSpriteRenderer("pickups", new IntRect(0, 0, 24, 24)), new Vector2f(16, 22), AddHealth),
-               [PickupType.ARMOR] = new cPickupInfo(PickupType.ARMOR, new cSpriteRenderer("pickups", new IntRect(0, 24, 24, 24)), new Vector2f(16, 22), AddArmor),
-               [PickupType.AMMO] = new cPickupInfo(PickupType.AMMO, new cSpriteRenderer("pickups", new IntRect(24, 0, 24, 24)), new Vector2f(16, 22), AddAmmo),
-               [PickupType.COIN_GOLD] = new cPickupInfo(PickupType.COIN_GOLD, new cAnimatedSpriteRenderer("coins-gold", new IntRect(0, 0, 16, 16)), new Vector2f(16, 16), AddCoin),
-               [PickupType.COIN_SILVER] = new cPickupInfo(PickupType.COIN_SILVER, new cAnimatedSpriteRenderer("coins-silver", new IntRect(0, 0, 16, 16)), new Vector2f(16, 16), AddCoin),
-               [PickupType.COIN_IRON] = new cPickupInfo(PickupType.COIN_IRON, new cAnimatedSpriteRenderer("coins-copper", new IntRect(0, 0, 16, 16)), new Vector2f(16, 16), AddCoin)
+               [PickupType.HEALTH] = new cPickupInfo(PickupType.HEALTH, new cSpriteRenderer("pickups", new MyIntRect(0, 0, 24, 24)), new Vector2f(16, 22), AddHealth),
+               [PickupType.ARMOR] = new cPickupInfo(PickupType.ARMOR, new cSpriteRenderer("pickups", new MyIntRect(0, 24, 24, 24)), new Vector2f(16, 22), AddArmor),
+               [PickupType.AMMO] = new cPickupInfo(PickupType.AMMO, new cSpriteRenderer("pickups", new MyIntRect(24, 0, 24, 24)), new Vector2f(16, 22), AddAmmo),
+               [PickupType.COIN_GOLD] = new cPickupInfo(PickupType.COIN_GOLD, new cAnimatedSpriteRenderer("coins-gold", new MyIntRect(0, 0, 16, 16), true), new Vector2f(16, 16), AddCoin),
+               [PickupType.COIN_SILVER] = new cPickupInfo(PickupType.COIN_SILVER, new cAnimatedSpriteRenderer("coins-silver", new MyIntRect(0, 0, 16, 16), true), new Vector2f(16, 16), AddCoin),
+               [PickupType.COIN_IRON] = new cPickupInfo(PickupType.COIN_IRON, new cAnimatedSpriteRenderer("coins-copper", new MyIntRect(0, 0, 16, 16), true), new Vector2f(16, 16), AddCoin)
             };
 
             pickupProbabilityTable = new Tuple<int, PickupType>[4]
@@ -155,6 +155,7 @@ namespace platformerGame.GameObjects.PickupInfo
         private static void AddCoin(cPlayer player)
         {
             AssetManager.playSound("coin_pickup1", 10);
+            // TODO: player.Money += 1;
         }
     }
 }

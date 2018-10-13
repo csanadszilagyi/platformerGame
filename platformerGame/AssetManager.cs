@@ -13,6 +13,13 @@ using platformerGame.Utilities;
 
 namespace platformerGame
 {
+    class Assets
+    {
+        List<string> textureNames;
+        List<string> fontNames;
+        List<string> soundNames;
+    }
+
     class AssetManager
     {
         public const string ROOT_PATH = "Resources/";
@@ -146,10 +153,11 @@ namespace platformerGame
             sounds.RemoveAll(snd => snd.Status != SoundStatus.Playing);
         }
 
-        public static void Destroy()
+        public static void ClearAll()
         {
             textures.Clear();
             fonts.Clear();
+            soundBuffers.Clear();
             sounds.Clear();
         }
 

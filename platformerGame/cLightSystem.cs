@@ -215,7 +215,7 @@ namespace platformerGame
             DrawingBase.DrawTextureSimple( destination, 
                                                 viewRect.topLeft, 
                                                 staticLightTexture.Texture, 
-                                                new IntRect(0, 0, (int)this.staticLightTexture.Size.X, (int)this.staticLightTexture.Size.Y),
+                                                new MyIntRect(0, 0, (int)this.staticLightTexture.Size.X, (int)this.staticLightTexture.Size.Y),
                                                //new IntRect((int)view_rect.topLeft.X, (int)view_rect.topLeft.Y,
                                                 //            (int)view_rect.dims.X, (int)view_rect.dims.Y),
                                                 Color.White,

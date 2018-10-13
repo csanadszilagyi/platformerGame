@@ -227,7 +227,7 @@ namespace platformerGame.Particles
         public override void Render(RenderTarget destination, float alpha)
         {
             if (this.pool.CountActive > 0)
-                DrawingBase.DrawTextureSimple(destination, this.pool.get(0).StartPos, this.renderStates.Texture, new IntRect(), Color.Yellow, BlendMode.Alpha);
+                DrawingBase.DrawTextureSimple(destination, this.pool.get(0).StartPos, this.renderStates.Texture, new MyIntRect(), Color.Yellow, BlendMode.Alpha);
             destination.Draw(vertices, renderStates);
         }
     }

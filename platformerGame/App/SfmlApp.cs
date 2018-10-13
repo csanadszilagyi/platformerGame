@@ -20,6 +20,8 @@ namespace platformerGame.App
         cTimer          m_Timer;
         bool            m_AppRunning;
 
+        Dictionary<string, GameState> definiedStates = new Dictionary<string, GameState>();
+        
         GameState      currentState = null;
         //cGameState      m_LastState = null;
 
@@ -98,7 +100,11 @@ namespace platformerGame.App
             // currentState = new GameScene(this);
             // currentState.Enter();
 
-            this.ChangeGameState(new MainMenu(this));
+            GameScene scene = new GameScene(this);
+            definiedStates.Add("main-menu", new MainMenu(this));
+            definiedStates.Add("game-scene", scene);
+
+            this.ChangeGameState("main-menu");
 
             m_AppRunning = true;
 
@@ -346,7 +352,7 @@ namespace platformerGame.App
 
         public void _destroy()
         {
-            AssetManager.Destroy();
+            AssetManager.ClearAll();
             currentState.Exit();
             mainWindow.Close();
         }
@@ -363,6 +369,7 @@ namespace platformerGame.App
         /// </summary>
         public void CloseApp()
         {
+            currentState.Exit();
             m_AppRunning = false;
         }
 
@@ -371,14 +378,22 @@ namespace platformerGame.App
             get { return m_FPS; }
         }
 
-        public void ChangeGameState(GameState new_state)
+        public void ChangeGameState(string new_state)
         {
-            if(currentState != null)
-                currentState.Exit();
 
-            //m_LastState = m_CurrentState;
-            currentState = new_state;
-            currentState.Enter();
+            GameState desired;
+            if(definiedStates.TryGetValue(new_state, out desired))
+            {
+                if (currentState != null)
+                {
+                   currentState.Exit();
+                }
+                   
+                currentState = desired;
+                currentState.Enter();
+            }
+
+            
         }
 
         private void OnResized(object sender, SizeEventArgs e)
@@ -390,7 +405,7 @@ namespace platformerGame.App
 
         private void OnClosed(object sender, EventArgs e)
         {
-            m_AppRunning = false;
+            this.CloseApp();
         }
 
         private void OnKeyPressed(object sender, KeyEventArgs e)
@@ -425,7 +440,7 @@ namespace platformerGame.App
 
         public void StartGame()
         {
-            this.ChangeGameState(new GameScene(this));
+            this.ChangeGameState("game-scene");
         }
     }
 }

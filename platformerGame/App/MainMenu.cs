@@ -193,8 +193,15 @@ namespace platformerGame.App
 
         public void Create()
         {
+            var b = this.camera.Bounds;
+            int buttonWidth = 180;
+            int buttonHeight = 40;
+
+            // centering the button
+            float left = b.halfDims.X - buttonWidth / 2.0f;
+
             this.connectItems("home", new[] {
-                new Button(this, new AABB(200,200,180,40), "Play") {
+                new Button(this, new AABB(left, 400, buttonWidth, buttonHeight), "Play") {
                                
                                OnClick = (MouseButtonEventArgs e) =>
                                {
@@ -202,10 +209,11 @@ namespace platformerGame.App
                                    this.appControllerRef.StartGame();
                                }
                 },
-                new Button(this, new AABB(200,300,180,40), "Exit") {
+                new Button(this, new AABB(left, 480, buttonWidth, buttonHeight), "Exit") {
                                
                                OnClick = (MouseButtonEventArgs e) =>
                                {
+                                   this.Exit();
                                    this.appControllerRef.CloseApp();
                                }
                 }

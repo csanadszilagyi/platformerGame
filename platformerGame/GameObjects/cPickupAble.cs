@@ -82,7 +82,7 @@ namespace platformerGame.GameObjects
                 // colliding tiles from other direction according to this condition
                 if (velocity.X > 0.0f)
                 {
-                    for (int i = 0; i < wallsPossibleColliding.Count; i++)
+                    for (int i = 0; i < wallsPossibleColliding.Count; ++i)
                     {
                         cGameObject wallObject = cGameObject.MakeWall(wallsPossibleColliding[i]);
                         if (cSatCollision.checkAndResolve(this, wallObject, step_time, true))
@@ -94,7 +94,7 @@ namespace platformerGame.GameObjects
                 else
                 {
                     // we have to iterate from "end" to the "start" in order to have the last colliding block below us
-                    for (int i = wallsPossibleColliding.Count-1; i >= 0; i--)
+                    for (int i = wallsPossibleColliding.Count-1; i >= 0; --i)
                     {
                         cGameObject wallObject = cGameObject.MakeWall(wallsPossibleColliding[i]);
                         if (cSatCollision.checkAndResolve(this, wallObject, step_time, true))
@@ -110,6 +110,7 @@ namespace platformerGame.GameObjects
         public override void Update(float step_time)
         {
             this.renderer.Update(step_time);
+
             cPlayer player = Scene.Player;
             if (this.pulling)
             {

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using SFML.System;
 using SFML.Graphics;
+using platformerGame.Utilities;
 
 namespace platformerGame
 {
@@ -14,8 +14,8 @@ namespace platformerGame
         public Vector2f topLeft;
         public Vector2f rightBottom;
         public Vector2f center;
-        public Vector2f dims;        //full (not half) width and height
-        public Vector2f halfDims;
+        public Vector2f dims;           // full (not half) width and height
+        public Vector2f halfDims;       // half width and height
 
         
         public AABB()
@@ -99,17 +99,28 @@ namespace platformerGame
         {
             Transform t = Transform.Identity;
             t.Scale(factors, relative_to);
-            FloatRect result = t.TransformRect(this.AsFloatRect());
+            FloatRect result = t.TransformRect(this.AsSfmlFloatRect());
             this.SetDims(new Vector2f(result.Width, result.Height));
             this.SetPosByTopLeft( new Vector2f(result.Left, result.Top));
         }
 
-        public FloatRect AsFloatRect()
+        public MyFloatRect AsMyFloatRect()
         {
+            return new MyFloatRect(topLeft.X, topLeft.Y, dims.X, dims.Y);
+        }
+
+        public MyIntRect AsMyIntRect()
+        {
+            return new MyIntRect((int)topLeft.X, (int)topLeft.Y, (int)dims.X, (int)dims.Y);
+        }
+
+        public FloatRect AsSfmlFloatRect()
+        {
+            
             return new FloatRect(topLeft, dims);
         }
 
-        public IntRect AsIntRect()
+        public IntRect AsSfmlIntRect()
         {
             return new IntRect((int)topLeft.X, (int)topLeft.Y, (int)dims.X, (int)dims.Y);
         }

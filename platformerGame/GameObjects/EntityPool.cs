@@ -87,7 +87,17 @@ namespace platformerGame.GameObjects
             return returner;
         }
 
-        public IEnumerable<cGameObject> getEntitiesNearby(Vector2f pos)
+        public List<cGameObject> getEntitiesInRadius(Vector2f centre, float radius)
+        {
+            float sideLen = 2.0f * radius;
+            AABB circleBoundRect = new AABB();
+            circleBoundRect.SetDims(new Vector2f(sideLen, sideLen));
+            circleBoundRect.SetPosByCenter(centre);
+
+            return getEntitiesInArea(circleBoundRect);
+        }
+
+        public List<cGameObject> getEntitiesNearby(Vector2f pos)
         {
             Vector2i gridPos = calcGridPos(pos);
             return this.getInGridRect(gridPos.X - 1, gridPos.Y - 1, gridPos.X + 1, gridPos.Y + 1);
@@ -95,7 +105,7 @@ namespace platformerGame.GameObjects
 
         public List<cGameObject> getEntitiesInArea(AABB area)
         {
-            FloatRect areaRect = area.AsFloatRect();
+            FloatRect areaRect = area.AsSfmlFloatRect();
 
             var overscan = ENTITY_OVERSCAN;
             var gridSize = ENTITY_GRID_SIZE;

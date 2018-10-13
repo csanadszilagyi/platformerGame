@@ -9,6 +9,8 @@ using SFML.System;
 using platformerGame.Utilities;
 using platformerGame.Particles;
 using platformerGame.App;
+using platformerGame.Rendering;
+using platformerGame.Effects;
 
 namespace platformerGame.GameObjects
 {
@@ -53,7 +55,7 @@ namespace platformerGame.GameObjects
         {
             base.initSprites();
 
-            IntRect viewRect = Constants.CHAR_VIEW_RECT;
+            MyIntRect viewRect = Constants.CHAR_VIEW_RECT;
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.STAND, HorizontalFacing.FACING_LEFT),
                                             AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
@@ -195,39 +197,43 @@ namespace platformerGame.GameObjects
             // ShakeScreen.Init(this.pscene.Camera.ActualPosition);
             // ShakeScreen.StartShake();
 
-            this.Scene.QueueAction(
-                () =>
-                    {
-                        AssetManager.playSound("blood_hit2", 25, this.position);
-                        //pscene.ParticleManager.Fireworks.NormalExplosion(new Particles.cEmissionInfo(this.Bounds.center, emitDirection));
-                        var e = pscene.ParticleManager["explosions"] as cExplosionController;
-                        e.NormalBlood(new Particles.EmissionInfo(this.Bounds.center, emitDirection));
+            this.Scene.QueueAction(() =>
+                {
+                    AssetManager.playSound("blood_hit2", 25, this.position);
+                    //pscene.ParticleManager.Fireworks.NormalExplosion(new Particles.cEmissionInfo(this.Bounds.center, emitDirection));
+                    var e = pscene.ParticleManager["explosions"] as cExplosionController;
+                    e.NormalBlood(new Particles.EmissionInfo(this.Bounds.center, emitDirection));
 
-                    }
-                //new GameCommands.comNormalBloodExplosion(this.Scene, new Particles.cEmissionInfo(this.Bounds.center, emitDirection))
-                );
+                    float gy = this.Bounds.rightBottom.Y;
 
-        this.Scene.QueueAction(() =>
-        {
+                    // pscene.Effects.PlaceGround(this.Bounds.center.X, gy, "side-explosion1");
+                    pscene.Effects.Place(this.bounds.center, "simple-explosion2");
 
-            AssetManager.playSound("coin_drop1", 20);
+                }
+                
+            );
 
-            ProbabilityRoll<int> numPickables = new ProbabilityRoll<int>();
-            numPickables.add(70, 2);
-            numPickables.add(30, 3);
-
-            int num = numPickables.roll();
-            for (int i = 0; i < num; ++i)
+            this.Scene.QueueAction(() =>
             {
-                pscene.EntityPool.AddPickup(
-                                    new cPickupAble(
-                                            this.Scene,
-                                            this.Bounds.center,
-                                            cAppMath.GetRandomUnitVec(), // emitDirection,
-                                            PickupInfo.PickupType.COIN_GOLD)
-                );
-            }
-        });
+
+                AssetManager.playSound("coin_drop1", 20);
+
+                ProbabilityRoll<int> numPickables = new ProbabilityRoll<int>();
+                numPickables.add(70, 2);
+                numPickables.add(30, 3);
+
+                int num = numPickables.roll();
+                for (int i = 0; i < num; ++i)
+                {
+                    pscene.EntityPool.AddPickup(
+                                        new cPickupAble(
+                                                this.Scene,
+                                                this.Bounds.center,
+                                                cAppMath.GetRandomUnitVec(), // emitDirection,
+                                                PickupInfo.PickupType.COIN_GOLD)
+                    );
+                }
+            });
                 /*
                 new platformerGame.GameCommands.comPlacePickup(
                     this.Scene,
@@ -253,12 +259,12 @@ namespace platformerGame.GameObjects
             Vector2f intersectionPoint = new Vector2f(0.0f, 0.0f);
 
             cAppMath.Raytrace(posA.X, posA.Y, posB.X, posB.Y, new VisitMethod(
-                (int x, int y) =>
-                {
-                    playerHiddenForMe = this.pscene.World.IsObastacleAtPos(new Vector2f(x, y));
+                    (int x, int y) =>
+                    {
+                        playerHiddenForMe = this.pscene.World.IsObastacleAtPos(new Vector2f(x, y));
 
-                    return playerHiddenForMe;
-                }
+                        return playerHiddenForMe;
+                    }
                 )
             );
 

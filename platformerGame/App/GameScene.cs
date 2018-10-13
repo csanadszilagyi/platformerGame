@@ -10,6 +10,7 @@ using platformerGame.GameObjects;
 using platformerGame.Particles;
 using platformerGame.Utilities;
 using platformerGame.Rendering;
+using platformerGame.Effects;
 
 namespace platformerGame.App
 {
@@ -33,6 +34,8 @@ namespace platformerGame.App
 
         cParticleManager particleManager;
 
+        EffectSystem effectSystem;
+
         RenderTexture staticTexture;
 
         Queue<Action> gameActions;
@@ -45,6 +48,7 @@ namespace platformerGame.App
        
         public override void Enter()
         {
+            // AssetManager.LoadResources();
             cAnimationAssets.LoadAnimations();
             camera = new Camera(new View(new Vector2f(appControllerRef.WindowSize.X / 2.0f, appControllerRef.WindowSize.Y / 2.0f), appControllerRef.WindowSize));
             camera.Zoom = 0.6f;
@@ -109,6 +113,7 @@ namespace platformerGame.App
             */
 
             this.particleManager = new cParticleManager(this);
+            this.effectSystem = new EffectSystem();
             // lightMap.renderStaticLightsToTexture();
 
             gameActions = new Queue<Action>(50);
@@ -157,7 +162,8 @@ namespace platformerGame.App
             */
 
             this.particleManager.Update(step_time);
- 
+            effectSystem.Update();
+
             Vector2f playerCenter = player.Bounds.center;
  
             this.camera.Update(playerCenter, gameWorld.WorldBounds);
@@ -166,7 +172,7 @@ namespace platformerGame.App
 
         public override void UpdateVariable(float step_time = 1.0f)
         {
-           
+            
         }
 
         private void PreRender(RenderTarget destination, float alpha)
@@ -226,15 +232,15 @@ namespace platformerGame.App
             this.entityPool.Render(destination);
             
             
-
+            /*
             DrawingBase.DrawTextureSimple( destination,
                                                 cameraBounds.topLeft,
                                                 this.staticTexture.Texture,
-                                                new IntRect((int)cameraBounds.topLeft.X, (int)cameraBounds.topLeft.Y,
-                                                            (int)cameraBounds.dims.X, (int)cameraBounds.dims.Y),
+                                                camera.Bounds.AsMyIntRect(),
                                                 Color.White,
                                                 BlendMode.Add);
 
+            */
 
             this.lightMap.Render(destination, cameraBounds);
 
@@ -244,7 +250,7 @@ namespace platformerGame.App
 
             this.particleManager.Render(destination, alpha);
 
-          
+            this.effectSystem.Render(destination);
 
             /*
 #if DEBUG
@@ -266,7 +272,7 @@ namespace platformerGame.App
             gameWorld.ClearAll();
             lightMap.RemoveAll();
             // TODO: seperate asset loading
-            AssetManager.Destroy();
+            AssetManager.ClearAll();
         }
 
         private void UpdatePlayerInput()
@@ -333,7 +339,7 @@ namespace platformerGame.App
         {
             if (e.Code == Keyboard.Key.Escape)
             {
-                this.appControllerRef.ChangeGameState(new MainMenu(this.appControllerRef));
+                this.appControllerRef.ChangeGameState("main-menu");
             }
 
             if (e.Code == Keyboard.Key.P)
@@ -374,6 +380,11 @@ namespace platformerGame.App
         public cParticleManager ParticleManager
         {
             get { return this.particleManager; }
+        }
+
+        public EffectSystem Effects
+        {
+            get { return this.effectSystem; }
         }
 
         public void QueueAction(Action action)

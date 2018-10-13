@@ -176,7 +176,7 @@ namespace platformerGame.Containers
             List<T> returnEntities = new List<T>();
             List<T> childReturnEntities = new List<T>();
 
-            FloatRect boundsRect = bounds.AsFloatRect();
+            FloatRect boundsRect = bounds.AsSfmlFloatRect();
 
             if (entities.Count > 0)
             {
