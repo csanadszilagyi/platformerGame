@@ -194,8 +194,8 @@ namespace platformerGame.GameObjects
 
             Vector2f emitDirection = cAppMath.Vec2NormalizeReturn(by.Velocity);
 
-            // ShakeScreen.Init(this.pscene.Camera.ActualPosition);
-            // ShakeScreen.StartShake();
+            //ShakeScreen.Init(this.pscene.Camera.ActualPosition);
+            ShakeScreen.StartShake();
 
             this.Scene.QueueAction(() =>
                 {
@@ -204,7 +204,7 @@ namespace platformerGame.GameObjects
                     var e = pscene.ParticleManager["explosions"] as cExplosionController;
                     e.NormalBlood(new Particles.EmissionInfo(this.Bounds.center, emitDirection));
 
-                    float gy = this.Bounds.rightBottom.Y;
+                    float gy = this.Bounds.rightBottom.Y; // ground y
 
                     // pscene.Effects.PlaceGround(this.Bounds.center.X, gy, "side-explosion1");
                     pscene.Effects.Place(this.bounds.center, "simple-explosion2");
