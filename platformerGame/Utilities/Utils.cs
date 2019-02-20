@@ -17,6 +17,12 @@ namespace platformerGame.Utilities
             return c;
         }
         //==========================================================================================================
+        public static Color GetRandomOrangeColor()
+        {
+            Color c = GetRandomColor(220, 255, 130, 160, 50, 70); // (160, 255, 20, 80, 20, 80);
+            return c;
+        }
+        //==========================================================================================================
         public static Color GetRandomGreenColor()
         {
             Color c = GetRandomColor(20, 100, 160, 255, 20, 100);
@@ -33,9 +39,9 @@ namespace platformerGame.Utilities
         {
             Color c = new Color();
 
-            c.R = cAppMath.GetRandomByte(minR, maxR);
-            c.G = cAppMath.GetRandomByte(minG, maxG);
-            c.B = cAppMath.GetRandomByte(minB, maxB);
+            c.R = AppMath.GetRandomByte(minR, maxR);
+            c.G = AppMath.GetRandomByte(minG, maxG);
+            c.B = AppMath.GetRandomByte(minB, maxB);
             c.A = 255;
             return c;
         }

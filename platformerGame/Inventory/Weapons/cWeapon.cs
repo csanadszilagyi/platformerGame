@@ -12,7 +12,7 @@ using platformerGame.Utilities;
 namespace platformerGame.Inventory.Weapons
 {
     // TODO: make inherited from Inventory.cItem
-    class cWeapon
+    abstract class cWeapon
     {
         protected cGameObject owner;
         protected cRegulator regulator;
@@ -25,14 +25,17 @@ namespace platformerGame.Inventory.Weapons
         protected int bulletsPerShot;
         protected float timeToReload;
 
-        public cWeapon(cGameObject owner, int firing_frequency)
+        protected string bulletBreedID;
+
+        public cWeapon(cGameObject owner, int firing_frequency, string bullet_breed_id)
         {
             this.owner = owner;
             this.firingFrequency = firing_frequency;
             this.regulator = new cRegulator();
             this.regulator.resetByFrequency(firing_frequency);
-            this.spread = (float)cAppMath.DegressToRadian(2);
+            this.spread = (float)AppMath.DegressToRadian(2);
             this.bulletsPerShot = 1;
+            this.bulletBreedID = bullet_breed_id;
         }
 
         protected bool isReadForNextShot()
@@ -40,15 +43,24 @@ namespace platformerGame.Inventory.Weapons
             return regulator.isReady();
         }
 
-        public virtual void fire(Vector2f target)
+        public abstract bool Fire(Vector2f target);
+        /*
         {
             if(this.isReadForNextShot())
             {
-               Vector2f dir = cAppMath.Vec2NormalizeReturn(target - owner.Bounds.center);
-               Vector2f toSpreadTarget = cAppMath.GetRandomVecBySpread(dir, spread);
+               Vector2f dir = AppMath.Vec2NormalizeReturn(target - owner.Bounds.center);
+               Vector2f toSpreadTarget = AppMath.GetRandomVecBySpread(dir, spread);
                cBullet b = new cBullet(this.owner, owner.Bounds.center, toSpreadTarget);
                owner.Scene.EntityPool.AddBullet(b);
             }
+        }
+        */
+
+        // in every weapon, the same method used to add a bullet to the scene
+        protected void Shot(Vector2f direction)
+        {
+            cBullet b = new cBullet(this.owner, BulletBreed.GetBreed(this.bulletBreedID), owner.Bounds.center, direction);
+            owner.Scene.EntityPool.AddBullet(b);
         }
 
         protected void decreaseAmmo()

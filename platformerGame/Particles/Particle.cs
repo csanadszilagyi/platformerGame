@@ -33,6 +33,11 @@ namespace platformerGame
 
         public bool Intersects;
 
+        /*
+         * UpdateController updater;
+         * 
+         */
+
         public Particle()
         {
             Pos = new Vector2f(0.0f, 0.0f);

@@ -99,11 +99,11 @@ namespace platformerGame.GameObjects
 
             if (acceleration.X < 0.0f)
             {
-                velocity.X = cAppMath.Max<float>(velocity.X, -this.maxWalkSpeed);
+                velocity.X = AppMath.Max<float>(velocity.X, -this.maxWalkSpeed);
             }
             else if (acceleration.X > 0.0f)
             {
-                velocity.X = cAppMath.Min<float>(velocity.X, this.maxWalkSpeed);
+                velocity.X = AppMath.Min<float>(velocity.X, this.maxWalkSpeed);
             }
             else
             // if (isOnGround)
@@ -300,7 +300,7 @@ namespace platformerGame.GameObjects
 
             for (int tileIndexY = begY; tileIndexY <= endY; ++tileIndexY)
             {
-                var topLeft = cAppMath.Interpolate(newTopLeft, oldTopLeft, (float)Math.Abs(endY - tileIndexY) / dist);
+                var topLeft = AppMath.Interpolate(newTopLeft, oldTopLeft, (float)Math.Abs(endY - tileIndexY) / dist);
                 var topRight = new Vector2f(topLeft.X + bounds.dims.X - 1, topLeft.Y);
 
                 for (var checkedTile = topLeft; ; checkedTile.X += Constants.TILE_SIZE)
@@ -309,7 +309,7 @@ namespace platformerGame.GameObjects
 
                     tileIndexX = world.ToMapPos(checkedTile).X;
 
-                    if (world.GetCurrentLevel().GetTileAtXY(tileIndexX, tileIndexY).Type == TileType.WALL)
+                    if (world.CurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).Type == TileType.WALL)
                     {
                         bottomY = (((float)tileIndexY) * Constants.TILE_SIZE + world.WorldBounds.topLeft.Y + Constants.TILE_SIZE);
                         return true;
@@ -350,8 +350,8 @@ namespace platformerGame.GameObjects
 
             for (int tileIndexY = begY; tileIndexY <= endY; ++tileIndexY)
             {
-                var bottomLeft = cAppMath.Interpolate(newBottomLeft, oldBottomLeft, (float)Math.Abs(endY - tileIndexY) / dist);
-                var bottomRight = new Vector2f(bottomLeft.X + bounds.dims.X - 2.0f, bottomLeft.Y);
+                var bottomLeft = AppMath.Interpolate(newBottomLeft, oldBottomLeft, (float)Math.Abs(endY - tileIndexY) / dist);
+                var bottomRight = new Vector2f(bottomLeft.X + bounds.dims.X - 1.0f, bottomLeft.Y); // -2.0f
 
                 for (var checkedTile = bottomLeft; ; checkedTile.X += Constants.TILE_SIZE)
                 {
@@ -359,11 +359,11 @@ namespace platformerGame.GameObjects
 
                     tileIndexX = world.ToMapPos(checkedTile).X;
 
-                    //world.GetCurrentLevel().GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = true;
+                    //world.GetCurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = true;
 
                     groundY = (int)((float)tileIndexY * Constants.TILE_SIZE + world.WorldBounds.topLeft.Y);
 
-                    TileType tile = world.GetCurrentLevel().GetTileAtXY(tileIndexX, tileIndexY).Type;
+                    TileType tile = world.CurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).Type;
                     if (tile == TileType.WALL)
                     {
                         isOnOnewWayPlatform = false;
@@ -412,12 +412,12 @@ namespace platformerGame.GameObjects
                 {
 
                     
-                    if (world.GetCurrentLevel().GetTileAtXY(tileIndexX, tileIndexY).Type == TileType.WALL)
+                    if (world.CurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).Type == TileType.WALL)
                     /*world.isRectOnWall()*/
                     {
-                        //world.GetCurrentLevel().GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = true;
+                        //world.GetCurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = true;
 
-                        world.GetCurrentLevel().GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = true;
+                        world.CurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = true;
                         groundY = (int)(tileIndexY * Constants.TILE_SIZE + world.WorldBounds.topLeft.Y);
                         return true;
                     }
@@ -454,11 +454,11 @@ namespace platformerGame.GameObjects
             {
                 for (int tileIndexY = tileBeginY; tileIndexY >= tileEndY; --tileIndexY)
                 {
-                    //world.GetCurrentLevel().GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = false;
-                    if (world.GetCurrentLevel().GetTileAtXY(tileIndexX, tileIndexY).Type == TileType.WALL)
+                    //world.GetCurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = false;
+                    if (world.CurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).Type == TileType.WALL)
                     /*world.isRectOnWall()*/
                     {
-                        //world.GetCurrentLevel().GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = true;
+                        //world.GetCurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = true;
                         wallRightX = (int)(tileIndexX * Constants.TILE_SIZE + Constants.TILE_SIZE + world.WorldBounds.topLeft.X);
                         return true;
                     }
@@ -489,11 +489,11 @@ namespace platformerGame.GameObjects
             {
                 for (int tileIndexY = tileBeginY; tileIndexY >= tileEndY; --tileIndexY)
                 {
-                    //world.GetCurrentLevel().GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = false;
-                    if (world.GetCurrentLevel().GetTileAtXY(tileIndexX, tileIndexY).Type == TileType.WALL)
+                    //world.GetCurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = false;
+                    if (world.CurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).Type == TileType.WALL)
                     /*world.isRectOnWall()*/
                     {
-                        //world.GetCurrentLevel().GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = true;
+                        //world.GetCurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = true;
                         wallLeftX = (int)(tileIndexX * Constants.TILE_SIZE + world.WorldBounds.topLeft.X);
                         return true;
                     }
@@ -511,7 +511,7 @@ namespace platformerGame.GameObjects
         public virtual void MeleeHit(int amount, cGameObject entity_by)
         {
             this.Hit(amount, entity_by);
-            Vector2f towardsMe = cAppMath.Vec2NormalizeReturn(this.HitCollisionRect.center - entity_by.HitCollisionRect.center);
+            Vector2f towardsMe = AppMath.Vec2NormalizeReturn(this.HitCollisionRect.center - entity_by.HitCollisionRect.center);
             this.force = towardsMe * 50000;
             
         }

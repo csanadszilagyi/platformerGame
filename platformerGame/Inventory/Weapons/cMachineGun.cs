@@ -6,29 +6,33 @@ namespace platformerGame.Inventory.Weapons
 {
     class cMachineGun : cWeapon
     {
-        public cMachineGun(cGameObject owner, int firing_frequency) : base(owner, firing_frequency)
+
+        public cMachineGun(cGameObject owner, int firing_frequency, string bullet_breed_id = "simple-bullet")
+            : base(owner, firing_frequency, bullet_breed_id)
         {
             this.maxAmmo = 300;
             this.currentAmmo = maxAmmo;
             this.magazineCapacity = 30;
             this.timeToReload = 1.5f;
-            this.spread = (float)cAppMath.DegressToRadian(4);
+            this.spread = (float)AppMath.DegressToRadian(4);
             this.bulletsPerShot = 1;
         }
 
-        public override void fire(Vector2f target)
+        public override bool Fire(Vector2f target)
         {
             if (this.isReadForNextShot())
             {
-                Vector2f dir = cAppMath.Vec2NormalizeReturn(target - owner.Bounds.center);
-                Vector2f toSpreadTarget = cAppMath.GetRandomVecBySpread(dir, spread);
-                cBullet b = new cBullet(this.owner, owner.Bounds.center, toSpreadTarget);
-                owner.Scene.EntityPool.AddBullet(b);
+                Vector2f dir = AppMath.Vec2NormalizeReturn(target - owner.Bounds.center);
+                Vector2f toSpreadTarget = AppMath.GetRandomVecBySpread(dir, spread);
+                this.Shot(toSpreadTarget);
 
                 decreaseAmmo();
 
                 AssetManager.playSound("cg1", 2);
+                return true;
             }
+
+            return false;
             
         }
     }

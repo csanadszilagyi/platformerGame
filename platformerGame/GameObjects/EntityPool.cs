@@ -40,6 +40,8 @@ namespace platformerGame.GameObjects
             this.allEntities = new List<cGameObject>();
             this.visibleEntites = new List<cGameObject>();
             this.entityGrid = new Dictionary<Vector2i, List<cGameObject>>();
+
+            BulletBreed.Init();
         }
 
         public void InitLevelEntites(cMapData level)
@@ -291,9 +293,17 @@ namespace platformerGame.GameObjects
             }
         }
 
-        public void Render(RenderTarget target)
+        public void RenderMonsters(RenderTarget target)
         {
             foreach (var m in this.visibleEntites.OfType<cMonster>())
+            {
+                m.Render(target);
+            }
+        }
+
+        public void RenderTurrets(RenderTarget target)
+        {
+            foreach (var m in this.visibleEntites.OfType<cTurret>())
             {
                 m.Render(target);
             }
@@ -315,7 +325,7 @@ namespace platformerGame.GameObjects
                 // order by distance to find the closest
                 if (cSatCollision.checkAndResolve(bul, mon, time, false))
                 {
-                    newDist = cAppMath.Vec2DistanceSqrt(mon.Bounds.center, pos_by);
+                    newDist = AppMath.Vec2DistanceSqrt(mon.Bounds.center, pos_by);
 
                     if (newDist < prevDist)
                     {
@@ -351,6 +361,8 @@ namespace platformerGame.GameObjects
                 }
 
             }
+
+            // TODO Player Vs Bullet
         }
 
         public IEnumerable<cMonster> getPossiblePlayerMeleeAttackers()

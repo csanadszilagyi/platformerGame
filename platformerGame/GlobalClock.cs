@@ -1,25 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using platformerGame.Utilities;
+﻿using platformerGame.Utilities;
 
 namespace platformerGame
 {
-    public class cGlobalClock
+    public class GlobalClock
     {
-        /*private static readonly cGlobalClock instance = new cGlobalClock();*/
+        /*private static readonly GlobalClock instance = new GlobalClock();*/
 
-        private static cTimer timer;
-        /*private cGlobalClock() { }*/
-        static cGlobalClock()
+        private static AppTimer timer;
+        /*private GlobalClock() { }*/
+        static GlobalClock()
         {
-            timer = new cTimer();
+            timer = new AppTimer();
         }
         /*
-        public static cGlobalClock Instance
+        public static GlobalClock Instance
         {
             get
             {

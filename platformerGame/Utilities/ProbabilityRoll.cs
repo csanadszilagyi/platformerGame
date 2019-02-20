@@ -104,7 +104,7 @@ namespace platformerGame.Utilities
                 sum_of_weights += probabilityTable[row].Item1;
             }
 
-            int x = cAppRandom.GetRandomNumber(0, use_empty ? 100 : sum_of_weights);
+            int x = AppRandom.GetRandomNumber(0, use_empty ? 100 : sum_of_weights);
             return lookupValue(x);
         }
 

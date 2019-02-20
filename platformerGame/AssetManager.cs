@@ -52,27 +52,18 @@ namespace platformerGame
                 LoadFont(fontName);
             }
 
-            //loadin textures
+            //loading textures
             foreach (string texName in Constants.TEXTURES_NAMES)
             {
                 LoadTexture(texName);
             }
 
-            LoadSound("shotgun.wav");
-            LoadSound("rifle.wav");
-            LoadSound("cg1.wav");
-            LoadSound("pistol.wav");
 
-            LoadSound("blood_hit1.wav");
-            LoadSound("blood_hit2.wav");
-            LoadSound("coin40.wav");
-            LoadSound("coin41.wav");
-            LoadSound("coin_pickup1.wav");
-            LoadSound("coin_drop1.wav");
-
-            LoadSound("weapon_blow2.wav");
-            LoadSound("wallhit.wav");
-            LoadSound("body_hit1.wav");
+            //loading textures
+            foreach (string soundName in Constants.SOUND_NAMES)
+            {
+                LoadSound(soundName);
+            }
         }
 
         public static string GenerateIDFromFilePath(string file_path)
@@ -92,7 +83,20 @@ namespace platformerGame
 
             fonts.Add(id_name, f);
         }
- 
+
+        public static void LoadSound(string file_name)
+        {
+            string path = Path.Combine(ROOT_PATH, SOUND_RESOURCE_PATH, file_name);
+            SoundBuffer buffer; // = new SoundBuffer(path);
+            string id_name = GenerateIDFromFilePath(file_name);
+
+            if (!soundBuffers.TryGetValue(id_name, out buffer))
+            {
+                buffer = new SoundBuffer(path);
+                soundBuffers.Add(id_name, buffer);
+            }
+        }
+
         public static void LoadTexture(string file_name)
         {
             string path = Path.Combine(ROOT_PATH, TEX_RESOURCE_PATH, file_name);
@@ -102,19 +106,6 @@ namespace platformerGame
             if(false == textures.ContainsKey(id_name))
             {
                 textures.Add(id_name, t);
-            }
-        }
-
-        public static void LoadSound(string file_name)
-        {
-            string path = Path.Combine(ROOT_PATH, SOUND_RESOURCE_PATH, file_name);
-            SoundBuffer buffer; // = new SoundBuffer(path);
-            string id_name = GenerateIDFromFilePath(file_name);
-
-            if( !soundBuffers.TryGetValue(id_name, out buffer))
-            {
-                buffer = new SoundBuffer(path);
-                soundBuffers.Add(id_name, buffer);
             }
         }
 
@@ -131,9 +122,16 @@ namespace platformerGame
         {
             return fonts[id];
         }
+
         public static Texture GetTexture(string id)
         {
-            return textures[id];
+            Texture t;
+            if(textures.TryGetValue(id, out t))
+            {
+                return t;
+            }
+
+            return LoadAndReturnTexture(id);
         }
 
         public static void playSound(string id, int volume = 50, Vector2f pos = default(Vector2f))

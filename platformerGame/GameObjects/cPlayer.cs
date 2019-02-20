@@ -13,12 +13,28 @@ namespace platformerGame.GameObjects
         cWeapon weapon;
         Text healthText;
 
+        cLight fireLight;
+
         public cPlayer(GameScene scene, Vector2f pos) : base(scene, pos)
         {
+            fireLight = new cLight();
+            fireLight.Pos = this.bounds.center;
+            fireLight.Bleed = 10.0f;
+            fireLight.Radius = 120.0f;
+            fireLight.LinearizeFactor = 0.96f;
+            fireLight.OriginalColor = new Color(136, 216, 176);
+            fireLight.Color = new Color(136, 216, 176);
+            fireLight.TurnOff();
+            this.Scene.LightMap.AddStaticLight(fireLight);
+
+
             p_followLight = new cLight();
+            p_followLight.Pos = this.bounds.center;
             p_followLight.Radius = 160.0f;
             p_followLight.LinearizeFactor = 0.9f;
+            p_followLight.OriginalColor = new Color(240, 219, 164);
             p_followLight.Color = new Color(240, 219, 164);
+            // p_followLight.TurnOff();
             this.Scene.LightMap.AddStaticLight(p_followLight);
 
             this.weapon = new cMachineGun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY);
@@ -137,6 +153,7 @@ namespace platformerGame.GameObjects
         public override void Update(float step_time)
         {
             base.Update(step_time);
+            
         }
 
         public override void Render(RenderTarget destination)
@@ -145,6 +162,7 @@ namespace platformerGame.GameObjects
             //viewPosition = cAppMath.Interpolate(position, lastPosition, alpha);
 
             p_followLight.Pos = GetCenterViewPos();
+            fireLight.Pos = GetCenterViewPos();
 
             spriteControl.Render(destination, viewPosition);
             base.Render(destination);
@@ -160,6 +178,17 @@ namespace platformerGame.GameObjects
         public void pickUp(cPickupInfo pickup)
         {
             pickup.applyEffect(this);
+        }
+
+
+        public void ItemAction(Vector2f mouse_pos)
+        {
+            if (weapon.Fire(mouse_pos))
+            {
+                //this.fireLight.TurnOn();
+                return;
+            }
+            //this.fireLight.TurnOff();
         }
 
         public cWeapon CurrentWeapon

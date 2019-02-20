@@ -102,8 +102,8 @@ namespace platformerGame.GameObjects.PickupInfo
         {
             /*
             int[] tcoords = { 0, 24, 48 };
-            int tx = cAppRandom.Chooose<int>(tcoords);
-            int ty = cAppRandom.Chooose<int>(tcoords, 2);
+            int tx = AppRandom.Chooose<int>(tcoords);
+            int ty = AppRandom.Chooose<int>(tcoords, 2);
             */
             pickupTypes = new Dictionary<PickupType, cPickupInfo>()
             {

@@ -105,6 +105,9 @@ namespace platformerGame.Utilities
         [JsonProperty("texture-names")]
         public static string[] TEXTURES_NAMES { get; private set; }
 
+        [JsonProperty("sound-names")]
+        public static string[] SOUND_NAMES { get; private set; }
+
         [JsonProperty("bg-texture")]
         public static string BG_TEXTURE { get; private set; }
 

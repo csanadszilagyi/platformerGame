@@ -19,7 +19,7 @@ namespace platformerGame.Utilities
     /// <summary>
     /// Contains mathematical utilies to make life easier in game programming.
     /// </summary>
-    class cAppMath
+    class AppMath
     {
         public const double PI = 3.1415926535897932384626433832795;
         public const double TWO_PI = PI * 2.0;
@@ -36,17 +36,17 @@ namespace platformerGame.Utilities
         //==============================================================================================
         public static int GetRandomNumber(int min, int max)
         {
-            return cAppRandom.GetRandomNumber(min, max);
+            return AppRandom.GetRandomNumber(min, max);
         }
 
         public static byte GetRandomByte(byte min, byte max)
         {
-            return (byte)cAppRandom.GetRandomNumber(min, max);
+            return (byte)AppRandom.GetRandomNumber(min, max);
         }
 
         public static double GetRandomDouble()
         {
-            return cAppRandom.GetRandomDouble();
+            return AppRandom.GetRandomDouble();
         }
 
         public static double GetRandomDoubleInRange(double x, double y)
@@ -133,7 +133,7 @@ namespace platformerGame.Utilities
             return returner;
         }
 
-        public static void Raytrace(int x0, int y0, int x1, int y1, VisitMethod breakVisit)
+        public static void Raytrace(int x0, int y0, int x1, int y1, Func<int, int, bool> breakVisit)
         {
             int dx = Math.Abs(x1 - x0);
             int dy = Math.Abs(y1 - y0);
@@ -168,7 +168,7 @@ namespace platformerGame.Utilities
         {
             Vector2f diff = lineB - lineA;
             Vector2f perp = new Vector2f(-diff.Y, diff.X);
-            float d = cAppMath.Vec2Dot(point - lineA, perp);
+            float d = AppMath.Vec2Dot(point - lineA, perp);
             return Math.Sign(d);
         }
 
@@ -238,6 +238,7 @@ namespace platformerGame.Utilities
         {
             return new Vector2f(Math.Abs(v.X), Math.Abs(v.Y));
         }
+
         public static void Vec2Truncate(ref Vector2f vec, double max)
         {
             if (Vec2Length(vec) > max)
@@ -258,7 +259,20 @@ namespace platformerGame.Utilities
             return rad * (180.0 / PI);
         }
 
-        public static float Lerp(float from, float to, float value)
+        //Spherical linear interpolation
+        public static Vector2f Slerp(Vector2f vecA, Vector2f vecB, double t)
+	    {
+
+            double cosAngle = Vec2Dot(vecA, vecB);
+            double angle = Math.Acos(cosAngle);
+            Vector2f ret = new Vector2f();
+            ret.X = (vecA.X * (float)Math.Sin((1 - t) * angle) + vecB.X * (float)Math.Sin(t* angle)) / (float)Math.Sin(angle);
+            ret.Y = (vecA.Y* (float)Math.Sin((1 - t) * angle) + vecB.Y* (float)Math.Sin(t* angle)) / (float)Math.Sin(angle);
+		    return ret;
+		    //return (vecA * sin((1 - t) * angle) + vecB * sin(t * angle)) / sin(angle);
+	    }
+
+    public static float Lerp(float from, float to, float value)
         {
             if (value < 0.0f)
                 return from;
@@ -266,6 +280,7 @@ namespace platformerGame.Utilities
                 return to;
             return (to - from) * value + from;
         }
+
         public static float LerpUnclamped(float from, float to, float value)
         {
             return (1.0f - value) * from + value * to;

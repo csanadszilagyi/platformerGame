@@ -10,18 +10,19 @@ namespace platformerGame.Inventory.Weapons
     class cShotgun : cWeapon
     {
 
-        public cShotgun(cGameObject owner, int firing_frequency) : base(owner, firing_frequency)
+        public cShotgun(cGameObject owner, int firing_frequency, string bullet_breed_id = "simple-bullet") 
+            : base(owner, firing_frequency, bullet_breed_id)
         { 
-            this.spread = (float)cAppMath.DegressToRadian(2);
+            this.spread = (float)AppMath.DegressToRadian(2);
             this.bulletsPerShot = 4;
         }
 
-        public override void fire(Vector2f target)
+        public override bool Fire(Vector2f target)
         {
             if (this.isReadForNextShot())
             {
-                Vector2f dir = cAppMath.Vec2NormalizeReturn(target - owner.Bounds.center);
-                float dirAngle = (float)cAppMath.GetAngleOfVector(dir);
+                Vector2f dir = AppMath.Vec2NormalizeReturn(target - owner.Bounds.center);
+                float dirAngle = (float)AppMath.GetAngleOfVector(dir);
                 float unitAngle = spread / bulletsPerShot;
                 float tangle = dirAngle - ((bulletsPerShot / 2.0f) * unitAngle);
                 for (int i = 0; i < bulletsPerShot; ++i)
@@ -30,13 +31,16 @@ namespace platformerGame.Inventory.Weapons
                     //Vector2f toSpreadTarget = cAppMath.GetRandomVecBySpread(dir, spread);
                     Vector2f toSpreadTarget = new Vector2f((float)Math.Cos(tangle), (float)Math.Sin(tangle));
 
-                    cBullet b = new cBullet(this.owner, owner.Bounds.center, toSpreadTarget);
-                    owner.Scene.EntityPool.AddBullet(b);
+                    this.Shot(toSpreadTarget);
                 }
                 
                 AssetManager.playSound("shotgun", 3);
 
+                return true;
+
             }
+
+            return false;
         }
     }
 }

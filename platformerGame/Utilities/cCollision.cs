@@ -22,13 +22,13 @@ namespace platformerGame.Utilities
     {
         public static bool isPointInsideCircle(Vector2f centre, float radius, Vector2f point)
         {
-            return cAppMath.Vec2DistanceSqrt(point, centre) <= (radius * radius);
+            return AppMath.Vec2DistanceSqrt(point, centre) <= (radius * radius);
         }
 
         public static bool testCircleVsCirlceOverlap(Vector2f centreA, float radiusA, Vector2f centreB, float radiusB)
         {
             float R = radiusA + radiusB;
-            return (cAppMath.Vec2DistanceSqrt(centreA, centreB) <= R * R);
+            return (AppMath.Vec2DistanceSqrt(centreA, centreB) <= R * R);
         }
 
         public static bool CircleAABBOverlap(Vector2f centre, float radius, AABB rect)
@@ -154,19 +154,23 @@ namespace platformerGame.Utilities
             int y1 = (int)bulPos.Y;
             bool collision = false;
             Vector2f temp = new Vector2f(0.0f, 0.0f);
-            cAppMath.Raytrace(x0, y0, x1, y1, new VisitMethod(
-                (int x, int y) =>
+            AppMath.Raytrace(x0, y0, x1, y1,
+                (x, y) =>
                 {
                     collision = IsPointInsideBox(new Vector2f(x, y), entityBounds);
                     temp.X = x;
                     temp.Y = y;
                     return collision;
                 }
-              )
             );
 
             intersection = temp;
             return collision;
+        }
+
+        public static void resolvePlayerVsBullet(cPlayer player, cBullet bullet, Vector2f intersection)
+        {
+            bullet.kill();
         }
 
         public static void resolveMonsterVsBullet(cMonster m, cBullet bullet, Vector2f intersection)
@@ -195,14 +199,14 @@ namespace platformerGame.Utilities
         {
             Vector2f D = velocity;
 
-            float n = cAppMath.Vec2Dot(D, N);
+            float n = AppMath.Vec2Dot(D, N);
 
             Vector2f Dn = N * n;
             Vector2f Dt = D - Dn;
 
             if (n > 0.0f) Dn = new Vector2f(0, 0);
 
-            float dt = cAppMath.Vec2Dot(Dt, Dt);
+            float dt = AppMath.Vec2Dot(Dt, Dt);
             float CoF = Constants.FRICTION;
 
             if (dt < Constants.GLUE * Constants.GLUE) CoF = 1.01f;
@@ -245,10 +249,10 @@ namespace platformerGame.Utilities
             Vector2f rightBottom = box.rightBottom;
             Vector2f leftBottom = new Vector2f(box.topLeft.X, box.rightBottom.Y);
 
-            Vector2f ntop = cAppMath.Vec2Perp(topRight - topLeft);
-            Vector2f nright = cAppMath.Vec2Perp(rightBottom - topRight);
-            Vector2f nbottom = cAppMath.Vec2Perp(leftBottom - rightBottom);
-            Vector2f nleft = cAppMath.Vec2Perp(topLeft - rightBottom);
+            Vector2f ntop = AppMath.Vec2Perp(topRight - topLeft);
+            Vector2f nright = AppMath.Vec2Perp(rightBottom - topRight);
+            Vector2f nbottom = AppMath.Vec2Perp(leftBottom - rightBottom);
+            Vector2f nleft = AppMath.Vec2Perp(topLeft - rightBottom);
 
             return ntop;
         }

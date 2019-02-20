@@ -91,7 +91,6 @@ namespace platformerGame
 
     class cWorld
     {
-
         cMapData currentLevel;
         AABB m_WorldBounds;
         Vector2u windowSize;
@@ -102,22 +101,15 @@ namespace platformerGame
         public AABB levelStartRegion;
         public AABB levelEndRegion;
 
-
         GameScene sceneRef;
-
-
-        cTileMapRenderer mapRenderer;
+        cTileMapRenderer mapRenderer = null;
 
         public cWorld(GameScene p_scene, Vector2u window_size)
         {
             sceneRef = p_scene;
             windowSize = window_size;
 
-
             currentLevel = new cMapData();
-            //m_Level1.Create(100, 100);
-            this.LoadLevel("levels/map_test2.tmx"); //"levels/Level1.txt"); //
-
 
             m_BGtexture = AssetManager.GetTexture(Constants.BG_TEXTURE);
             m_BGtexture.Repeated = true;
@@ -126,11 +118,23 @@ namespace platformerGame
             //tempSprite = new Sprite(m_TileSetTexture);
 
             background = new Sprite(m_BGtexture);
-            background.TextureRect = new IntRect(0, 0, (int)m_WorldBounds.dims.X, (int)m_WorldBounds.dims.Y); // (int)m_TextureOfTiles.Size.X, (int)m_TextureOfTiles.Size.Y);
             background.Color = Constants.BACKGROUND_COLOR;
 
-            mapRenderer = new cTileMapRenderer(this);
+        }
 
+        public void InitLevel()
+        {
+            //m_Level1.Create(100, 100);
+            this.LoadLevel("levels/map_test2.tmx"); //"levels/Level1.txt");
+
+            m_WorldBounds = new AABB(0.0f, 0.0f, currentLevel.Width * Constants.TILE_SIZE, currentLevel.Height * Constants.TILE_SIZE);
+
+            background.TextureRect = new IntRect(0, 0, (int)m_WorldBounds.dims.X, (int)m_WorldBounds.dims.Y); // (int)m_TextureOfTiles.Size.X, (int)m_TextureOfTiles.Size.Y);
+
+            if (mapRenderer != null)
+                mapRenderer.ClearTileLayers();
+
+            mapRenderer = new cTileMapRenderer(this);
         }
 
         public void LoadLevel(string file_name)
@@ -138,12 +142,11 @@ namespace platformerGame
             // m_Level1.LoadFromFile(file_name);
             currentLevel.LoadFromTMX(file_name);
 
-            m_WorldBounds = new AABB(0.0f, 0.0f, currentLevel.Width * Constants.TILE_SIZE, currentLevel.Height * Constants.TILE_SIZE);
-
-            levelStartRegion = GetCurrentLevel().LevelStartRegion;
-            levelEndRegion = GetCurrentLevel().LevelEndRegion;
+            levelStartRegion = CurrentLevel.LevelStartRegion;
+            levelEndRegion = CurrentLevel.LevelEndRegion;
             //initTileSprites();
         }
+
         public AABB LevelStartRegion
         {
             get { return levelStartRegion; }
@@ -280,12 +283,9 @@ namespace platformerGame
             destination.Draw(background);
         }
 
-        
-
         public void PreRender(AABB view_rect)
         {
             mapRenderer.RecalculateDrawBounds(view_rect);
-
         }
 
         public void Render(RenderTarget destination, AABB view_rect)
@@ -350,7 +350,7 @@ namespace platformerGame
         public bool IsWallAtPos(Vector2f world_pos)
         {
             Vector2i map = ToMapPos(world_pos);
-            TileType tt = GetCurrentLevel().GetTypeAtPos(map);
+            TileType tt = CurrentLevel.GetTypeAtPos(map);
             return tt == TileType.WALL;
         }
 
@@ -378,9 +378,9 @@ namespace platformerGame
             get { return m_WorldBounds; }
         }
 
-        public cMapData GetCurrentLevel()
+        public cMapData CurrentLevel
         {
-            return currentLevel;
+           get { return currentLevel; }
         }
 
         public bool isRectOnWall(float left, float top, float width, float height)
@@ -401,7 +401,7 @@ namespace platformerGame
             currentLevel.Clear();
         }
 
-        public void collideSAT(cGameObject obj, float step_time)
+        public void collideSAT(cGameObject obj, float step_time, bool resolve = true, Action on_collision = null)
         {
             // check collisions with world
             List<AABB> wallsPossibleColliding = this.getCollidableBlocks(obj.Bounds);
@@ -413,28 +413,31 @@ namespace platformerGame
                 for (int i = 0; i < wallsPossibleColliding.Count; i++)
                 {
                     cGameObject wallObject = cGameObject.MakeWall(wallsPossibleColliding[i]);
-                    if (cSatCollision.checkAndResolve(obj, wallObject, step_time, true))
+                    if (cSatCollision.checkAndResolve(obj, wallObject, step_time, resolve))
                     {
+                        on_collision?.Invoke();
                         break;
                     }
                 }
-            }
-            else
-            {
-                // we have to iterate from "end" to the "start" in order to have the last colliding block below us
-                for (int i = wallsPossibleColliding.Count - 1; i >= 0; i--)
-                {
-                    cGameObject wallObject = cGameObject.MakeWall(wallsPossibleColliding[i]);
-                    if (cSatCollision.checkAndResolve(obj, wallObject, step_time, true))
-                    {
-                        break;
-                    }
 
-                }
+                return;
             }
+
+            // we have to iterate from "end" to the "start" in order to have the last colliding block below us
+            for (int i = wallsPossibleColliding.Count - 1; i >= 0; i--)
+            {
+                cGameObject wallObject = cGameObject.MakeWall(wallsPossibleColliding[i]);
+                if (cSatCollision.checkAndResolve(obj, wallObject, step_time, resolve))
+                {
+                    on_collision?.Invoke();
+                    break;
+                }
+
+            }
+            
         }
 
-        public void collideParticleSAT(Particle particle, float step_time)
+        public void collideParticleSAT(Particle particle, float step_time, bool physics = true)
         {
             cGameObject obj = cGameObject.fromParticle(particle);
             this.collideSAT(obj, step_time);
@@ -449,8 +452,8 @@ namespace platformerGame
             bool collided = false;
             Vector2f intersectionPoint = new Vector2f(0.0f, 0.0f);
 
-            cAppMath.Raytrace(posA.X, posA.Y, posB.X, posB.Y, new VisitMethod(
-               (int x, int y) =>
+            AppMath.Raytrace(posA.X, posA.Y, posB.X, posB.Y,
+               (x, y) =>
                {
                    collided = this.IsObastacleAtPos(new Vector2f(x, y));
                    if (collided)
@@ -475,7 +478,6 @@ namespace platformerGame
 
                    return collided;
                }
-             )
            );
         }
 
@@ -497,7 +499,7 @@ namespace platformerGame
                 {
                     if ( y >= 0 && x >= 0 && y < this.currentLevel.Height && x < this.currentLevel.Width )
                     {
-                        cTile tile = this.GetCurrentLevel().GetTileAtXY(x, y);
+                        cTile tile = this.CurrentLevel.GetTileAtXY(x, y);
                         
                         TileType tt = tile.Type;
                         //int tid = tile.IdCode;

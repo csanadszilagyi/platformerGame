@@ -48,14 +48,14 @@ namespace platformerGame
             m_FlipVertically = false;
             m_CurrentFrame = 0;
             Active = true;
-            m_CurrentAnimTime = cGlobalClock.GetTimeInMilliseconds();
+            m_CurrentAnimTime = GlobalClock.GetTimeInMilliseconds();
             m_FrameTime = Constants.ANIM_FRAME_TIME;
             m_LastAnimTime = m_CurrentAnimTime;
         }
 
         private bool _isReadyForNextFrame()
         {
-            m_CurrentAnimTime = cGlobalClock.GetTimeInMilliseconds();
+            m_CurrentAnimTime = GlobalClock.GetTimeInMilliseconds();
             return (m_CurrentAnimTime - m_LastAnimTime >= m_FrameTime);
         }
 
@@ -65,7 +65,7 @@ namespace platformerGame
             {
                 if (_isReadyForNextFrame())
                 {
-                    m_LastAnimTime = cGlobalClock.GetTimeInMilliseconds();
+                    m_LastAnimTime = GlobalClock.GetTimeInMilliseconds();
 
                     m_CurrentFrame += 1;
 
@@ -105,7 +105,7 @@ namespace platformerGame
                        1.0f, //SCALE_FACTOR,
                        false, //p_myCurrentAnim->IsFlippedHorizontally(),
                        false,
-                       BlendMode.Alpha,
+                       BlendMode.Add,
                        null);
         }
 

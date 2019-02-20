@@ -44,6 +44,7 @@ namespace platformerGame
 
             loadShader();
         }
+
         public cLightSystem(Color clear_color)
         {
             lightMapDarkShape = new RectangleShape();
@@ -70,6 +71,7 @@ namespace platformerGame
             light.Bleed = 0.01f;
             return light;
         }
+
         public void Create(uint width, uint height)
         {
             lightMapDarkShape.Size = new Vector2f(width, height);
@@ -83,6 +85,7 @@ namespace platformerGame
             dynamicLightTexture.SetActive(true);
             dynamicLightTexture.Clear(m_ClearColor);
         }
+
         public void RemoveAll()
         {
             staticLights.Clear();
@@ -91,8 +94,11 @@ namespace platformerGame
             dynamicLightTexture.Clear(m_ClearColor);
 
         }
+
         public void AddStaticLight(cLight light)
         {
+            System.Diagnostics.Debug.WriteLine(
+                   string.Format("light pos: {0}, {1}", light.Pos.X, light.Pos.Y));
             staticLights.Add(light);
         }
 

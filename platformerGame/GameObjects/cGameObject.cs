@@ -280,7 +280,7 @@ namespace platformerGame.GameObjects
 
         public void CalculateViewPos(float alpha)
         {
-            viewPosition = cAppMath.Interpolate(position, lastPosition, alpha);
+            viewPosition = AppMath.Interpolate(position, lastPosition, alpha);
         }
 
         public virtual void Update(float step_time)
@@ -306,6 +306,10 @@ namespace platformerGame.GameObjects
             this.velocity.X += offset.X;
             this.velocity.Y += offset.Y;
         }
+
+        public virtual void Kill(cGameObject by)
+        { }
+
 
         public static cGameObject fromParticle(Particle p)
         {

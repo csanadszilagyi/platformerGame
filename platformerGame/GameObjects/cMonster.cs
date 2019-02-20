@@ -20,32 +20,40 @@ namespace platformerGame.GameObjects
 
         cLight eye;
 
-        cTimer locateTime;
-
         bool attacking;
         cRegulator attackCharger;
+
+        Sprite bloom;
 
         public cMonster(GameScene scene, Vector2f pos) : base(scene, pos)
         {
 
             p_followLight = new cLight();
-            p_followLight.Radius = 80.0f;
-            p_followLight.LinearizeFactor = 0.9f;
+            p_followLight.Pos = this.bounds.center;
+            p_followLight.Radius = 100.0f;
+            p_followLight.LinearizeFactor = 0.4f;
             p_followLight.Bleed = 2.0f;
-            p_followLight.Color = new Color(20, 184, 87);
-            //this.Scene.LightMap.AddStaticLight(p_followLight);
+            p_followLight.OriginalColor = new Color(239, 129, 37);
+            p_followLight.Color = new Color(239, 129, 37); //  new Color(20, 184, 87);
+            
+            this.Scene.LightMap.AddStaticLight(p_followLight);
 
-
+            
             eye = new cLight();
             eye.Radius = 10.0f;
             eye.LinearizeFactor = 0.98f;
             eye.Bleed = 5.0f;
             eye.OriginalColor = new Color(255, 39, 13);
             eye.Color = new Color(255, 39, 13);
-
             this.Scene.LightMap.AddStaticLight(eye);
 
-            locateTime = new cTimer();
+            this.sleep();
+
+            bloom = new Sprite(AssetManager.GetTexture("bloom"));
+            bloom.Scale = new Vector2f(0.2f, 0.2f);
+            bloom.Origin = new Vector2f(bloom.Texture.Size.X / 2.0f, bloom.Texture.Size.Y / 2.0f);
+            bloom.Color = Color.Red;
+
             this.attacking = false;
             this.attackCharger = new cRegulator();
             this.attackCharger.resetByFrequency(2);
@@ -183,7 +191,7 @@ namespace platformerGame.GameObjects
             return !killed;
         }
 
-        public void Kill(cGameObject by)
+        public override void Kill(cGameObject by)
         {
             this.Scene.LightMap.remove(this.p_followLight);
             this.Scene.LightMap.remove(this.eye);
@@ -192,7 +200,9 @@ namespace platformerGame.GameObjects
             this.health = 0;
             this.killed = true;
 
-            Vector2f emitDirection = cAppMath.Vec2NormalizeReturn(by.Velocity);
+            // int y = AppRandom.Choose<int>(new[] { 1,-1});
+
+            Vector2f emitDirection = AppMath.Vec2NormalizeReturn(by.Velocity); //  new Vector2f(0.0f, y); 
 
             ShakeScreen.Init(this.pscene.Camera.ActualPosition);
             ShakeScreen.StartShake();
@@ -202,12 +212,23 @@ namespace platformerGame.GameObjects
                     AssetManager.playSound("blood_hit2", 25, this.position);
                     //pscene.ParticleManager.Fireworks.NormalExplosion(new Particles.cEmissionInfo(this.Bounds.center, emitDirection));
                     var e = pscene.ParticleManager["explosions"] as cExplosionController;
-                    e.NormalBlood(new Particles.EmissionInfo(this.Bounds.center, emitDirection));
+                    e.NormalBlood(new EmissionInfo(this.Bounds.center, emitDirection));
 
-                    float gy = this.Bounds.rightBottom.Y; // ground y
+                    this.Scene.QueueAction(() =>
+                    {
+                        this.Scene.Effects.Place(this.Bounds.center, "simple-explosion3");
 
-                    // pscene.Effects.PlaceGround(this.Bounds.center.X, gy, "side-explosion1");
-                    pscene.Effects.Place(this.bounds.center, "simple-explosion2");
+                        // this.Scene.Effects.Place(intersection, "fire1");
+                    });
+
+                    // e.FastBlood(new EmissionInfo(this.Bounds.center,new Vector2f(0.0f, 0.0f)));
+
+                    //float gy = this.Bounds.rightBottom.Y; // ground y
+
+                    //pscene.Effects.PlaceGround(this.Bounds.center.X, gy, "side-explosion1");
+
+                    //pscene.EntityPool.getEntitiesInRadius()
+                    // pscene.Effects.Place(this.bounds.center, "simple-explosion2");
 
                 }
                 
@@ -229,7 +250,7 @@ namespace platformerGame.GameObjects
                                         new cPickupAble(
                                                 this.Scene,
                                                 this.Bounds.center,
-                                                cAppMath.GetRandomUnitVec(), // emitDirection,
+                                                AppMath.GetRandomUnitVec(), // emitDirection,
                                                 PickupInfo.PickupType.COIN_GOLD)
                     );
                 }
@@ -251,32 +272,35 @@ namespace platformerGame.GameObjects
             this.Marked = false;
 
             Vector2f playerCenter = this.Scene.Player.Bounds.center;
-            double sqrDistFromPlayer = cAppMath.Vec2DistanceSqrt(playerCenter, this.Bounds.center);
+            double sqrDistFromPlayer = AppMath.Vec2DistanceSqrt(playerCenter, this.Bounds.center);
 
             Vector2i posA = new Vector2i((int)this.Bounds.center.X, (int)this.Bounds.center.Y);
             Vector2i posB = new Vector2i((int)this.Scene.Player.Bounds.center.X, (int)this.Scene.Player.Bounds.center.Y);
             bool playerHiddenForMe = true;
             Vector2f intersectionPoint = new Vector2f(0.0f, 0.0f);
 
-            cAppMath.Raytrace(posA.X, posA.Y, posB.X, posB.Y, new VisitMethod(
-                    (int x, int y) =>
+            
+
+            if (sqrDistFromPlayer <= 80000.0) // 100 unit distance  1000000.0
+            {
+                AppMath.Raytrace(posA.X, posA.Y, posB.X, posB.Y, 
+                    (x, y) =>
                     {
                         playerHiddenForMe = this.pscene.World.IsObastacleAtPos(new Vector2f(x, y));
 
                         return playerHiddenForMe;
                     }
-                )
-            );
+                    
+                );
 
-            if (!playerHiddenForMe && sqrDistFromPlayer <= 80000.0) // 100 unit distance  1000000.0
-            {
                 //this.wake();
-                if (attacking)
+
+
+
+                if (playerHiddenForMe == false)
                 {
-                    this.StopMoving();
-                }
-                else
-                {
+                    this.wake();
+
                     if (playerCenter.X > this.Position.X)
                     {
                         if (velocity.X < 0.0f) this.StopMovingX();
@@ -288,6 +312,13 @@ namespace platformerGame.GameObjects
                         if (velocity.X > 0.0f) this.StopMovingX();
                         this.StartMovingLeft();
                     }
+                }
+                    
+                    if (attacking)
+                    {
+                        this.StopMoving();
+                    }
+
 
                     /*
                     if (this.Scene.Player.Bounds.topLeft.Y < this.Bounds.topLeft.Y)
@@ -295,12 +326,13 @@ namespace platformerGame.GameObjects
                     else
                         this.StopJumping();
                         */
-                }
+                
+                
             }
             else
             {
                 this.StopMoving();
-                //this.sleep();
+                this.sleep();
             }
 
             this.spriteControl.Update(this.GetSpriteState());
@@ -314,16 +346,23 @@ namespace platformerGame.GameObjects
         public override void Render(RenderTarget destination)
         {
             Vector2f cw = GetCenterViewPos();
+            bloom.Position = cw;
+
+            
             p_followLight.Pos = cw;
             eye.Pos = new Vector2f(cw.X + 2, cw.Y - 5);
+            
+
             base.Render(destination);
-                
+
+            /*
             if(this.Marked)
             {
                 DrawingBase.DrawRectangleShape(destination, this.Bounds, new Color(255, 20, 20, 120), BlendMode.Alpha);
             }
-                
+            */
 
+            // destination.Draw(bloom, new RenderStates(BlendMode.Add));
         }
 
         public override void Hit(int amount, cGameObject entity_by)
@@ -378,11 +417,13 @@ namespace platformerGame.GameObjects
 
         protected void wake()
         {
+            this.p_followLight.TurnOn();
             this.eye.TurnOn();
         }
 
         protected void sleep()
         {
+            this.p_followLight.TurnOff();
             this.eye.TurnOff();
         }
     }

@@ -23,7 +23,7 @@ namespace platformerGame
 
         public bool isReady()
         {
-            currentTime = cGlobalClock.GetTimeInMilliseconds();
+            currentTime = GlobalClock.GetTimeInMilliseconds();
 
             if ((currentTime - lastTime) >= periodTime * 1000.0)
             {
@@ -38,13 +38,13 @@ namespace platformerGame
         {
             this.freq = frequency;
             this.periodTime = (frequency > 0.0) ? (1.0 / frequency) : 0.0;
-            lastTime = cGlobalClock.GetTimeInMilliseconds();
+            lastTime = GlobalClock.GetTimeInMilliseconds();
         }
         public void resetByPeriodTime(float period_time_in_seconds)
         {
             this.periodTime = period_time_in_seconds;
             this.freq = (periodTime > 0.0) ? (1.0 / periodTime) : 0.0;
-            lastTime = cGlobalClock.GetTimeInMilliseconds();
+            lastTime = GlobalClock.GetTimeInMilliseconds();
         }
         public double getPeriodTime()
         {

@@ -35,10 +35,11 @@ namespace platformerGame.Effects
             this.effects.Add(effect);
         }
 
-        public void Place(Vector2f centre, string animation_name)
+        public void Place(Vector2f centre, string animation_name, bool repeat = false)
         {
             var effect = new AnimatedEffect();
             effect.Animation = new cAnimation(cAnimationAssets.Get(animation_name));
+            effect.Animation.AnimData.Repeat = repeat;
             effect.Centre = centre;
             this.Place(effect);
         }

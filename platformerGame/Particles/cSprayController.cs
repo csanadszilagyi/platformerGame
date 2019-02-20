@@ -16,9 +16,22 @@ namespace platformerGame.Particles
         double minScale = 0.3;
         double maxScale = 0.6;
 
+        bool emiting;
+        const int INC_PER_EMIT = 40;
+
+        cRegulator emitTimer;
+        int remaining;
+
         public cSprayController(cParticleManager manager, uint max_particles = 300) : base(manager, max_particles)
         {
             this.renderStates.Texture = manager.SmokeTexture; // smoke
+            this.emiting = false;
+
+            this.remaining = 0;
+
+            /*
+            emitTimer = new cRegulator();
+            emitTimer.resetByFrequency(5.0);*/
         }
 
         private void empower(Particle particle)
@@ -26,14 +39,14 @@ namespace platformerGame.Particles
             particle.Pos = particle.StartPos;
             particle.LastPos = particle.Pos;
             particle.ViewPos = particle.Pos;
-            particle.MaxSpeed = cAppMath.GetRandomNumber(30, 50); //200,400 | 700, 900 | (400, 600); //3, 8//Math->GetRandomNumber(510, 800); // 2000.0f
+            particle.MaxSpeed = AppMath.GetRandomNumber(30, 50); //200,400 | 700, 900 | (400, 600); //3, 8//Math->GetRandomNumber(510, 800); // 2000.0f
 
             //------------------------------------------------------------------------------------------------
-            float angle = (float)cAppMath.DegressToRadian(cAppMath.GetRandomNumber(0, 360));//sDivisions * m_Angles;
+            float angle = (float)AppMath.DegressToRadian(AppMath.GetRandomNumber(0, 360));//sDivisions * m_Angles;
             particle.Rotation = angle;
 
             // Vector2f dirUnit = cAppMath.GetRandomUnitVec();
-            Vector2f dirUnit = cAppMath.GetRandomVecBySpread(new Vector2f(0.0f, -1.0f), cAppMath.DegressToRadian(6));
+            Vector2f dirUnit = AppMath.GetRandomVecBySpread(new Vector2f(0.0f, -1.0f), AppMath.DegressToRadian(6));
 
             particle.Vel = dirUnit * particle.MaxSpeed;
             //------------------------------------------------------------------------------------------------
@@ -46,16 +59,16 @@ namespace platformerGame.Particles
 
             Vector2u uSize = this.renderStates.Texture.Size;
 
-            particle.Scale = (float)cAppMath.GetRandomDoubleInRange(this.minScale, this.maxScale);
+            particle.Scale = (float)AppMath.GetRandomDoubleInRange(this.minScale, this.maxScale);
 
             particle.Dims = new Vector2f(uSize.X * particle.Scale, uSize.Y * particle.Scale);
 
-            particle.ScaleSpeed = (float)cAppMath.GetRandomNumber(15, 25) / 100.0f;
+            particle.ScaleSpeed = (float)AppMath.GetRandomNumber(15, 25) / 100.0f;
 
             particle.Color = Utils.GetRandomColor(250, 250, 1, 160, 0, 0); // GetRandomRedColor();
             particle.Opacity = 255.0f;
             particle.Life = 15.0f;
-            particle.Fade = cAppRandom.GetRandomNumber(10, 40);
+            particle.Fade = AppRandom.GetRandomNumber(10, 40);
 
             particle.Intersects = false;
         }
@@ -75,17 +88,38 @@ namespace platformerGame.Particles
             this.empower(particle);
         }
 
+        protected void ip()
+        {
+            Particle particle = pool.getNew();
+
+        }
+
         public void Emit(EmissionInfo emission)
         {
             minScale = 0.1;
             maxScale = 0.35;
-            
+
+            this.remaining += INC_PER_EMIT;
+
             loopAddition(emission, 40);
+            /*
+            this.emiting = true;
+            emission.Particle = pool.getNew();
+            initParticle(emission);*/
         }
 
         public override void Update(float step_time)
         {
             cWorld world = particleManager.Scene.World;
+
+            /*
+            if(emiting && this.emitTimer.isReady())
+            {
+               // initParticle();
+                remaining -= 1;
+                emiting = remaining > 0;
+            }
+            */
 
             for (int i = 0; i < pool.CountActive; ++i)
             {
@@ -96,7 +130,7 @@ namespace platformerGame.Particles
                 p.Vel.X *= p.SlowDown;
                 p.Vel.Y *= p.SlowDown;
 
-                cAppMath.Vec2Truncate(ref p.Vel, p.MaxSpeed);
+                AppMath.Vec2Truncate(ref p.Vel, p.MaxSpeed);
 
                 //world.collideParticleSAT(p, step_time);
 
@@ -110,9 +144,9 @@ namespace platformerGame.Particles
                 p.Pos.X += p.Vel.X * step_time;
                 p.Pos.Y += p.Vel.Y * step_time;
 
-                if (!cAppMath.Vec2IsZero(p.Vel))
+                if (!AppMath.Vec2IsZero(p.Vel))
                 {
-                    p.Heading = cAppMath.Vec2NormalizeReturn(p.Vel);
+                    p.Heading = AppMath.Vec2NormalizeReturn(p.Vel);
                     // p.Rotation = (float)cAppMath.GetAngleOfVector(p.Heading);
                 }
 
@@ -161,7 +195,7 @@ namespace platformerGame.Particles
                 halfDims.X = p.Dims.X / division;
                 halfDims.Y = p.Dims.Y / division;
 
-                p.ViewPos = cAppMath.Interpolate(p.LastPos, p.Pos, alpha);
+                p.ViewPos = AppMath.Interpolate(p.Pos, p.LastPos, alpha);
 
                 uint vertexIndex = (uint)i * multiplier;
 
@@ -180,7 +214,7 @@ namespace platformerGame.Particles
 
                 // if want rotation included:
                 Transform rot = Transform.Identity;
-                rot.Rotate((float)cAppMath.RadianToDegress(p.Rotation), p.ViewPos);
+                rot.Rotate((float)AppMath.RadianToDegress(p.Rotation), p.ViewPos);
                
                 v0Pos = rot.TransformPoint(v0Pos);
                 v1Pos = rot.TransformPoint(v1Pos);

@@ -47,12 +47,15 @@ namespace platformerGame.Map
 
         public void Clear()
         {
+
             layers.Clear();
         }
+
         public List<cTile> Tiles
         {
             get { return layers[TileLayerTypes.WALLS]; }
         }
+
         public int NumOfTiles
         {
             get { return numOfTiles; }
@@ -159,7 +162,7 @@ namespace platformerGame.Map
             }
             else
             {
-                int index2 = cAppMath.Clamp<int>(index, 0, NumOfTiles - 1);
+                int index2 = AppMath.Clamp<int>(index, 0, NumOfTiles - 1);
                 return layers[layer][index2];
             }
         }
@@ -181,7 +184,7 @@ namespace platformerGame.Map
             layers[TileLayerTypes.WALLS] = new List<cTile>();
             for (int i = 0; i < numOfTiles; i++)
             {
-               /* if(cAppRandom.GetRandomFloat() < 0.4f)
+               /* if(AppRandom.GetRandomFloat() < 0.4f)
                     m_Tiles.Add(new cTile(i + 1, TileType.WALL));
                 else*/
                     layers[TileLayerTypes.WALLS].Add(new cTile(i + 1, TileType.EMPTY));
@@ -327,7 +330,7 @@ namespace platformerGame.Map
             // works also
             string fileName = AssetManager.TEX_RESOURCE_PATH + AssetManager.TILESET_PATH + tileSet.Image.Source.Split('\\').Last();
             
-            this.tilesetTexture = AssetManager.LoadAndReturnTexture(tileSet.Image.Source); // fileName);
+            this.tilesetTexture = AssetManager.GetTexture(tileSet.Image.Source); // fileName);
 
 #if DEBUG
 

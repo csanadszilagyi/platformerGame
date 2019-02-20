@@ -17,13 +17,13 @@ namespace platformerGame.App
     {
         RenderWindow    mainWindow;
         Vector2f        windowSize;
-        cTimer          m_Timer;
+        AppTimer          m_Timer;
         bool            m_AppRunning;
 
-        Dictionary<string, GameState> definiedStates = new Dictionary<string, GameState>();
+        Dictionary<string, Action> definiedStates = new Dictionary<string, Action>();
         
         GameState      currentState = null;
-        //cGameState      m_LastState = null;
+        // GameState   lastState = null;
 
         double m_DeltaTime;
         double m_StepTime;
@@ -48,7 +48,7 @@ namespace platformerGame.App
 
         private void _setUpSFML()
         {
-            windowSize = new Vector2f(1280.0f, 720.0f);
+            windowSize = new Vector2f(1600.0f, 900.0f);
             
             //if WPF: m_MainWindow = new RenderWindow(formHandle);
             mainWindow = new RenderWindow(new VideoMode((uint)windowSize.X, (uint)windowSize.Y, 32), "Platformer", Styles.Close);
@@ -81,7 +81,7 @@ namespace platformerGame.App
             m_Time = 0.0;
             m_FPS = 0.0;
 
-            m_Timer = new cTimer();
+            m_Timer = new AppTimer();
             //ChangeGameState( new GameScene(this) );
 
             fpsUpdater = new cRegulator();
@@ -95,18 +95,17 @@ namespace platformerGame.App
             timeText.FillColor = Color.White;
             timeText.Style = Text.Styles.Bold;
 
-            cGlobalClock.Start();
+            GlobalClock.Start();
 
             // currentState = new GameScene(this);
             // currentState.Enter();
 
-            GameScene scene = new GameScene(this);
-            definiedStates.Add("main-menu", new MainMenu(this));
-            definiedStates.Add("game-scene", scene);
+            m_AppRunning = true;
+
+            definiedStates.Add("main-menu", () => { this.SetGameState(new MainMenu(this)); });
+            definiedStates.Add("game-scene", () => { this.SetGameState(new GameScene(this)); });
 
             this.ChangeGameState("main-menu");
-
-            m_AppRunning = true;
 
         }
 
@@ -378,22 +377,21 @@ namespace platformerGame.App
             get { return m_FPS; }
         }
 
-        public void ChangeGameState(string new_state)
+        private void SetGameState(GameState new_state)
         {
+            currentState?.Exit();
+            currentState = new_state;
+            currentState.Enter();
+        }
 
-            GameState desired;
-            if(definiedStates.TryGetValue(new_state, out desired))
+        public void ChangeGameState(string state_id)
+        {
+            Action desired;
+            if(definiedStates.TryGetValue(state_id, out desired))
             {
-                if (currentState != null)
-                {
-                   currentState.Exit();
-                }
-                   
-                currentState = desired;
-                currentState.Enter();
+                desired.Invoke();
             }
 
-            
         }
 
         private void OnResized(object sender, SizeEventArgs e)

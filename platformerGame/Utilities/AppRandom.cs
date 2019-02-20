@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace platformerGame.Utilities
 {
-    class cAppRandom
+    class AppRandom
     {
         private static Random random;
 
-        static cAppRandom()
+        static AppRandom()
         {
             random = new Random();
         }
@@ -21,7 +21,7 @@ namespace platformerGame.Utilities
         /// <param name="array"></param>
         /// <param name="len">0 to len to choose, if -1, the length of the array used</param>
         /// <returns></returns>
-        public static T Chooose<T>(T[] array, int len = -1)
+        public static T Choose<T>(T[] array, int len = -1)
         {
             return array[ random.Next(0, (len < 0) ? array.Length : len) ];
         }

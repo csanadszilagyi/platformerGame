@@ -314,14 +314,14 @@ namespace platformerGame
                                      Shader shader )
 {
 
-        double lightSubdivisionSize = cAppMath.PI / 24.0;
+        double lightSubdivisionSize = AppMath.PI / 24.0;
 
         VertexArray va = new VertexArray(PrimitiveType.TriangleFan);
 
         Transform t = Transform.Identity;
         RenderStates states = new RenderStates(blend_mode, t, null, shader);
 		
-	    double light_dir_angle = cAppMath.GetAngleOfVector(light_dir);
+	    double light_dir_angle = AppMath.GetAngleOfVector(light_dir);
             //Math->GetAngleBetwenVecs(light_pos, light_dir) - Math->PI/2.0;
 
         va.Append(new Vertex(light_pos, Color, new Vector2f()) );

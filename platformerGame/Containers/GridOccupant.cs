@@ -11,7 +11,7 @@ namespace platformerGame.Containers
         protected AABB bounds;
         public GridOccupant()
         {
-            bounds = new AABB(0, 0, 0, 0);
+            bounds = new AABB(0, 0, 1, 1);
         }
 
         public GridOccupant(AABB _bounds)

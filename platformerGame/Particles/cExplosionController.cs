@@ -33,18 +33,19 @@ namespace platformerGame.Particles
             particle.Pos = emission.StartPosition;
             particle.LastPos = particle.Pos;
             particle.ViewPos = particle.Pos;
-            particle.MaxSpeed = cAppMath.GetRandomNumber(minSpeed, maxSpeed); //700, 900 | (400, 600); //3, 8//Math->GetRandomNumber(510, 800); // 2000.0f
+            particle.MaxSpeed = AppMath.GetRandomNumber(minSpeed, maxSpeed); //700, 900 | (400, 600); //3, 8//Math->GetRandomNumber(510, 800); // 2000.0f
 
-            if( !cAppMath.Vec2IsZero(emission.EmitDirection))
+            if( !AppMath.Vec2IsZero(emission.EmitDirection))
             {
-                Vector2f particleDirection = cAppMath.GetRandomVecBySpread(emission.EmitDirection, cAppMath.HALF_PI);
+                Vector2f particleDirection = AppMath.GetRandomVecBySpread(emission.EmitDirection, AppMath.HALF_PI);
                 particle.Vel = new Vector2f(particleDirection.X * particle.MaxSpeed, particleDirection.Y * particle.MaxSpeed);
             }
             else
             {
-                float angle = (float)cAppMath.DegressToRadian(cAppMath.GetRandomNumber(0, 360));//sDivisions * m_Angles;
+                // float angle = (float)cAppMath.DegressToRadian(cAppMath.GetRandomNumber(0, 360));//sDivisions * m_Angles;
 
-                particle.Vel = new Vector2f((float)Math.Cos(angle) * particle.MaxSpeed, (float)Math.Sin(angle) * particle.MaxSpeed);
+                particle.Vel = AppMath.GetRandomUnitVec() * particle.MaxSpeed;
+                // particle.Vel = new Vector2f((float)Math.Cos(angle) * particle.MaxSpeed, (float)Math.Sin(angle) * particle.MaxSpeed);
             }
 
             //float dir = Math->GetRandomClamped();
@@ -58,10 +59,10 @@ namespace platformerGame.Particles
 
             Vector2u uSize = this.renderStates.Texture.Size;
 
-            particle.Scale = (float)cAppMath.GetRandomDoubleInRange(this.minScale, this.maxScale);
+            particle.Scale = (float)AppMath.GetRandomDoubleInRange(this.minScale, this.maxScale);
             particle.Dims = new Vector2f(uSize.X * particle.Scale, uSize.Y * particle.Scale);
 
-            particle.ScaleSpeed = -cAppMath.GetRandomNumber(10, 50);
+            particle.ScaleSpeed = -AppMath.GetRandomNumber(10, 50);
             particle.Color = Utils.GetRandomGreenColor();
             particle.Opacity = 255.0f;
             particle.Life = 1.0f;
@@ -93,6 +94,15 @@ namespace platformerGame.Particles
             loopAddition(emission, 25);
         }
 
+        public void FastBlood(EmissionInfo emission)
+        {
+            minScale = 0.4;
+            maxScale = 0.7;
+            minSpeed = 400;
+            maxSpeed = 600;
+            loopAddition(emission, 20);
+        }
+
         public override void Update(float step_time)
         {
             cWorld world = particleManager.Scene.World;
@@ -114,24 +124,26 @@ namespace platformerGame.Particles
                     p.Vel.X *= p.SlowDown;
                     p.Vel.Y *= p.SlowDown;
 
-                    cAppMath.Vec2Truncate(ref p.Vel, p.MaxSpeed * 1.5f);
+                    AppMath.Vec2Truncate(ref p.Vel, p.MaxSpeed * 1.5f);
 
-                    //world.collideParticleSAT(p, step_time);
+                    world.collideParticleSAT(p, step_time, false);
 
                     //p.Heading = cAppMath.Vec2NormalizeReturn(p.Vel);
                     p.LastPos = p.Pos;
-                    p.Pos.X += p.Vel.X * step_time*1.5f;
-                    p.Pos.Y += p.Vel.Y * step_time*1.5f;
+                    p.Pos.X += p.Vel.X * step_time;
+                    p.Pos.Y += p.Vel.Y * step_time;
 
 
 
-                    if (!cAppMath.Vec2IsZero(p.Vel))
+                    if (!AppMath.Vec2IsZero(p.Vel))
                     {
-                        p.Heading = cAppMath.Vec2NormalizeReturn(p.Vel);
-                        p.Rotation = (float)cAppMath.GetAngleOfVector(p.Heading);
+                        p.Heading = AppMath.Vec2NormalizeReturn(p.Vel);
+                        p.Rotation = (float)AppMath.GetAngleOfVector(p.Heading);
                     }
 
-                    world.collideParticleRayTrace(p, step_time);
+                   
+
+                   // world.collideParticleRayTrace(p, step_time);
                     
 
                
@@ -173,7 +185,7 @@ namespace platformerGame.Particles
                 newDims.X = p.Dims.X / division;
                 newDims.Y = p.Dims.Y / division;
 
-                p.ViewPos = cAppMath.Interpolate(p.LastPos, p.Pos, alpha);
+                p.ViewPos = AppMath.Interpolate(p.Pos, p.LastPos, alpha);
 
                 uint vertexIndex = i * multiplier;
 

@@ -10,14 +10,14 @@ using SFML.System;
 
 namespace platformerGame.Utilities
 {
-    class cTimer
+    class AppTimer
     {
         private Stopwatch m_Timer; //SFML beépített clock-ja
 
         private double m_CurrentTime;
         private double m_LastTime;
 
-        public cTimer()
+        public AppTimer()
         {
             m_Timer = new Stopwatch();
         }

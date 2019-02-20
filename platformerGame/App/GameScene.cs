@@ -28,7 +28,7 @@ namespace platformerGame.App
 
         cLightSystem lightMap;
 
-        cTimer levelTimer;
+        AppTimer levelTimer;
 
         EntityPool entityPool;
 
@@ -42,7 +42,7 @@ namespace platformerGame.App
 
         public GameScene(SfmlApp controller) : base(controller)
         {
-            levelTimer = new cTimer();
+            levelTimer = new AppTimer();
         }
 
        
@@ -73,10 +73,12 @@ namespace platformerGame.App
             lightMap = new cLightSystem(Constants.LIGHTMAP_COLOR); //((uint)m_World.WorldBounds.dims.X, (uint)m_World.WorldBounds.dims.Y, Constants.LIGHTMAP_COLOR);
             gameWorld = new cWorld(this, appControllerRef.MainWindow.Size);
 
+            gameWorld.InitLevel();
+
             //lightMap.Create((uint)m_World.WorldBounds.dims.X, (uint)m_World.WorldBounds.dims.Y);
             lightMap.Create(appControllerRef.MainWindow.Size.X, appControllerRef.MainWindow.Size.Y);
 
-            lightMap.loadLightsFromTmxMap(gameWorld.GetCurrentLevel().GetTmxMap());
+            lightMap.loadLightsFromTmxMap(gameWorld.CurrentLevel.GetTmxMap());
 
             this.staticTexture = new RenderTexture((uint)gameWorld.WorldBounds.dims.X, (uint)gameWorld.WorldBounds.dims.Y);
             this.staticTexture.SetActive(true);
@@ -91,7 +93,7 @@ namespace platformerGame.App
             player = new cPlayer(this, playerStart);
 
             entityPool = new EntityPool(this, gameWorld.WorldBounds.dims, player);
-            entityPool.InitLevelEntites(World.GetCurrentLevel());
+            entityPool.InitLevelEntites(World.CurrentLevel);
 
             //vizekhez adunk fényt
             /*
@@ -191,7 +193,7 @@ namespace platformerGame.App
 
 
             // camera.Update();
-            this.camera.DeployOn(destination);
+            this.camera.DeployOn(destination, alpha);
             var cameraBounds = camera.Bounds;
             //viewRect.SetPosByCenter(m_View.Center);
 
@@ -230,7 +232,9 @@ namespace platformerGame.App
 
             //worldEnvironment.RenderWaterBlocks(destination);
 
-            this.entityPool.Render(destination);
+            this.entityPool.RenderTurrets(destination);
+
+            this.entityPool.RenderMonsters(destination);
             
             
             /*
@@ -282,7 +286,7 @@ namespace platformerGame.App
 
             if (Mouse.IsButtonPressed(Mouse.Button.Left))
             {
-                player.CurrentWeapon.fire(mouse);
+                player.ItemAction(mouse);
                 // m_Player.Position = this.GetMousePos();
             }
 
@@ -351,6 +355,18 @@ namespace platformerGame.App
                     spray.Emit(new EmissionInfo(this.GetMousePos()));
                 });
                 
+            }
+
+            if (e.Code == Keyboard.Key.T)
+            {
+                entityPool.AddEntity(new cTurret(this, GetMousePos()));
+
+            }
+
+            if (e.Code == Keyboard.Key.M)
+            {
+                gameWorld.InitLevel();
+
             }
         }
 

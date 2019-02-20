@@ -60,7 +60,7 @@ namespace platformerGame.GameObjects
 
             this.velocity.X = this.heading.X * EMIT_SPEED;
             this.velocity.Y = this.heading.Y * EMIT_SPEED;
-            orientation = cAppMath.GetAngleOfVector(heading);
+            orientation = AppMath.GetAngleOfVector(heading);
         }
 
         public override bool isActive()
@@ -75,6 +75,8 @@ namespace platformerGame.GameObjects
             if (false == pulling)
             {
                 pscene.World.collideSAT(this, step_time);
+
+                /*
                 // check collisions with world
                 List<AABB> wallsPossibleColliding = world.getCollidableBlocks(Bounds);
 
@@ -104,6 +106,7 @@ namespace platformerGame.GameObjects
 
                     }
                 }
+                */
             }
         }
 
@@ -114,7 +117,7 @@ namespace platformerGame.GameObjects
             cPlayer player = Scene.Player;
             if (this.pulling)
             {
-                Vector2f predicted = cAppMath.Vec2NormalizeReturn((player.Bounds.center + (player.Velocity * step_time)) - this.Bounds.center);
+                Vector2f predicted = AppMath.Vec2NormalizeReturn((player.Bounds.center + (player.Velocity * step_time)) - this.Bounds.center);
                 // pull pickup
                 //Vector2f toPlayer = cAppMath.Vec2NormalizeReturn(player.Bounds.center - this.Bounds.center);
 
@@ -138,14 +141,14 @@ namespace platformerGame.GameObjects
             //velocity.X = Math.Abs(velocity.X) < 0.05f ? 0.0f : velocity.X;
             //velocity.Y = Math.Abs(velocity.Y) < 0.05f ? 0.0f : velocity.Y;
 
-            double len = cAppMath.Vec2Length(velocity);
+            double len = AppMath.Vec2Length(velocity);
             if (len < 0.1)
             {
                 velocity = new Vector2f(0.0f, 0.0f);
 
             }
 
-            cAppMath.Vec2Truncate(ref velocity, MaxSpeed);
+            AppMath.Vec2Truncate(ref velocity, MaxSpeed);
 
             // get more precise result calling it here (because of the updated velocity)
             // instead of calling at the beginning of this update method
@@ -158,10 +161,10 @@ namespace platformerGame.GameObjects
             Bounds.SetPosByCenter(position);
             this.hitCollisionRect = bounds;
 
-            if (!cAppMath.Vec2IsZero(velocity))
+            if (!AppMath.Vec2IsZero(velocity))
             {
-                heading = cAppMath.Vec2NormalizeReturn(velocity);
-                orientation = cAppMath.GetAngleOfVector(heading); 
+                heading = AppMath.Vec2NormalizeReturn(velocity);
+                orientation = AppMath.GetAngleOfVector(heading); 
             }
 
             force = new Vector2f(0.0f, 0.0f);
@@ -192,7 +195,7 @@ namespace platformerGame.GameObjects
         {
             cPlayer player = Scene.Player;
 
-            float d = (float)cAppMath.Vec2Distance(player.Bounds.center, this.Bounds.center);
+            float d = (float)AppMath.Vec2Distance(player.Bounds.center, this.Bounds.center);
 
             if (!this.pulling)
             {

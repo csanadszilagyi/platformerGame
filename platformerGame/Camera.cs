@@ -10,11 +10,6 @@ using platformerGame.Utilities;
 
 namespace platformerGame
 {
-    class MyCamera
-    {
-
-    }
-
     class Camera
     {
         /// <summary>
@@ -35,7 +30,7 @@ namespace platformerGame
         /// <summary>
         /// Smoothness determines how quickly the transition will take place. Higher smoothness will reach the target position faster.
         /// </summary>
-        public float Smoothness = 0.166f; //0.033f;
+        public float Smoothness = 0.1f; //0.033f; 0.1666f
 
         /// <summary>
         /// Toggle for automatic position rounding. Useful if pixel sizes become inconsistent or font blurring occurs.
@@ -43,6 +38,7 @@ namespace platformerGame
         public bool RoundPosition = false;
 
         internal View View;
+        internal Vector2f PreviousPosition;
         internal Vector2f ActualPosition;
         private Vector2f originalSize;
 
@@ -76,6 +72,7 @@ namespace platformerGame
             Target = View.Size / 2.0f;
             originalSize = View.Size;
             ActualPosition = Target;
+            PreviousPosition = Target;
         }
 
         public void SetOffset(Vector2f offset)
@@ -90,7 +87,7 @@ namespace platformerGame
         }
         */
 
-        public static Vector2f nullVec()
+        public static Vector2f NullVec()
         {
             return new Vector2f(0.0f, 0.0f);
         }
@@ -101,13 +98,18 @@ namespace platformerGame
             
             if (Smooth)
             {
-                var dir = cAppMath.Vec2NormalizeReturn(Target - ActualPosition);
-                float len = (float)cAppMath.Vec2Distance(ActualPosition, Target);
-                ActualPosition += dir * (len * Smoothness);
+                Vector2f dir = AppMath.Vec2NormalizeReturn(Target - ActualPosition);
+                float len = (float)AppMath.Vec2Distance(ActualPosition, Target);
+                Vector2f vel = dir * (len * Smoothness);
+                //AppMath.Vec2Truncate(ref vel, 2.0f);
+                //vel += ShakeScreen.Offset;
+                PreviousPosition = ActualPosition;
+                ActualPosition += vel;
             }
             else
             {
                 ActualPosition = Target + ShakeScreen.Offset;
+                PreviousPosition = ActualPosition;
             }
 
             checkBounds(region_bounds);
@@ -164,7 +166,7 @@ namespace platformerGame
            // cameraBounds.SetPosByCenter(ActualPosition);
         }
 
-        public void DeployOn(RenderTarget target, AABB region_bounds = null)
+        public void DeployOn(RenderTarget target, float alpha, AABB region_bounds = null)
         {
             
             /*
@@ -175,7 +177,7 @@ namespace platformerGame
             */
             //Target = center;
             //ActualPosition = center;
-            this.View.Center = ActualPosition;
+            this.View.Center = AppMath.Interpolate(ActualPosition, PreviousPosition, alpha);
             target.SetView(this.View);
         }
     }

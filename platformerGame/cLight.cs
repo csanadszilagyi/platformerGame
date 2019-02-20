@@ -19,7 +19,7 @@ namespace platformerGame
         private Vector3f glColor;
         public Color OriginalColor { get; set; }
 
-        private float opacity;
+        public float Opacity { get; set; }
 
         public float Radius { get; set; }
         public float SpreadAngle { get; set; }
@@ -38,7 +38,7 @@ namespace platformerGame
             OriginalColor = color;
             Opacity = 255.0f;
             Radius = 20.0f;
-            SpreadAngle = (float)cAppMath.TWO_PI;
+            SpreadAngle = (float)AppMath.TWO_PI;
             Bleed = 1.0f;
             LinearizeFactor = 0.6f;
             Active = true;
@@ -48,9 +48,10 @@ namespace platformerGame
         {
             Pos = pos;
         }
+
         public void TurnOn()
         {
-            Color = OriginalColor;
+            Color = new Color(OriginalColor);
         }
 
         public void TurnOff()
@@ -67,16 +68,6 @@ namespace platformerGame
                 glColor.X = ((float)color.R / 255.0f);
                 glColor.Y = ((float)color.G / 255.0f);
                 glColor.Z = ((float)color.B / 255.0f);
-            }
-        }
-
-        public float Opacity
-        {
-            get { return opacity; }
-            set
-            {
-                opacity = value;
-
             }
         }
 

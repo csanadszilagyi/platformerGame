@@ -70,7 +70,7 @@ namespace platformerGame.Rendering
             }
         }
 
-        public static IEnumerable<MyIntRect> getLooped(int start_row, int start_column, int num_frames, int frame_width, int frame_height)
+        public static IEnumerable<MyIntRect> getLoopedRow(int start_row, int start_column, int num_frames, int frame_width, int frame_height)
         {
             for (int f = 0; f < num_frames; f++)
             {
@@ -80,12 +80,13 @@ namespace platformerGame.Rendering
 
         public static void LoadAnimations()
         {
-            framesContainer.Add("coins-gold", new AnimationInfo("coins", getLooped(0, 0, 8, 16, 16), new MyIntRect(0,0,16,16)));
-            framesContainer.Add("coins-silver", new AnimationInfo("coins", getLooped(1, 0, 8, 16, 16), new MyIntRect(0, 0, 16, 16)));
-            framesContainer.Add("coins-copper", new AnimationInfo("coins", getLooped(2, 0, 8, 16, 16), new MyIntRect(0, 0, 16, 16)));
+            framesContainer.Add("coins-gold", new AnimationInfo("coins", getLoopedRow(0, 0, 8, 16, 16), new MyIntRect(0,0,16,16)));
+            framesContainer.Add("coins-silver", new AnimationInfo("coins", getLoopedRow(1, 0, 8, 16, 16), new MyIntRect(0, 0, 16, 16)));
+            framesContainer.Add("coins-copper", new AnimationInfo("coins", getLoopedRow(2, 0, 8, 16, 16), new MyIntRect(0, 0, 16, 16)));
             framesContainer.Add("side-explosion1", new AnimationInfo("side_explosion1", getLoopedFull(3, 5, 96, 96), new MyIntRect(0, 0, 96, 96)));
             framesContainer.Add("simple-explosion1", new AnimationInfo("explosion32_B", getLoopedFull(4, 4, 32, 32), new MyIntRect(0, 0, 32, 32)));
             framesContainer.Add("simple-explosion2", new AnimationInfo("explosion32", getLoopedFull(4, 4, 32, 32), new MyIntRect(0, 0, 32, 32)));
+            framesContainer.Add("simple-explosion3", new AnimationInfo("explosion196_C", getLoopedFull(4, 4, 49, 49), new MyIntRect(0, 0, 49, 49)));
         }
 
         public static void ClearAll()

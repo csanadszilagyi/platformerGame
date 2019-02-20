@@ -5,7 +5,8 @@ using platformerGame.GameObjects;
 namespace platformerGame.Utilities
 {
     /// <summary>
-    /// Collision detection based on the Separating Axis Theorem (for fast moving objects, like projectiles).
+    /// Providing collision detection based on Separating Axis Theorem (for fast moving objects, like projectiles).
+    /// Only works with AABBs.
     /// </summary>
     class cSatCollision
     {
@@ -65,14 +66,14 @@ namespace platformerGame.Utilities
             //Vector2f D = m_xDisplacement - xBody.m_xDisplacement;
             Vector2f D = objA.Velocity - objB.Velocity;
 
-            float n = cAppMath.Vec2Dot(D, N);
+            float n = AppMath.Vec2Dot(D, N);
 
             Vector2f Dn = N * n;
             Vector2f Dt = D - Dn;
 
             if (n > 0.0f) Dn = new Vector2f(0, 0);
             
-            float dt = cAppMath.Vec2Dot(Dt, Dt);
+            float dt = AppMath.Vec2Dot(Dt, Dt);
             float CoF = Constants.FRICTION;
             
             if (dt < Constants.GLUE * Constants.GLUE)
@@ -166,7 +167,7 @@ namespace platformerGame.Utilities
 
            
             Vector2f N = mtd;
-            cAppMath.Vec2Normalize(ref N);
+            AppMath.Vec2Normalize(ref N);
             ProcessCollision(objA, objB, N, 0.0f);
             
         }
@@ -199,7 +200,7 @@ namespace platformerGame.Utilities
 
             xAxis[iNumAxes] = new Vector2f(-xVel.Y, xVel.X);
 
-            float fVel2 = cAppMath.Vec2Dot(xVel, xVel);
+            float fVel2 = AppMath.Vec2Dot(xVel, xVel);
 
             if (fVel2 > 0.000001f)
             {
@@ -294,8 +295,9 @@ namespace platformerGame.Utilities
                 return false;
 
             // make sure the polygons gets pushed away from each other.
-            if (cAppMath.Vec2Dot(N, xOffset) < 0.0f)
+            if (AppMath.Vec2Dot(N, xOffset) < 0.0f)
                 N = -N;
+
 
             return true;
         }
@@ -303,11 +305,11 @@ namespace platformerGame.Utilities
         // calculate the projection range of a polygon along an axis
         private static void GetInterval(Vector2f[] axVertices, int iNumVertices, Vector2f xAxis, out float min, out float max)
         {
-            min = max = cAppMath.Vec2Dot(axVertices[0], xAxis);
+            min = max = AppMath.Vec2Dot(axVertices[0], xAxis);
 
             for (int i = 1; i < iNumVertices; i++)
             {
-                float d = cAppMath.Vec2Dot(axVertices[i], xAxis);
+                float d = AppMath.Vec2Dot(axVertices[i], xAxis);
                 if (d < min)
                     min = d;
                 else if (d > max)
@@ -326,7 +328,7 @@ namespace platformerGame.Utilities
             GetInterval(A, Anum, xAxis, out min0, out max0);
             GetInterval(B, Bnum, xAxis, out min1, out max1);
 
-            float h = cAppMath.Vec2Dot(xOffset, xAxis);
+            float h = AppMath.Vec2Dot(xOffset, xAxis);
             min0 += h;
             max0 += h;
 
@@ -336,7 +338,7 @@ namespace platformerGame.Utilities
             // separated, test dynamic intervals
             if (d0 > 0.0f || d1 > 0.0f)
             {
-                float v = cAppMath.Vec2Dot(xVel, xAxis);
+                float v = AppMath.Vec2Dot(xVel, xAxis);
 
                 // small velocity, so only the overlap test will be relevant. 
                 if (Math.Abs(v) < 0.000001f) //0.0000001f
@@ -382,7 +384,7 @@ namespace platformerGame.Utilities
                         mini = i;
                         t = taxis[i];
                         N = xAxis[i];
-                        cAppMath.Vec2Normalize(ref N); //.Normalise();
+                        AppMath.Vec2Normalize(ref N); //.Normalise();
                     }
                 }
             }
@@ -395,7 +397,7 @@ namespace platformerGame.Utilities
             mini = -1;
             for (int i = 0; i < iNumAxes; i++)
             {
-                float n = (float)cAppMath.Vec2Length(cAppMath.Vec2NormalizeReturn(xAxis[i]));   //xAxis[i].Normalise();
+                float n = (float)AppMath.Vec2Length(AppMath.Vec2NormalizeReturn(xAxis[i]));   //xAxis[i].Normalise();
                 taxis[i] /= n;
 
                 if (taxis[i] > t || mini == -1)

@@ -155,24 +155,34 @@ namespace platformerGame.App
 
         public MainMenu(SfmlApp app_ref) : base(app_ref)
         {
-            this.menus = new Dictionary<string, MenuScreen>();
-            this.menus.Add("home", new MenuScreen());
+            this.menus = new Dictionary<string, MenuScreen>()
+            {
+                {"home", new MenuScreen() }
+            };
+
+            // this.menus.Add("home", new MenuScreen());
         }
 
         
-        public void connectItems(string menu, BaseGuiItem[] items = null)
+        public void connectItems(string menu, BaseGuiItem[] items)
         {
 
-            MenuScreen s;
-            if (menus.TryGetValue(menu, out s))
+            MenuScreen ms;
+
+            System.Diagnostics.Debug.WriteLine(string.Format("if előtt"));
+
+            if (menus.TryGetValue(menu, out ms))
             {
-                s.Add(items);
+                System.Diagnostics.Debug.WriteLine(string.Format("if-ben"));
+                ms.Add(items);
                 return;
             }
 
-            s = new MenuScreen();
-            s.Add(items);
-            menus.Add(menu, s);
+            System.Diagnostics.Debug.WriteLine(string.Format("if után - no menu found"));
+            
+            ms = new MenuScreen();
+            ms.Add(items);
+            menus.Add(menu, ms);
         }
 
         public void SwitchMenu(string name)
@@ -200,25 +210,43 @@ namespace platformerGame.App
             // centering the button
             float left = b.halfDims.X - buttonWidth / 2.0f;
 
-            this.connectItems("home", new[] {
-                new Button(this, new AABB(left, 400, buttonWidth, buttonHeight), "Play") {
-                               
+
+            var thisState = this;
+
+            System.Diagnostics.Debug.WriteLine(string.Format("has-home (before try): {0}", menus.ContainsKey("home")));
+            // valami nem ok itt, amikor visszalépünk főmenübe lefegy a játék...
+            try
+            {
+                this.connectItems("home", new Button[2] {
+                new Button(thisState, new AABB(left, 400, buttonWidth, buttonHeight), "Play") {
+
                                OnClick = (MouseButtonEventArgs e) =>
                                {
                                    // this.SwitchMenu("options");
-                                   this.appControllerRef.StartGame();
+                                   appControllerRef.StartGame();
                                }
                 },
-                new Button(this, new AABB(left, 480, buttonWidth, buttonHeight), "Exit") {
-                               
+                new Button(thisState, new AABB(left, 480, buttonWidth, buttonHeight), "Exit") {
+
                                OnClick = (MouseButtonEventArgs e) =>
                                {
-                                   this.Exit();
-                                   this.appControllerRef.CloseApp();
+                                   Exit();
+                                   appControllerRef.CloseApp();
                                }
                 }
 
             });
+            }
+            catch(Exception e)
+            {
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine(string.Format("has home (in exception): {0}", menus.ContainsKey("home")));
+                System.Diagnostics.Debug.WriteLine(e.Message + e.Source + e.StackTrace);
+
+#endif
+                Exit();
+                appControllerRef.CloseApp();
+            }
 
             /*
             this.connectItems("options", new[] {
@@ -245,7 +273,7 @@ namespace platformerGame.App
 
         public override void Exit()
         {
-            
+            this.menus.Clear();
         }
 
         public override void HandleKeyPress(KeyEventArgs e)
@@ -279,7 +307,7 @@ namespace platformerGame.App
 
         public override void Render(RenderTarget destination, float alpha)
         {
-            camera.DeployOn(destination);
+            camera.DeployOn(destination, alpha);
             currentMenu?.Render(destination);
         }
 

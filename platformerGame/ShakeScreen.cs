@@ -46,7 +46,7 @@ namespace platformerGame
             shaking = true;
             m_CurrentCenterPos = m_DefaultCenter;
             //m_Offset = new Vector2f(0.0f, 0.0f);
-            m_CurrentAngle = (float)cAppRandom.GetRandomNumber(0, 360);
+            m_CurrentAngle = (float)AppRandom.GetRandomNumber(0, 360);
             m_CurrentRadius = start_radius;
             m_MinShakeRadius = min_shake_radius;
             m_DiminishFactor = dimin_factor;
@@ -58,8 +58,8 @@ namespace platformerGame
             if(shaking)
             {
                 m_CurrentRadius *= m_DiminishFactor; //diminish radius each frame
-                m_CurrentAngle += (150.0f + cAppRandom.GetRandomNumber(0, 60)); //pick new angle 
-                float rad = (float)cAppMath.DegressToRadian(m_CurrentAngle);
+                m_CurrentAngle += (150.0f + AppRandom.GetRandomNumber(0, 60)); //pick new angle 
+                float rad = (float)AppMath.DegressToRadian(m_CurrentAngle);
                 m_Offset = new Vector2f((float)Math.Sin(rad) * m_CurrentRadius, (float)Math.Cos(rad) * m_CurrentRadius); //create offset 2d vector
 
                 m_CurrentCenterPos = m_DefaultCenter + m_Offset;

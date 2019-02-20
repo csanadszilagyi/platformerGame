@@ -25,7 +25,7 @@ namespace platformerGame.Map
             this.world = world;
             this.drawTileLayers = new List<cTileLayer>();
 
-            this.tileSetTexture = world.GetCurrentLevel().TilesetTexture;
+            this.tileSetTexture = world.CurrentLevel.TilesetTexture;
 
             drawTileBounds = new AABB();
 
@@ -75,7 +75,7 @@ namespace platformerGame.Map
                 {
                     for (int layer = 0; layer < drawTileLayers.Count; layer++)
                     {
-                        cTile tempTile = world.GetCurrentLevel().GetTileAtXY(x, y, drawTileLayers[layer].TypeID);
+                        cTile tempTile = world.CurrentLevel.GetTileAtXY(x, y, drawTileLayers[layer].TypeID);
 
                         if (tempTile.Type != TileType.EMPTY)
                         {
@@ -107,8 +107,8 @@ namespace platformerGame.Map
             // TODO comment
             drawTileBounds.topLeft.X = Math.Max(drawTileBounds.topLeft.X, 0.0f);
             drawTileBounds.topLeft.Y = Math.Max(drawTileBounds.topLeft.Y, 0.0f);
-            drawTileBounds.rightBottom.X = Math.Min(drawTileBounds.rightBottom.X, this.world.GetCurrentLevel().Width);
-            drawTileBounds.rightBottom.Y = Math.Min(drawTileBounds.rightBottom.Y, this.world.GetCurrentLevel().Height);
+            drawTileBounds.rightBottom.X = Math.Min(drawTileBounds.rightBottom.X, this.world.CurrentLevel.Width);
+            drawTileBounds.rightBottom.Y = Math.Min(drawTileBounds.rightBottom.Y, this.world.CurrentLevel.Height);
 
             filterDrawableTiles();
 

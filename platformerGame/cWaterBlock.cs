@@ -37,7 +37,7 @@ namespace platformerGame
             force = new Vector2f();
             acceleration = new Vector2f();
             
-            SPEED = cAppRandom.GetRandomNumber(40, 300);
+            SPEED = AppRandom.GetRandomNumber(40, 300);
 
             
         }
@@ -50,7 +50,7 @@ namespace platformerGame
             acceleration.Y = force.Y * step_time;
             velocity.Y += acceleration.Y * step_time;
 
-            cAppMath.Vec2Truncate(ref velocity, MAX_VELOCITY);
+            AppMath.Vec2Truncate(ref velocity, MAX_VELOCITY);
 
             lastPosition = position;
 
@@ -123,7 +123,7 @@ namespace platformerGame
 
             for (int i = 1; i < points.Length-1; i++)
             {
-                int add = cAppRandom.GetRandomNumber(MIN_OFFSET_Y, MAX_OFFSET_Y);
+                int add = AppRandom.GetRandomNumber(MIN_OFFSET_Y, MAX_OFFSET_Y);
                 points[i] = new Vector2f(area.topLeft.X + i * unitLength, area.topLeft.Y + add);
             }
 
