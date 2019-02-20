@@ -5,13 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using SFML.System;
 
-namespace platformerGame
+namespace platformerGame.Containers
 {
     class cSpatialGrid
     {
         const int CELL_SIZE = 128; // 128 X 128 square
 
         cSpatialCell[] grid;
+
+        Dictionary<Vector2i, List<int>> cells;
+
         int height;
         int width;
         int numCells;
@@ -100,7 +103,7 @@ namespace platformerGame
             return ret;
         }
 
-        public void DeHandleObject(int id, cAABB last_bounds)
+        public void DeHandleObject(int id, AABB last_bounds)
         {
 
         }
@@ -109,7 +112,7 @@ namespace platformerGame
         {
         }
 
-        public void HandleObject(int id, cAABB bounds)
+        public void HandleObject(int id, AABB bounds)
         {
             int topLeftIndex = GetCellIndexAtWorldPos(bounds.topLeft);
             int topRightIndex = GetCellIndexAtWorldPos(bounds.getTopRight());
@@ -148,7 +151,7 @@ namespace platformerGame
             return GetCellAtXY(grid_x, grid_y)?.getAll();
         }
 
-        public int[] getPossibleCollidableObjects(cAABB bounds)
+        public int[] getPossibleCollidableObjects(AABB bounds)
         {
             List<int> all = new List<int>();
             int topLeftIndex = GetCellIndexAtWorldPos(bounds.topLeft);

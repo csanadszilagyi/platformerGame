@@ -11,16 +11,18 @@ using System.Threading;
 
 using platformerGame.Utilities;
 
-namespace platformerGame
+namespace platformerGame.App
 {
-    class cSfmlApp
+    class SfmlApp
     {
-        RenderWindow    m_MainWindow;
-        Vector2u        m_WindowSize;
+        RenderWindow    mainWindow;
+        Vector2f        windowSize;
         cTimer          m_Timer;
         bool            m_AppRunning;
 
-        cGameState      m_CurrentState = null;
+        Dictionary<string, GameState> definiedStates = new Dictionary<string, GameState>();
+        
+        GameState      currentState = null;
         //cGameState      m_LastState = null;
 
         double m_DeltaTime;
@@ -32,8 +34,6 @@ namespace platformerGame
 
         Color clearColor;
 
-        cPlayerInfo playerInfo;
-
         cRegulator fpsUpdater;
         Text timeText;
 
@@ -41,41 +41,33 @@ namespace platformerGame
 
         bool vsync = false;
 
-        public string LevelName { get; set; }
-        public cSfmlApp()
+        public SfmlApp()
         {
             Constants.Load();
-            playerInfo = new cPlayerInfo();
-        }
-
-        public cSfmlApp(string level_name)
-        {
-            playerInfo = new cPlayerInfo();
-            LevelName = level_name;
         }
 
         private void _setUpSFML()
         {
-            m_WindowSize = new Vector2u(1280, 720);
+            windowSize = new Vector2f(1280.0f, 720.0f);
             
             //if WPF: m_MainWindow = new RenderWindow(formHandle);
-            m_MainWindow = new RenderWindow(new VideoMode(m_WindowSize.X, m_WindowSize.Y, 32), "Platformer", Styles.Close);
-            m_MainWindow.SetVisible(true);
+            mainWindow = new RenderWindow(new VideoMode((uint)windowSize.X, (uint)windowSize.Y, 32), "Platformer", Styles.Close);
+            mainWindow.SetVisible(true);
             activateVSYNC();
-            m_MainWindow.SetFramerateLimit(0);
-            m_MainWindow.SetKeyRepeatEnabled(false);
+            mainWindow.SetFramerateLimit(0);
+            mainWindow.SetKeyRepeatEnabled(false);
 
-            m_MainWindow.Closed += new EventHandler(OnClosed);
-            m_MainWindow.KeyPressed += new EventHandler<KeyEventArgs>(OnKeyPressed);
-            m_MainWindow.Resized += new EventHandler<SizeEventArgs>(OnResized);
-            m_MainWindow.MouseButtonPressed += new EventHandler<MouseButtonEventArgs>(OnMouseButtonPressed);
+            mainWindow.Closed += new EventHandler(OnClosed);
+            mainWindow.KeyPressed += new EventHandler<KeyEventArgs>(OnKeyPressed);
+            mainWindow.Resized += new EventHandler<SizeEventArgs>(OnResized);
+            mainWindow.MouseButtonPressed += new EventHandler<MouseButtonEventArgs>(OnMouseButtonPressed);
             
             
             clearColor = new Color(0, 0, 0, 255);
 
-            this.defaultView = m_MainWindow.DefaultView;
+            this.defaultView = mainWindow.DefaultView;
             //resource-ok betöltése (font-ok és textúrák, képek a játékhoz)
-            cAssetManager.LoadResources();
+            AssetManager.LoadResources();
         }
 
         private void _init()
@@ -90,23 +82,29 @@ namespace platformerGame
             m_FPS = 0.0;
 
             m_Timer = new cTimer();
-            //ChangeGameState( new cGameScene(this) );
+            //ChangeGameState( new GameScene(this) );
 
             fpsUpdater = new cRegulator();
             fpsUpdater.resetByPeriodTime(1.0f);
 
 
             //Idő szöveg
-            timeText = new Text("", cAssetManager.GetFont("pf_tempesta_seven"));
+            timeText = new Text("", AssetManager.GetFont("pf_tempesta_seven"));
             timeText.Position = new Vector2f(this.defaultView.Size.X-500, 30);
             timeText.CharacterSize = 28; // in pixels, not points!
-            timeText.Color = Color.White;
+            timeText.FillColor = Color.White;
             timeText.Style = Text.Styles.Bold;
 
             cGlobalClock.Start();
 
-            m_CurrentState = new cGameScene(this);
-            m_CurrentState.Enter();
+            // currentState = new GameScene(this);
+            // currentState.Enter();
+
+            GameScene scene = new GameScene(this);
+            definiedStates.Add("main-menu", new MainMenu(this));
+            definiedStates.Add("game-scene", scene);
+
+            this.ChangeGameState("main-menu");
 
             m_AppRunning = true;
 
@@ -120,42 +118,47 @@ namespace platformerGame
         private void activateVSYNC()
         {
             this.vsync = true;
-            m_MainWindow.SetVerticalSyncEnabled(true);
+            mainWindow.SetVerticalSyncEnabled(true);
         }
 
         private void deactivateVSYNC()
         {
             this.vsync = false;
-            m_MainWindow.SetVerticalSyncEnabled(false);
+            mainWindow.SetVerticalSyncEnabled(false);
         }
 
         private void _beforeUpdate()
         {
-            m_CurrentState.BeforeUpdate();
+            currentState.BeforeUpdate();
         }
 
-        private void _update(float step_time)
+        private void _updateFixed(float step_time)
         {
-            m_CurrentState.Update(step_time);
+            currentState.UpdateFixed(step_time);
+        }
+
+        private void _updateVariable(float step_time  = 1.0f)
+        {
+            currentState.UpdateVariable(step_time);
         }
 
         private void _render(float alpha)
         {
-            m_MainWindow.Clear(clearColor);
+            mainWindow.Clear(clearColor);
 
-            m_CurrentState.Render(m_MainWindow, alpha);
+            currentState.Render(mainWindow, alpha);
 
 
 
-            this.m_MainWindow.SetView(this.defaultView);
+            this.mainWindow.SetView(this.defaultView);
             
-            if (fpsUpdater.isReady())
-                timeText.DisplayedString = /*"Delta: " + delta.ToString() + "  " + */"VSYNC: " + (this.vsync ? "ON" : "OFF"); //entityPool.getNumOfActiveBullets().ToString();
-             
-            this.m_MainWindow.Draw(timeText);
+            //if (fpsUpdater.isReady())
+             //   timeText.DisplayedString = /*"Delta: " + delta.ToString() + "  " + */"VSYNC: " + (this.vsync ? "ON" : "OFF"); //entityPool.getNumOfActiveBullets().ToString();
+            
+            this.mainWindow.Draw(timeText);
 
 
-            m_MainWindow.Display();
+            mainWindow.Display();
         }
 
 
@@ -190,7 +193,7 @@ namespace platformerGame
                 if (delta > MAX_DELTA)
                     delta = MAX_DELTA;
 
-                m_MainWindow.DispatchEvents();
+                mainWindow.DispatchEvents();
 
                 _beforeUpdate();
 
@@ -200,7 +203,7 @@ namespace platformerGame
 
                 while (accu >= STEP)
                 {
-                    _update(FSTEP_TIME);
+                    _updateFixed(FSTEP_TIME);
                     accu -= STEP;
                 }
 
@@ -252,7 +255,7 @@ namespace platformerGame
                 
                 curTime = (ulong)gameTime.ElapsedTime.AsMicroseconds();
 
-                m_MainWindow.DispatchEvents();
+                mainWindow.DispatchEvents();
                 _beforeUpdate();
 
 
@@ -260,7 +263,7 @@ namespace platformerGame
 
                 while (next_game_tick < curTime && loops < MAX_FRAMESKIP)
                 {
-                    _update(STEP_TIME);
+                    _updateFixed(STEP_TIME);
 
                     next_game_tick += SKIP_TICKS;
                     loops++;
@@ -271,8 +274,6 @@ namespace platformerGame
 
                
                 _render(interpolation);
-                
-                
             }
         }
 
@@ -292,7 +293,7 @@ namespace platformerGame
             
             float maxDelta = 0.25f; //0.25f
             float acc = 0;
-            float stepTime = 1.0f / 60.0f;
+            float stepTime = Constants.STEP_TIME;
             int loops;
             float alpha = 0.0f;
 
@@ -303,31 +304,45 @@ namespace platformerGame
                 delta = time - lastTime;
                 lastTime = time;
 
-                m_MainWindow.DispatchEvents();
+                //m_MainWindow.DispatchEvents();
 
                 //m_DeltaTime = m_Timer.GetDeltaTime();
                 //m_FPS = 1.0f / m_DeltaTime;
-
-               if (delta > maxDelta)
+                
+                if (delta > maxDelta)
                     delta = maxDelta;
+                
 
                 acc += delta;
+
+                /*
+                float lagTreshold = MAX_FRAMESKIP * stepTime;
+                if (acc > lagTreshold)
+                {
+                    acc = lagTreshold;
+                }
+                */
 
                 _beforeUpdate();
 
                 loops = 0;
                 while (acc >= stepTime)
                 {
-                    _update(stepTime);
+                    mainWindow.DispatchEvents();
+                    _updateFixed(stepTime);
                     acc -= stepTime;
 
                     loops++;
+                    
                     if(loops >= MAX_FRAMESKIP)
                     {
                         acc = 0.0f;
                         break;
                     }
+                    
                 }
+
+                _updateVariable();
 
                 alpha = acc / stepTime;
                 _render(alpha);
@@ -337,9 +352,9 @@ namespace platformerGame
 
         public void _destroy()
         {
-            cAssetManager.Destroy();
-            m_CurrentState.Exit();
-            m_MainWindow.Close();
+            AssetManager.ClearAll();
+            currentState.Exit();
+            mainWindow.Close();
         }
         
         public void Run()
@@ -349,16 +364,12 @@ namespace platformerGame
             _destroy();
         }
 
-        public cPlayerInfo PlayerInfo
-        {
-            get { return playerInfo; }
-            set { playerInfo = value; }
-        }
         /// <summary>
         /// Pl. kilépés menüre gombra kattintanak
         /// </summary>
         public void CloseApp()
         {
+            currentState.Exit();
             m_AppRunning = false;
         }
 
@@ -367,46 +378,69 @@ namespace platformerGame
             get { return m_FPS; }
         }
 
-        public void ChangeGameState(cGameScene new_state)
+        public void ChangeGameState(string new_state)
         {
-            if(m_CurrentState != null)
-                m_CurrentState.Exit();
 
-            //m_LastState = m_CurrentState;
-            m_CurrentState = new_state;
-            m_CurrentState.Enter();
+            GameState desired;
+            if(definiedStates.TryGetValue(new_state, out desired))
+            {
+                if (currentState != null)
+                {
+                   currentState.Exit();
+                }
+                   
+                currentState = desired;
+                currentState.Enter();
+            }
+
+            
         }
 
         private void OnResized(object sender, SizeEventArgs e)
         {
-            var view = m_MainWindow.GetView();
-            view.Size = new Vector2f(m_WindowSize.X, m_WindowSize.Y); // (e.Width, e.Height);
-            m_MainWindow.SetView(view);
+            var view = mainWindow.GetView();
+            view.Size = new Vector2f(windowSize.X, windowSize.Y); // (e.Width, e.Height);
+            mainWindow.SetView(view);
         }
 
         private void OnClosed(object sender, EventArgs e)
         {
-            m_AppRunning = false;
+            this.CloseApp();
         }
+
         private void OnKeyPressed(object sender, KeyEventArgs e)
         {
-
+            /*
             if (e.Code == Keyboard.Key.Escape)
                 m_AppRunning = false;
+            */
 
             if (e.Code == Keyboard.Key.V)
                 toggleVSYNC();
+
+            currentState.HandleKeyPress(e);
+
         }
 
         private void OnMouseButtonPressed(object sender, MouseButtonEventArgs e)
         {
-            m_CurrentState.HandleSingleMouseClick(e);
+            currentState.HandleSingleMouseClick(e);
         }
         
 
         public RenderWindow MainWindow
         {
-            get { return m_MainWindow; }
+            get { return mainWindow; }
+        }
+
+        public Vector2f WindowSize
+        {
+            get { return windowSize; }
+        }
+
+        public void StartGame()
+        {
+            this.ChangeGameState("game-scene");
         }
     }
 }

@@ -8,16 +8,16 @@ using SFML.System;
 
 namespace platformerGame.Particles
 {
-    class cEmissionInfo
+    class EmissionInfo
     {
-        Particle particle;
+        Particle particleRef;
         Vector2f startPosition;
         Vector2f emitDirection;
 
         public Particle Particle
         {
-            get { return particle; }
-            set { particle = value; }
+            get { return particleRef; }
+            set { particleRef = value; }
         }
 
         public Vector2f StartPosition
@@ -32,30 +32,30 @@ namespace platformerGame.Particles
             set { emitDirection = value; }
         }
 
-        public cEmissionInfo(Vector2f start_position)
+        public EmissionInfo(Vector2f start_position)
         {
-            this.particle = null;
+            this.particleRef = null;
             this.startPosition = start_position;
             this.emitDirection = new Vector2f(0.0f, 0.0f);
         }
 
-        public cEmissionInfo(Vector2f start_position, Vector2f emit_direction)
+        public EmissionInfo(Vector2f start_position, Vector2f emit_direction)
         {
-            this.particle = null;
+            this.particleRef = null;
             this.startPosition = start_position;
             this.emitDirection = emit_direction;
         }
 
-        public cEmissionInfo(Particle particle, Vector2f start_position)
+        public EmissionInfo(Particle particle, Vector2f start_position)
         {
-            this.particle = particle;
+            this.particleRef = particle;
             this.startPosition = start_position;
             this.emitDirection = new Vector2f(0.0f, 0.0f);
         }
 
-        public cEmissionInfo(Particle particle, Vector2f start_position, Vector2f emit_direction)
+        public EmissionInfo(Particle particle, Vector2f start_position, Vector2f emit_direction)
         {
-            this.particle = particle;
+            this.particleRef = particle;
             this.startPosition = start_position;
             this.emitDirection = emit_direction;
         }

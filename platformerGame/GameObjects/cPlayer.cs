@@ -1,9 +1,10 @@
 ﻿using SFML.Graphics;
 using SFML.System;
 
-using platformerGame.Weapons;
+using platformerGame.Inventory.Weapons;
 using platformerGame.Utilities;
 using platformerGame.GameObjects.PickupInfo;
+using platformerGame.App;
 
 namespace platformerGame.GameObjects
 {
@@ -11,20 +12,23 @@ namespace platformerGame.GameObjects
     {
         cWeapon weapon;
         Text healthText;
-        public cPlayer(cGameScene scene, Vector2f pos) : base(scene, pos)
+
+        public cPlayer(GameScene scene, Vector2f pos) : base(scene, pos)
         {
             p_followLight = new cLight();
-            p_followLight.Radius = 80.0f;
+            p_followLight.Radius = 160.0f;
             p_followLight.LinearizeFactor = 0.9f;
             p_followLight.Color = new Color(240, 219, 164);
             this.Scene.LightMap.AddStaticLight(p_followLight);
 
-            this.weapon = new cShotgun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY); // 9
+            this.weapon = new cMachineGun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY);
+                // new cShotgun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY); // 9
 
-            healthText = new Text("", cAssetManager.GetFont("pf_tempesta_seven"));
+            this.health = 50;
+            healthText = new Text("", AssetManager.GetFont("pf_tempesta_seven"));
             healthText.Position = new Vector2f(pscene.AppController.MainWindow.DefaultView.Size.X - 500, 30);
             healthText.CharacterSize = 28; // in pixels, not points!
-            healthText.Color = Color.White;
+            healthText.FillColor = Color.White;
             healthText.Style = Text.Styles.Bold;
         }
 
@@ -32,10 +36,10 @@ namespace platformerGame.GameObjects
         {
             base.initSprites();
 
-            IntRect viewRect = Constants.CHAR_VIEW_RECT;
+            MyIntRect viewRect = Constants.CHAR_VIEW_RECT;
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.STAND, HorizontalFacing.FACING_LEFT),
-                                         cAssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
@@ -46,7 +50,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.STAND, HorizontalFacing.FACING_RIGHT),
-                                         cAssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
@@ -57,7 +61,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.WALK, HorizontalFacing.FACING_LEFT),
-                                         cAssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
@@ -68,7 +72,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.WALK, HorizontalFacing.FACING_RIGHT),
-                                         cAssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
@@ -79,7 +83,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.JUMP, HorizontalFacing.FACING_LEFT),
-                                         cAssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          1,
@@ -90,7 +94,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.JUMP, HorizontalFacing.FACING_RIGHT),
-                                         cAssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          1,
@@ -102,7 +106,7 @@ namespace platformerGame.GameObjects
 
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.FALL, HorizontalFacing.FACING_LEFT),
-                                         cAssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          6,
@@ -113,7 +117,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.FALL, HorizontalFacing.FACING_RIGHT),
-                                         cAssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          6,

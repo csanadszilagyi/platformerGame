@@ -14,6 +14,7 @@ namespace platformerGame
         public Vector2f Pos;
         public Vector2f LastPos;
         public Vector2f ViewPos;
+        public Vector2f StartPos;
 
         public Vector2f Dims; //width, height
         public Vector2f Vel; // velocity
@@ -37,6 +38,7 @@ namespace platformerGame
             Pos = new Vector2f(0.0f, 0.0f);
             LastPos = new Vector2f(0.0f, 0.0f);
             ViewPos = new Vector2f(0.0f, 0.0f);
+            StartPos = new Vector2f(0.0f, 0.0f);
             Dims = new Vector2f(2.0f, 2.0f); // 2x2 square
             Vel = new Vector2f(0.0f, 0.0f);
             Heading = new Vector2f(0.0f, 0.0f);
@@ -52,9 +54,9 @@ namespace platformerGame
             Intersects = false;
         }
 
-        public cAABB getBoundingBox()
+        public AABB getBoundingBox()
         {
-            cAABB b = new cAABB();
+            AABB b = new AABB();
             b.SetDims(Dims);
             b.SetPosByCenter(Pos);
             return b;
@@ -65,6 +67,7 @@ namespace platformerGame
             this.Pos = p.Pos;
             this.LastPos = p.LastPos;
             this.ViewPos = p.ViewPos;
+            this.StartPos = p.StartPos;
             this.Dims = p.Dims;
             this.Vel = p.Vel;
             this.Heading = p.Heading;

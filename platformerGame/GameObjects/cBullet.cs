@@ -14,7 +14,9 @@ namespace platformerGame.GameObjects
     class cBullet : cGameObject
     {
         const uint SLUG_LENGTH = 5;
-        const uint TEXTURE_INTERSECTION_OFFSET = 0; //30 // 15; // pixel from the edge of the texture
+
+        // 30, 15 pixels from the edge of the texture
+        const uint TEXTURE_INTERSECTION_OFFSET = 30; 
 
         cGameObject owner;
         Vector2f oppositeDir;
@@ -37,7 +39,7 @@ namespace platformerGame.GameObjects
             this.alpha = 255.0f;
             this.owner = owner;
             this.heading = direction;
-            this.bounds = new cAABB();
+            this.bounds = new AABB();
             this.bounds.SetDims(new Vector2f(1.0f, 1.0f));
             this.oppositeDir = new Vector2f(-this.heading.X*SLUG_LENGTH, -this.heading.Y*SLUG_LENGTH);
             this.intersection = new Vector2f(0.0f, 0.0f);
@@ -46,7 +48,7 @@ namespace platformerGame.GameObjects
             this.velocity.Y = this.heading.Y * Constants.BULLET_START_SPEED;
             orientation = cAppMath.GetAngleOfVector(heading);
 
-            this.sprite = new Sprite(cAssetManager.GetTexture(Constants.BULLET_TEXTURE_NAME)); // bullet_yellow_sm; bullet_light_gree
+            this.sprite = new Sprite(AssetManager.GetTexture(Constants.BULLET_TEXTURE_NAME)); // bullet_yellow_sm; bullet_light_gree
             this.sprite.Scale = new Vector2f(0.5f, 0.5f);
             this.sprite.Rotation = (float)cAppMath.RadianToDegress(this.orientation);
             this.sprite.Origin = new Vector2f(this.sprite.TextureRect.Width - TEXTURE_INTERSECTION_OFFSET, this.sprite.TextureRect.Height/2.0f);
@@ -67,7 +69,7 @@ namespace platformerGame.GameObjects
                 (int x, int y) =>
                 {
 
-                    collided = world.IsObastacleAtPos(new Vector2f(x, y)); //world.GetCurrentLevel().IsObstacleAtPos(x, y);
+                    collided = world.IsWallAtPos(new Vector2f(x, y)); //world.GetCurrentLevel().IsObstacleAtPos(x, y);
 
                     intersectionPoint.X = x; // = world.ToWorldPos(new Vector2i(x, y));
                     intersectionPoint.Y = y;
@@ -100,6 +102,7 @@ namespace platformerGame.GameObjects
                 position.X = intersection.X;
                 position.Y = intersection.Y;
                 velocity = new Vector2f(0.0f, 0.0f);
+                //cAssetManager.playSound("wallhit", 5);
                 this.kill();
             }
 

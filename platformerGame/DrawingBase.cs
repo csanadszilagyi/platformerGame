@@ -13,18 +13,18 @@ using platformerGame.Utilities;
 
 namespace platformerGame
 {
-    class cRenderFunctions
+    class DrawingBase
     {
         //private static Sprite sprite = new Sprite();
         private static Sprite sprite = new Sprite();
-        static cRenderFunctions()
+        static DrawingBase()
         {
 
         }
         public static void DrawSprite(RenderTarget destination,
                                       Vector2f location,
 								      Texture texture,
-								      IntRect sub_rect,
+								      MyIntRect sub_rect,
                                       Color coloration,
 								      float rotation,
                                       Vector2f scale,
@@ -55,7 +55,7 @@ namespace platformerGame
         public static void DrawTextureSimple(RenderTarget destination,
                                        Vector2f location,
                                        Texture texture,
-                                       IntRect sub_rect,
+                                       MyIntRect sub_rect,
                                        Color coloration,
                                        BlendMode blend_mode
                                        )
@@ -94,7 +94,7 @@ namespace platformerGame
         public static void DrawTexture(RenderTarget destination,
     							       Vector2f location,
     							       Texture texture,
-                                       IntRect sub_rect,
+                                       MyIntRect sub_rect,
     							       Color coloration,
                                        float rotation,
                                        float scale,
@@ -111,12 +111,6 @@ namespace platformerGame
                 sub_rect.Width = (int)texture.Size.X;
                 sub_rect.Height = (int)texture.Size.Y;
             }
-
-            /*
-            Vector2f centre = new Vector2f();
-            centre.X = location.X + texture.Size.X / 2.0f;
-            centre.Y = location.Y + texture.Size.Y / 2.0f;
-            */
 
             //Set the position in space.
             Transform translationT = Transform.Identity;
@@ -228,6 +222,87 @@ namespace platformerGame
             //vertices.Draw(destination, states);
         }
 
+        public static void DrawTextureUseCenter(RenderTarget destination,
+                                       Vector2f location,
+                                       Texture texture,
+                                       MyIntRect sub_rect,
+                                       Color coloration,
+                                       float rotation,
+                                       float scale,
+                                       bool flip_horizontally,
+                                       bool flip_vertically,
+                                       BlendMode blend_mode,
+                                       Shader shader)
+        {
+
+            if (sub_rect.Width == 0 || sub_rect.Height == 0)
+            {
+                sub_rect.Top = 0;
+                sub_rect.Left = 0;
+                sub_rect.Width = (int)texture.Size.X;
+                sub_rect.Height = (int)texture.Size.Y;
+            }
+
+
+            //Set the position in space.
+            Transform translationT = Transform.Identity;
+
+            translationT.Translate(location); //location
+
+            //Set the rotation (rotated around the center, since this Transform wasn't moved).
+            Transform rotationT = Transform.Identity;
+            rotationT.Rotate(rotation);
+
+            Transform scaleT = Transform.Identity;
+            scaleT.Scale(scale, scale);
+
+            //Setup the render state.
+            float left = sub_rect.Left;
+            float right = left + sub_rect.Width;
+            float top = sub_rect.Top;
+            float bottom = top + sub_rect.Height;
+
+            float widthBeforeTransform = sub_rect.Width;
+            float heightBeforeTransform = sub_rect.Height;
+
+            RenderStates states = new RenderStates(blend_mode, translationT * rotationT * scaleT, texture, shader);
+
+
+
+            //Setup the vertices and their attributes.
+
+            VertexArray vertices = new VertexArray(PrimitiveType.Quads);
+
+
+            if (flip_vertically)
+            {
+                Utils.Swap<float>(ref top, ref bottom);
+            }
+
+            if (flip_horizontally)
+            {
+                Utils.Swap<float>(ref right, ref left);
+            }
+
+            // centered
+            
+            vertices.Append(new Vertex(new Vector2f(-widthBeforeTransform/2, -heightBeforeTransform/2), coloration, new Vector2f(left, top)));
+            vertices.Append(new Vertex(new Vector2f(widthBeforeTransform/2, -heightBeforeTransform / 2), coloration, new Vector2f(right, top)));
+            vertices.Append(new Vertex(new Vector2f(widthBeforeTransform/2, heightBeforeTransform/2), coloration, new Vector2f(right, bottom)));
+            vertices.Append(new Vertex(new Vector2f(-widthBeforeTransform / 2, heightBeforeTransform/2), coloration, new Vector2f(left, bottom)));
+            /*
+            vertices.Append(new Vertex(new Vector2f(0.0f, 0.0f), coloration, new Vector2f(left, top)));
+            vertices.Append(new Vertex(new Vector2f(widthBeforeTransform, 0), coloration, new Vector2f(right, top)));
+            vertices.Append(new Vertex(new Vector2f(widthBeforeTransform, heightBeforeTransform), coloration, new Vector2f(right, bottom)));
+            vertices.Append(new Vertex(new Vector2f(0, heightBeforeTransform), coloration, new Vector2f(left, bottom)));
+            */
+            //Use the RenderTarget to draw the vertices using the RenderStates we set up.
+
+            destination.Draw(vertices, states);
+
+        }
+
+
         public static void DrawDirLightByDVec(RenderTarget destination,
 
                                      Vector2f light_pos,
@@ -241,7 +316,7 @@ namespace platformerGame
 
         double lightSubdivisionSize = cAppMath.PI / 24.0;
 
-        VertexArray va = new VertexArray(PrimitiveType.TrianglesFan);
+        VertexArray va = new VertexArray(PrimitiveType.TriangleFan);
 
         Transform t = Transform.Identity;
         RenderStates states = new RenderStates(blend_mode, t, null, shader);
@@ -326,7 +401,7 @@ namespace platformerGame
 }
 
         public static void DrawRectangleShape(RenderTarget destination,
-                                              cAABB bounds,
+                                              AABB bounds,
                                               Color color,
                                               BlendMode blend_mode,
                                               double orientation = 0.0)

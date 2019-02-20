@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using SFML.Graphics;
 using SFML.System;
+using platformerGame.Utilities;
 
 namespace platformerGame
 {
@@ -32,14 +32,14 @@ namespace platformerGame
                                         int num_rows_of_frames,
                                         uint frame_time )
         {
-            cAnimation temp = new cAnimation(texture);
+            cAnimation temp = new cAnimation(texture, new MyIntRect());
             //temp.SetSpriteSheet(texture);
 
             for (int y = 0; y < num_rows_of_frames; y++)
             {
                 for (int x = 0; x < num_columns_of_frames; x++)
                 {
-                    temp.AddFrame(new IntRect(x * a_frame_width,
+                    temp.AddFrame(new MyIntRect(x * a_frame_width,
                                                y * a_frame_height,
                                                a_frame_width,
                                                a_frame_height));
@@ -56,24 +56,26 @@ namespace platformerGame
 
         public void AddAnimState(cSpriteState state_type,
 					  Texture texture,
-					  int a_frame_width,
-                      int a_frame_height,
+					  int frame_width,
+                      int frame_height,
                       int start_frame_column, //x
                       int start_frame_row, //y
                       uint anim_start_frame,
                       int num_frames,
-                      uint frame_time,
-                      IntRect view_rect,
+                      uint frame_time, // in ms
+                      MyIntRect view_rect,
                       bool flip_vertically = false,
                       bool flip_horizontally = false)
         {
             if(view_rect.Width == 0 && view_rect.Height == 0)
             {
-                view_rect.Width = a_frame_width;
-                view_rect.Height = a_frame_height;
+                view_rect.Width = frame_width;
+                view_rect.Height = frame_height;
             }
 
             cAnimation anim = new cAnimation(texture, view_rect);
+            anim.AnimData.Repeat = true;
+
             anim.FlipHorizontally = flip_horizontally;
             anim.FlipVertically = flip_vertically;
             //anim.SetSpriteSheet(texture);
@@ -83,10 +85,10 @@ namespace platformerGame
 
             for (int x = 0; x < num_frames; ++x)
             {
-                anim.AddFrame(new IntRect((start_frame_column + x) * a_frame_width,
-                                               start_frame_row * a_frame_height,
-                                               a_frame_width,
-                                               a_frame_height));
+                anim.AddFrame(new MyIntRect((start_frame_column + x) * frame_width,
+                                               start_frame_row * frame_height,
+                                               frame_width,
+                                               frame_height));
             }
 
             anim.SetFrameTime(frame_time);
@@ -134,6 +136,7 @@ namespace platformerGame
 
             m_SpriteStates.Clear();
         }
+
         public void Render(RenderTarget destination, Vector2f pos)
         {
             m_pCurrentAnim.Render(destination, pos);

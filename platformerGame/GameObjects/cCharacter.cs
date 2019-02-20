@@ -7,6 +7,8 @@ using SFML.Graphics;
 using SFML.System;
 
 using platformerGame.Utilities;
+using platformerGame.Map;
+using platformerGame.App;
 
 namespace platformerGame.GameObjects
 {
@@ -29,7 +31,7 @@ namespace platformerGame.GameObjects
         protected float maxWalkSpeed;
 
 
-        public cCharacter(cGameScene scene, Vector2f pos) : base(scene, pos)
+        public cCharacter(GameScene scene, Vector2f pos) : base(scene, pos)
         {
             spriteControl = new cSpriteStateController();
             initSprites();
@@ -43,7 +45,7 @@ namespace platformerGame.GameObjects
 
         protected virtual void init()
         {
-            bounds = new cAABB(0,0,1,1);
+            bounds = new AABB(0,0,1,1);
             bounds.SetDims(new Vector2f(Constants.CHAR_COLLISON_RECT.Width, Constants.CHAR_COLLISON_RECT.Height));
             bounds.SetPosByTopLeft(position);
 
@@ -84,6 +86,12 @@ namespace platformerGame.GameObjects
         {
             return viewPosition + bounds.halfDims;
         }
+
+        public Vector2f GetCenterPos()
+        {
+            return position + bounds.halfDims;
+        }
+
         protected virtual void updateX(float step_time, cWorld world)
         {
             acceleration.X = force.X;
@@ -498,6 +506,14 @@ namespace platformerGame.GameObjects
         public virtual void Hit(int amount, cGameObject entity_by)
         {
             this.health -= amount;
+        }
+
+        public virtual void MeleeHit(int amount, cGameObject entity_by)
+        {
+            this.Hit(amount, entity_by);
+            Vector2f towardsMe = cAppMath.Vec2NormalizeReturn(this.HitCollisionRect.center - entity_by.HitCollisionRect.center);
+            this.force = towardsMe * 50000;
+            
         }
 
         public int Health

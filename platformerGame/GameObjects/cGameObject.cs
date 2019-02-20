@@ -2,19 +2,23 @@
 using SFML.Graphics;
 
 using platformerGame.Utilities;
+using platformerGame.Containers;
+using platformerGame.App;
 
 namespace platformerGame.GameObjects
 {
-    class cGameObject : cQuadTreeOccupant, IDrawable
+    class cGameObject : GridOccupant, IDrawable
     {
-        protected int m_ID;
+        protected int id;
         protected static int m_NextValidID;
       
-        protected cGameScene pscene;
+        protected GameScene pscene;
 
         protected Vector2f position;
         protected Vector2f lastPosition;
         protected Vector2f viewPosition; // interpolációhoz
+
+        protected Vector2i gridCoordinate;
 
         protected Vector2f velocity;
         protected Vector2f acceleration;
@@ -28,6 +32,11 @@ namespace platformerGame.GameObjects
         public float MaxSpeed { get; set; }
         public float SlowDown { get; set; }
 
+        /// <summary>
+        /// For Debug purposes.
+        /// </summary>
+        public bool Marked { get; set; }
+
         protected Vector2f viewSize;
         //protected cAABB boundingBox;
         
@@ -36,14 +45,17 @@ namespace platformerGame.GameObjects
 
         protected bool movAble;
 
-        protected cAABB hitCollisionRect;
+        protected AABB hitCollisionRect;
 
         public cGameObject() : base()
         {
             pscene = null;
-            position = new Vector2f(0.0f, 0.0f); ;
-            lastPosition = new Vector2f(0.0f, 0.0f); ;
-            viewPosition = new Vector2f(0.0f, 0.0f); ;
+            position = new Vector2f(0.0f, 0.0f);
+            lastPosition = new Vector2f(0.0f, 0.0f);
+            viewPosition = new Vector2f(0.0f, 0.0f);
+
+            gridCoordinate = new Vector2i(0, 0);
+
             velocity = new Vector2f(0.0f, 0.0f);
             acceleration = new Vector2f(0.0f, 0.0f);
             force = new Vector2f(0.0f, 0.0f);
@@ -52,16 +64,19 @@ namespace platformerGame.GameObjects
             orientation = 0.0;
             mass = 1.0f;
             movAble = true;
-            hitCollisionRect = new cAABB();
-            m_ID = GetNextValidID();
-            
+            hitCollisionRect = new AABB();
+            this.Marked = false;
+            id = GetNextValidID();
         }
-        public cGameObject(cGameScene scene, Vector2f pos) : base()
+
+        public cGameObject(GameScene scene, Vector2f pos) : base()
         {
             pscene = scene;
             position = pos;
             lastPosition = pos;
             viewPosition = pos;
+
+            gridCoordinate = new Vector2i(0, 0);
 
             velocity = new Vector2f(0.0f, 0.0f);
             acceleration = new Vector2f(0.0f, 0.0f);
@@ -69,8 +84,14 @@ namespace platformerGame.GameObjects
             orientation = 0.0;
             mass = 1.0f;
             movAble = true;
-            hitCollisionRect = new cAABB();
-            m_ID = GetNextValidID();
+            hitCollisionRect = new AABB();
+            this.Marked = false;
+            id = GetNextValidID();
+        }
+
+        public void Create()
+        {
+            this.gridCoordinate = EntityPool.calcGridPos(this.Bounds.center);
         }
 
         protected static int GetNextValidID()
@@ -84,7 +105,7 @@ namespace platformerGame.GameObjects
             set { viewSize = value; }
         }
         
-        public cAABB HitCollisionRect
+        public AABB HitCollisionRect
         {
             get { return hitCollisionRect; }
             set { hitCollisionRect = value; }
@@ -92,9 +113,9 @@ namespace platformerGame.GameObjects
 
         public int ID
         {
-            get { return m_ID; }
+            get { return id; }
         }
-        public cGameScene Scene
+        public GameScene Scene
         {
             get { return pscene; }
         }
@@ -136,6 +157,12 @@ namespace platformerGame.GameObjects
             {
                 viewPosition = value;
             }
+        }
+        
+        public Vector2i GridCoordinate
+        {
+            get { return this.gridCoordinate; }
+            set { this.gridCoordinate = value; }
         }
 
         public Vector2f Velocity
@@ -287,13 +314,15 @@ namespace platformerGame.GameObjects
             go.LastPosition = p.LastPos;
             go.Velocity = p.Vel;
             go.viewPosition = p.ViewPos;
-            go.HitCollisionRect = new cAABB();
-            go.HitCollisionRect.SetDims(new Vector2f(1, 1));
-            go.HitCollisionRect.SetPosByCenter(p.Pos);
+            go.Bounds.SetDims(new Vector2f(2.0f, 2.0f));
+            go.Bounds.SetPosByCenter(p.Pos);
+            go.mass = 1.0f;
+            go.movAble = true;
+            go.HitCollisionRect = go.Bounds.ShallowCopy();
             return go;
         }
 
-        public static cGameObject MakeWall(cAABB box)
+        public static cGameObject MakeWall(AABB box)
         {
             cGameObject go = new cGameObject();
             go.Position = box.center;

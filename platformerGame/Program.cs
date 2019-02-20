@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
+using platformerGame.App;
 
 namespace platformerGame
 {
@@ -12,10 +13,11 @@ namespace platformerGame
     {
         static void Main(string[] args)
         {
-            cSfmlApp gameApp;
+            SfmlApp gameApp;
+            
             try
             {
-                gameApp = new cSfmlApp();
+                gameApp = new SfmlApp();
                 gameApp.Run();
             }
             catch (Exception e)

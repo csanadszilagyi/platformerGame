@@ -15,6 +15,9 @@ namespace platformerGame.Utilities
 {
     class Constants
     {
+        public const float STEP_TIME = 1.0f / 60.0f;
+        public const uint ANIM_FRAME_TIME = 50; //in ms
+
         public static int TILE_SIZE = 16;
         public static int TILE_SIZE_HALF = TILE_SIZE / 2;
 
@@ -85,10 +88,10 @@ namespace platformerGame.Utilities
         public static int MONSTER_MAX_HEALTH { get; private set; }
 
         [JsonProperty("character-collision-rect")]
-        public static IntRect CHAR_COLLISON_RECT { get; private set; } // = new IntRect(10, 0, 22, 32); //32-10 = 22 | 10:left, 32:width
+        public static MyIntRect CHAR_COLLISON_RECT { get; private set; } // = new IntRect(10, 0, 22, 32); //32-10 = 22 | 10:left, 32:width
 
         [JsonProperty("character-view-rect")]
-        public  static IntRect CHAR_VIEW_RECT { get; private set; } // = new IntRect(5, 0, 27, 32);
+        public  static MyIntRect CHAR_VIEW_RECT { get; private set; } // = new IntRect(5, 0, 27, 32);
 
         [JsonProperty("lightmap-color")]
         public  static Color LIGHTMAP_COLOR { get; private set; }

@@ -8,12 +8,12 @@ using SFML.Graphics;
 
 namespace platformerGame.Utilities
 {
-    class Utils
+    public static class Utils
     {
         //==========================================================================================================
         public static Color GetRandomRedColor()
         {
-            Color c = GetRandomColor(90, 255, 1, 80, 1, 80); // (160, 255, 20, 80, 20, 80);
+            Color c = GetRandomColor(200, 255, 5, 90, 5, 90); // (160, 255, 20, 80, 20, 80);
             return c;
         }
         //==========================================================================================================
@@ -46,6 +46,20 @@ namespace platformerGame.Utilities
             T c = a;
             a = b;
             b = c;
+        }
+        //==========================================================================================================
+        public static Color GetSfmlColorFromHex(string hex_color)
+        {
+            System.Drawing.Color c = System.Drawing.ColorTranslator.FromHtml(hex_color);
+            return new Color(c.R, c.G, c.B, c.A);
+        }
+        //==========================================================================================================
+        public static void RemoveAll<TKey, TValue>(this Dictionary<TKey, TValue> dict, Func<KeyValuePair<TKey, TValue>, bool> match)
+        {
+            foreach (var cur in dict.Where(match).ToList())
+            {
+                dict.Remove(cur.Key);
+            }
         }
     }
 }

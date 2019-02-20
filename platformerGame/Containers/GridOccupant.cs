@@ -4,22 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace platformerGame
+namespace platformerGame.Containers
 {
-    class cQuadTreeOccupant
+    class GridOccupant
     {
-        protected cAABB bounds;
-        public cQuadTreeOccupant()
+        protected AABB bounds;
+        public GridOccupant()
         {
-            bounds = new cAABB(0, 0, 0, 0);
+            bounds = new AABB(0, 0, 0, 0);
         }
 
-        public cQuadTreeOccupant(cAABB _bounds)
+        public GridOccupant(AABB _bounds)
         {
             bounds = _bounds.ShallowCopy();
         }
 
-        public cAABB Bounds
+        public AABB Bounds
         {
             get { return bounds; }
             set { bounds = value; }

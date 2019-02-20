@@ -77,15 +77,25 @@ namespace platformerGame.Utilities
             //return ((val < min) ? min : (val > max) ? max : val);
         }
 
+        public static float RoundToNearest(float value, float factor)
+        {
+            return (float)Math.Round(value / factor) * factor;
+        }
+
         public static double GetAngleOfVector(Vector2f vec)
         {
             return (Math.Atan2(vec.X, -vec.Y) - HALF_PI);
         }
-
+        //==============================================================================================
         //Getting the angle of two vectors
         public static float GetAngleBetwenVecs(Vector2f vecA, Vector2f vecB)
         {
             return (float)Math.Acos(Vec2Dot(vecA, vecB) / (Vec2Length(vecA) * Vec2Length(vecB)));
+        }
+        //==============================================================================================
+        public static Vector2f LengthDir(float angle, float len)
+        {
+            return new Vector2f( (float)Math.Cos(angle) * len, (float)Math.Sin(angle) * len); // -sin?
         }
         //==============================================================================================
         //only works correctly with unit vectors

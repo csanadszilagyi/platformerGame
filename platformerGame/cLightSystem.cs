@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 using SFML.Graphics;
 using SFML.System;
+using tileLoader;
 
 using platformerGame.Utilities;
+using SFML.Graphics.Glsl;
 
 namespace platformerGame
 {
@@ -16,7 +18,7 @@ namespace platformerGame
         private RenderTexture staticLightTexture;
         private RenderTexture dynamicLightTexture;
 
-        private Shader m_AutenuationShader;
+        private Shader autenuationShader;
 
         private List<cLight> staticLights;
 
@@ -51,7 +53,7 @@ namespace platformerGame
             dynamicLights = new List<cLight>();
             m_ClearColor = clear_color;
 
-            lightTexture = new Texture(cAssetManager.GetTexture("light1"));
+            lightTexture = new Texture(AssetManager.GetTexture("light1"));
             lightTexture.Smooth = true;
             lightSprite = new Sprite(this.lightTexture);
             lightSprite.Origin = new Vector2f(lightTexture.Size.X / 2.0f, lightTexture.Size.Y / 2.0f);
@@ -105,11 +107,12 @@ namespace platformerGame
         private void loadShader()
         {
             
-            m_AutenuationShader = new Shader(null, "Resources/lightAttenuationShader.frag");
-            m_AutenuationShader.SetParameter("texture", Shader.CurrentTexture);
+            autenuationShader = new Shader(null, null, "Resources/lightAttenuationShader.frag");
+            //autenuationShader.SetParameter("texture", Shader.CurrentTexture);
+            autenuationShader.SetUniform("texture", Shader.CurrentTexture);
         }
 
-        private void renderALight(cLight light, RenderTarget target, cAABB viewRect)
+        private void renderALight(cLight light, RenderTarget target, AABB viewRect)
         {
             /*
             Vector3f glColor = new Vector3f(0, 0, 0);
@@ -119,21 +122,22 @@ namespace platformerGame
             */
 
             Vector2f newPos = new Vector2f(light.Pos.X - viewRect.topLeft.X, light.Pos.Y - viewRect.topLeft.Y);
+          
+            //autenuationShader.SetUniform("lightPos", new Vec2(newPos.X, target.Size.Y - newPos.Y));
+            autenuationShader.SetUniform("lightPos", new Vec2(newPos.X, target.Size.Y - newPos.Y));
+            autenuationShader.SetUniform("lightColor", new Vec3(light.GLcolor.X, light.GLcolor.Y, light.GLcolor.Z));
+            autenuationShader.SetUniform("radius", light.Radius);
+            autenuationShader.SetUniform("bleed", light.Bleed);
+            autenuationShader.SetUniform("linearizeFactor", light.LinearizeFactor);
 
-            m_AutenuationShader.SetParameter("lightPos", newPos.X, target.Size.Y - newPos.Y);
-            m_AutenuationShader.SetParameter("lightColor", light.GLcolor.X, light.GLcolor.Y, light.GLcolor.Z);
-            m_AutenuationShader.SetParameter("radius", light.Radius);
-            m_AutenuationShader.SetParameter("bleed", light.Bleed);
-            m_AutenuationShader.SetParameter("linearizeFactor", light.LinearizeFactor);
-
-            cRenderFunctions.DrawDirLightByDVec(target,
+            DrawingBase.DrawDirLightByDVec(target,
                                             newPos,
                                             light.Radius,
                                             light.Dir,
                                             light.SpreadAngle,
                                             light.Color,
                                             BlendMode.Add,
-                                            m_AutenuationShader);
+                                            autenuationShader);
             
             /*
             Vector2f newPos = new Vector2f();
@@ -155,7 +159,7 @@ namespace platformerGame
 
         }
 
-        public void separateVisibleLights(cAABB viewRect)
+        public void separateVisibleLights(AABB viewRect)
         {
             visibleLights.Clear();
 
@@ -169,7 +173,7 @@ namespace platformerGame
                 }
             }
         }
-        public void renderStaticLightsToTexture(cAABB viewRect)
+        public void renderStaticLightsToTexture(AABB viewRect)
         {
            staticLightTexture.Clear(m_ClearColor);
 
@@ -195,7 +199,7 @@ namespace platformerGame
 
         }
         */
-        public void Render(RenderTarget destination, cAABB viewRect)
+        public void Render(RenderTarget destination, AABB viewRect)
         {
 
             //destination.Draw(this.lightMapDarkShape, new RenderStates(BlendMode.Multiply));
@@ -208,10 +212,10 @@ namespace platformerGame
 
             //cRenderFunctions.DrawTextureSimple(destination, new Vector2f(), m_LightTexture.Texture, new IntRect(0,0, (int)m_LightTexture.Size.X, (int)m_LightTexture.Size.Y),Color.White, BlendMode.Multiply);
 
-            cRenderFunctions.DrawTextureSimple( destination, 
+            DrawingBase.DrawTextureSimple( destination, 
                                                 viewRect.topLeft, 
                                                 staticLightTexture.Texture, 
-                                                new IntRect(0, 0, (int)this.staticLightTexture.Size.X, (int)this.staticLightTexture.Size.Y),
+                                                new MyIntRect(0, 0, (int)this.staticLightTexture.Size.X, (int)this.staticLightTexture.Size.Y),
                                                //new IntRect((int)view_rect.topLeft.X, (int)view_rect.topLeft.Y,
                                                 //            (int)view_rect.dims.X, (int)view_rect.dims.Y),
                                                 Color.White,
@@ -229,6 +233,28 @@ namespace platformerGame
                                                    BlendMode.Multiply);
             */
 
+        }
+
+
+        public void loadLightsFromTmxMap(TmxMap map)
+        {
+            foreach(var tmxLight in map.ObjectGroups["Lights"].Objects)
+            {
+                Vector2f pos = new Vector2f();
+                pos.X = (float)(tmxLight.X + tmxLight.Width / 2.0);
+                pos.Y = (float)(tmxLight.Y + tmxLight.Height / 2.0);
+
+                cLight light = new cLight(pos);
+
+                // custom props conversion
+                string hexColor = tmxLight.Properties["color"];
+                light.Color = Utils.GetSfmlColorFromHex(hexColor);
+                light.Radius = float.Parse(tmxLight.Properties["radius"]);
+                light.Bleed = float.Parse(tmxLight.Properties["intensity"]);
+
+                this.AddStaticLight(light);
+            }
+            
         }
     }
 }

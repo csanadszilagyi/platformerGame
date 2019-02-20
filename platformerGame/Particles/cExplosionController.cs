@@ -17,20 +17,23 @@ namespace platformerGame.Particles
         double minScale = 0.3;
         double maxScale = 0.6;
 
+        int minSpeed = 200;
+        int maxSpeed = 400;
+
         public cExplosionController(cParticleManager manager, uint max_particles = 300) : base(manager, max_particles)
         {
             this.renderStates.Texture = manager.ExplosionTexture;
         }
 
 
-        protected override void initParticle(cEmissionInfo emission)
+        protected override void initParticle(EmissionInfo emission)
         {
             Particle particle = emission.Particle;
 
             particle.Pos = emission.StartPosition;
             particle.LastPos = particle.Pos;
             particle.ViewPos = particle.Pos;
-            particle.MaxSpeed = cAppMath.GetRandomNumber(200, 400); //700, 900 | (400, 600); //3, 8//Math->GetRandomNumber(510, 800); // 2000.0f
+            particle.MaxSpeed = cAppMath.GetRandomNumber(minSpeed, maxSpeed); //700, 900 | (400, 600); //3, 8//Math->GetRandomNumber(510, 800); // 2000.0f
 
             if( !cAppMath.Vec2IsZero(emission.EmitDirection))
             {
@@ -53,7 +56,7 @@ namespace platformerGame.Particles
                                        //particle.m_SlowDown = (float)Math->GetRandomDoubleInRange(0.55, 0.7); //0.6f;
                                        //phs->AddForce( sf::Vector2f(Math->GetRandomClamped() * phs->MaxSpeed, Math->GetRandomClamped() * phs->MaxSpeed) );
 
-            Vector2u uSize = particleManager.ExplosionTexture.Size;
+            Vector2u uSize = this.renderStates.Texture.Size;
 
             particle.Scale = (float)cAppMath.GetRandomDoubleInRange(this.minScale, this.maxScale);
             particle.Dims = new Vector2f(uSize.X * particle.Scale, uSize.Y * particle.Scale);
@@ -62,7 +65,7 @@ namespace platformerGame.Particles
             particle.Color = Utils.GetRandomGreenColor();
             particle.Opacity = 255.0f;
             particle.Life = 1.0f;
-            particle.Fade = 90; //Math->GetRandomNumber(100, 240);
+            particle.Fade = 80; // 90; //Math->GetRandomNumber(100, 240);
 
             particle.Intersects = false;
         }
@@ -72,18 +75,22 @@ namespace platformerGame.Particles
         /// </summary>
         /// <param name="position"></param>
         /// <param name="direction">Normalized vector of the emission direction</param>
-        public void LittleBlood(cEmissionInfo emission)
+        public void LittleBlood(EmissionInfo emission)
         {
             minScale = 0.2;
             maxScale = 0.4;
+            minSpeed = 200;
+            maxSpeed = 400;
             loopAddition(emission, 3);
         }
 
-        public void NormalBlood(cEmissionInfo emission)
+        public void NormalBlood(EmissionInfo emission)
         {
-            minScale = 0.5;
-            maxScale = 0.8;
-            loopAddition(emission, 20);
+            minScale = 0.5; // 0.5
+            maxScale = 0.8; // 0.8
+            minSpeed = 200;
+            maxSpeed = 400;
+            loopAddition(emission, 25);
         }
 
         public override void Update(float step_time)
@@ -99,7 +106,7 @@ namespace platformerGame.Particles
                             p.Dims.Y += p.ScaleSpeed * step_time; //+=
                             p.Dims.y += p.ScaleSpeed * step_time; //+=
                     */
-                    cAppMath.Vec2Truncate(ref p.Vel, p.MaxSpeed * 1.5f);
+                    
 
 
                     p.Vel.Y += (Constants.GRAVITY * 40.0f * (step_time * step_time));
@@ -107,10 +114,14 @@ namespace platformerGame.Particles
                     p.Vel.X *= p.SlowDown;
                     p.Vel.Y *= p.SlowDown;
 
+                    cAppMath.Vec2Truncate(ref p.Vel, p.MaxSpeed * 1.5f);
+
+                    //world.collideParticleSAT(p, step_time);
+
                     //p.Heading = cAppMath.Vec2NormalizeReturn(p.Vel);
                     p.LastPos = p.Pos;
-                    p.Pos.X += p.Vel.X * step_time;
-                    p.Pos.Y += p.Vel.Y * step_time;
+                    p.Pos.X += p.Vel.X * step_time*1.5f;
+                    p.Pos.Y += p.Vel.Y * step_time*1.5f;
 
 
 
@@ -121,7 +132,7 @@ namespace platformerGame.Particles
                     }
 
                     world.collideParticleRayTrace(p, step_time);
-
+                    
 
                
                 
@@ -149,7 +160,7 @@ namespace platformerGame.Particles
 
             float division = 2.0f;
 
-            Vector2u uSize = particleManager.ExplosionTexture.Size;
+            Vector2u uSize = this.renderStates.Texture.Size;
             float tsizeX = uSize.X;
             float tsizeY = uSize.Y;
 

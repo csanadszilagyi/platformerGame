@@ -5,7 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 using SFML.Graphics;
+using SFML.System;
 using platformerGame.Utilities;
+using platformerGame.Rendering;
 
 namespace platformerGame.GameObjects.PickupInfo
 {
@@ -16,26 +18,34 @@ namespace platformerGame.GameObjects.PickupInfo
         UNKNOWN = -1,
         HEALTH = 0,
         ARMOR,
-        AMMO
+        AMMO,
+        COIN_GOLD,
+        COIN_SILVER,
+        COIN_IRON
     }
+
 
     class cPickupInfo
     {
-        PickupType type;
+        PickupType pickupType;
+        cBaseRenderer renderer;
+        Vector2f hitRectSize;
         PickupEffectFunction effect;
-        IntRect textureRect;
+        
 
         public cPickupInfo()
         {
-            this.type = PickupType.UNKNOWN;
-            this.textureRect = new IntRect(0,0,0,0);
+            this.pickupType = PickupType.UNKNOWN;
+            this.renderer = null;
+            this.hitRectSize = new Vector2f(0, 0);
             this.effect = null;
         }
 
-        public cPickupInfo(PickupType type, PickupEffectFunction effect, IntRect texture_rect)
+        public cPickupInfo(PickupType pickup_type, cBaseRenderer renderer, Vector2f hit_rect_size, PickupEffectFunction effect)
         {
-            this.type = type;
-            this.textureRect = texture_rect;
+            this.pickupType = pickup_type;
+            this.renderer = renderer;
+            this.hitRectSize = hit_rect_size;
             this.effect = effect;
         }
 
@@ -49,14 +59,23 @@ namespace platformerGame.GameObjects.PickupInfo
             return (cPickupInfo)this.MemberwiseClone();
         }
 
-        public IntRect TextureRect
+        /*
+        public cPickupInfo DeepCopy()
         {
-            get { return textureRect; }
+            cPickupInfo copy = this.ShallowCopy();
+
+            return copy;
+        }
+        */
+
+        public PickupType PickupType
+        {
+            get { return pickupType; }
         }
 
-        public PickupType Type
+        public cBaseRenderer Renderer
         {
-            get { return type; }
+            get { return renderer; }
         }
 
         public PickupEffectFunction Effect
@@ -64,7 +83,10 @@ namespace platformerGame.GameObjects.PickupInfo
             get { return effect; }
         }
 
-
+        public Vector2f HitRectSize
+        {
+           get { return this.hitRectSize; }
+        }
     }
 
     class PickupEffects
@@ -85,16 +107,20 @@ namespace platformerGame.GameObjects.PickupInfo
             */
             pickupTypes = new Dictionary<PickupType, cPickupInfo>()
             {
-               [PickupType.HEALTH] = new cPickupInfo(PickupType.HEALTH, AddHealth, new IntRect(0,0,24,24)),
-               [PickupType.ARMOR] = new cPickupInfo(PickupType.ARMOR, AddArmor, new IntRect(0,24,24,24)),
-               [PickupType.AMMO] = new cPickupInfo(PickupType.AMMO, AddAmmo, new IntRect(24,0,24,24))
+               [PickupType.HEALTH] = new cPickupInfo(PickupType.HEALTH, new cSpriteRenderer("pickups", new MyIntRect(0, 0, 24, 24)), new Vector2f(16, 22), AddHealth),
+               [PickupType.ARMOR] = new cPickupInfo(PickupType.ARMOR, new cSpriteRenderer("pickups", new MyIntRect(0, 24, 24, 24)), new Vector2f(16, 22), AddArmor),
+               [PickupType.AMMO] = new cPickupInfo(PickupType.AMMO, new cSpriteRenderer("pickups", new MyIntRect(24, 0, 24, 24)), new Vector2f(16, 22), AddAmmo),
+               [PickupType.COIN_GOLD] = new cPickupInfo(PickupType.COIN_GOLD, new cAnimatedSpriteRenderer("coins-gold", new MyIntRect(0, 0, 16, 16), true), new Vector2f(16, 16), AddCoin),
+               [PickupType.COIN_SILVER] = new cPickupInfo(PickupType.COIN_SILVER, new cAnimatedSpriteRenderer("coins-silver", new MyIntRect(0, 0, 16, 16), true), new Vector2f(16, 16), AddCoin),
+               [PickupType.COIN_IRON] = new cPickupInfo(PickupType.COIN_IRON, new cAnimatedSpriteRenderer("coins-copper", new MyIntRect(0, 0, 16, 16), true), new Vector2f(16, 16), AddCoin)
             };
 
-            pickupProbabilityTable = new Tuple<int, PickupType>[3]
+            pickupProbabilityTable = new Tuple<int, PickupType>[4]
             {
                 new Tuple<int, PickupType>(50, PickupType.HEALTH),
-                new Tuple<int, PickupType>(25, PickupType.ARMOR),
-                new Tuple<int, PickupType>(25, PickupType.AMMO)
+                new Tuple<int, PickupType>(5, PickupType.ARMOR),
+                new Tuple<int, PickupType>(5, PickupType.AMMO),
+                new Tuple<int, PickupType>(40, PickupType.COIN_GOLD)
             };
 
             roller = new ProbabilityRoll<PickupType>();
@@ -113,17 +139,23 @@ namespace platformerGame.GameObjects.PickupInfo
 
         private static void AddHealth(cPlayer player)
         {
-            player.Health += 2;
+            player.Health += 1;
         }
 
         private static void AddArmor(cPlayer player)
         {
-            player.Health += 2;
+            player.Health += 1;
         }
 
         private static void AddAmmo(cPlayer player)
         {
-            player.Health += 2;
+            player.Health += 1;
+        }
+
+        private static void AddCoin(cPlayer player)
+        {
+            AssetManager.playSound("coin_pickup1", 10);
+            // TODO: player.Money += 1;
         }
     }
 }

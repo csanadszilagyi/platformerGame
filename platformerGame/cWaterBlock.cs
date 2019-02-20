@@ -62,7 +62,7 @@ namespace platformerGame
 
     class cWaterBlock
     {
-        cAABB area;
+        AABB area;
         VertexArray vertices;
 
         const int MAX_OFFSET_Y = 4; //4
@@ -85,7 +85,7 @@ namespace platformerGame
 
         }
 
-        public cWaterBlock(cAABB area)
+        public cWaterBlock(AABB area)
         {
             this.area = area.ShallowCopy();
 
@@ -169,7 +169,7 @@ namespace platformerGame
             while (i < waterNodes.Count-1 && vIndex < vertices.VertexCount);
         }
 
-        public cAABB Area
+        public AABB Area
         {
             get { return area; }
         }
