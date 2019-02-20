@@ -31,7 +31,7 @@ namespace platformerGame.GameObjects
             BulletBreed b = new BulletBreed()
             {
                 sprite = new Sprite(AssetManager.GetTexture("bullet_light_green")),
-                startSpeed = 1200,
+                startSpeed = Constants.BULLET_START_SPEED,
                 textureIntersectionOffset = 30,
                 slugLength = 5
             };
