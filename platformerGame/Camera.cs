@@ -25,7 +25,7 @@ namespace platformerGame
         /// <summary>
         /// Toggle for smooth camera transition
         /// </summary>
-        public bool Smooth = true;
+        public bool Smooth =  true;
 
         /// <summary>
         /// Smoothness determines how quickly the transition will take place. Higher smoothness will reach the target position faster.
@@ -95,7 +95,7 @@ namespace platformerGame
         public void Update(Vector2f target, AABB region_bounds, float step_time = Constants.STEP_TIME)
         {
             this.Target = target;
-            
+            PreviousPosition = ActualPosition;
             if (Smooth)
             {
                 Vector2f dir = AppMath.Vec2NormalizeReturn(Target - ActualPosition);
@@ -103,13 +103,13 @@ namespace platformerGame
                 Vector2f vel = dir * (len * Smoothness);
                 //AppMath.Vec2Truncate(ref vel, 2.0f);
                 //vel += ShakeScreen.Offset;
-                PreviousPosition = ActualPosition;
                 ActualPosition += vel;
             }
             else
             {
+                
                 ActualPosition = Target + ShakeScreen.Offset;
-                PreviousPosition = ActualPosition;
+                
             }
 
             checkBounds(region_bounds);

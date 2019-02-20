@@ -126,7 +126,7 @@ namespace platformerGame.Particles
 
                     AppMath.Vec2Truncate(ref p.Vel, p.MaxSpeed * 1.5f);
 
-                    world.collideParticleSAT(p, step_time, false);
+                    // world.collideParticleSAT(p, step_time, false);
 
                     //p.Heading = cAppMath.Vec2NormalizeReturn(p.Vel);
                     p.LastPos = p.Pos;
@@ -143,7 +143,7 @@ namespace platformerGame.Particles
 
                    
 
-                   // world.collideParticleRayTrace(p, step_time);
+                    world.collideParticleRayTrace(p, step_time);
                     
 
                
