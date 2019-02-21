@@ -46,6 +46,7 @@ namespace platformerGame.GameObjects
         protected bool movAble;
 
         protected AABB hitCollisionRect;
+        protected float boundingRadius = 16.0f; // for separetion
 
         public cGameObject() : base()
         {
@@ -65,6 +66,7 @@ namespace platformerGame.GameObjects
             mass = 1.0f;
             movAble = true;
             hitCollisionRect = new AABB();
+
             this.Marked = false;
             id = GetNextValidID();
         }
@@ -273,6 +275,12 @@ namespace platformerGame.GameObjects
            get { return !this.movAble; }
         }
 
+        public float BoundingRadius
+        {
+            get { return this.boundingRadius; }
+            set { this.boundingRadius = value; }
+        }
+
         public void AddForce(Vector2f impulse)
         {
             this.force += impulse;
@@ -292,6 +300,16 @@ namespace platformerGame.GameObjects
         public virtual bool isActive()
         {
             return true;
+        }
+
+        public Vector2f GetCenterViewPos()
+        {
+            return viewPosition + bounds.halfDims;
+        }
+
+        public Vector2f GetCenterPos()
+        {
+            return position + bounds.halfDims;
         }
 
         public void MoveBy(Vector2f offset)

@@ -68,6 +68,11 @@ namespace platformerGame.GameObjects
             this.health = 1;
         }
 
+        public bool IsOnGround
+        {
+            get { return this.isOnGround; }
+        }
+
         public bool IsOnOneWayPlatform
         {
             get { return isOnOnewWayPlatform; }
@@ -80,16 +85,6 @@ namespace platformerGame.GameObjects
             //lastPosition = position;
             position.X += offset_x;
             position.Y += offset_y;
-        }
-
-        public Vector2f GetCenterViewPos()
-        {
-            return viewPosition + bounds.halfDims;
-        }
-
-        public Vector2f GetCenterPos()
-        {
-            return position + bounds.halfDims;
         }
 
         protected virtual void updateX(float step_time, cWorld world)
@@ -274,7 +269,6 @@ namespace platformerGame.GameObjects
 
         public override void Render(RenderTarget destination)
         {
-
             //viewPosition = cAppMath.Interpolate(position, lastPosition, alpha);
             this.spriteControl.Render(destination, viewPosition);
         }
@@ -339,7 +333,7 @@ namespace platformerGame.GameObjects
 
             Vector2f oldBottomLeft = new Vector2f(position.X, position.Y + bounds.dims.Y);
             Vector2f newBottomLeft = new Vector2f(position.X, predictedPosY + bounds.dims.Y);
-            Vector2f newBottomRight = new Vector2f(newBottomLeft.X + bounds.dims.X - 2.0f, newBottomLeft.Y);
+            Vector2f newBottomRight = new Vector2f(newBottomLeft.X + bounds.dims.X , newBottomLeft.Y);
 
             int endY = world.ToMapPos(newBottomLeft).Y; //mMap.GetMapTileYAtPoint(newBottomLeft.y);
             int begY = Math.Max(world.ToMapPos(oldBottomLeft).Y - 1, endY);
@@ -441,25 +435,25 @@ namespace platformerGame.GameObjects
             float predictedPosX = position.X + delta;
 
             Vector2f oldTopLeft = new Vector2f(position.X, position.Y);
-            Vector2f newTopLeft = new Vector2f(predictedPosX - 1, position.Y);
-            Vector2f newBottomLeft = new Vector2f(newTopLeft.X, newTopLeft.Y + bounds.dims.Y - 2.0f);
+            Vector2f newTopLeft = new Vector2f(predictedPosX, position.Y);
+            Vector2f newBottomLeft = new Vector2f(newTopLeft.X, newTopLeft.Y + bounds.dims.Y-2.0f);
 
-            int tileEndX = world.ToMapPos(newTopLeft).X - 1;
+            int tileEndX = world.ToMapPos(newTopLeft).X-1;
             int tileBeginX = Math.Max(world.ToMapPos(oldTopLeft).X, tileEndX);
 
-            int tileBeginY = world.ToMapPos(newBottomLeft).Y;
-            int tileEndY = world.ToMapPos(newTopLeft).Y;
+            int tileBeginY = world.ToMapPos(newTopLeft).Y;
+            int tileEndY = world.ToMapPos(newBottomLeft).Y;
 
             for (int tileIndexX = tileBeginX; tileIndexX > tileEndX; --tileIndexX)
             {
-                for (int tileIndexY = tileBeginY; tileIndexY >= tileEndY; --tileIndexY)
+                for (int tileIndexY = tileBeginY; tileIndexY <= tileEndY; ++tileIndexY)
                 {
                     //world.GetCurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = false;
                     if (world.CurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).Type == TileType.WALL)
                     /*world.isRectOnWall()*/
                     {
                         //world.GetCurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = true;
-                        wallRightX = (int)(tileIndexX * Constants.TILE_SIZE + Constants.TILE_SIZE + world.WorldBounds.topLeft.X);
+                        wallRightX = (int)(tileIndexX * Constants.TILE_SIZE + Constants.TILE_SIZE); // + world.WorldBounds.topLeft.X
                         return true;
                     }
                 }
@@ -477,24 +471,24 @@ namespace platformerGame.GameObjects
 
             Vector2f oldTopRight = new Vector2f(position.X + bounds.dims.X, position.Y);
             Vector2f newTopRight = new Vector2f(predictedPosX, position.Y);
-            Vector2f newBottomRight = new Vector2f(newTopRight.X+2, newTopRight.Y + bounds.dims.Y - 2.0f);
+            Vector2f newBottomRight = new Vector2f(newTopRight.X, newTopRight.Y + bounds.dims.Y-2.0f);
 
             int tileEndX = world.ToMapPos(newTopRight).X + 1;
             int tileBeginX = Math.Min(world.ToMapPos(oldTopRight).X, tileEndX);
 
-            int tileBeginY = world.ToMapPos(newBottomRight).Y;
-            int tileEndY = world.ToMapPos(newTopRight).Y; // changed to handle right walking between walls when falling
+            int tileBeginY = world.ToMapPos(newTopRight).Y;
+            int tileEndY = world.ToMapPos(newBottomRight).Y; // changed to handle right walking between walls when falling
 
             for (int tileIndexX = tileBeginX; tileIndexX < tileEndX; ++tileIndexX)
             {
-                for (int tileIndexY = tileBeginY; tileIndexY >= tileEndY; --tileIndexY)
+                for (int tileIndexY = tileBeginY; tileIndexY <= tileEndY; ++tileIndexY)
                 {
                     //world.GetCurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = false;
                     if (world.CurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).Type == TileType.WALL)
                     /*world.isRectOnWall()*/
                     {
                         //world.GetCurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = true;
-                        wallLeftX = (int)(tileIndexX * Constants.TILE_SIZE + world.WorldBounds.topLeft.X);
+                        wallLeftX = (int)(tileIndexX * Constants.TILE_SIZE); // + world.WorldBounds.topLeft.X
                         return true;
                     }
                 }
@@ -511,8 +505,8 @@ namespace platformerGame.GameObjects
         public virtual void MeleeHit(int amount, cGameObject entity_by)
         {
             this.Hit(amount, entity_by);
-            Vector2f towardsMe = AppMath.Vec2NormalizeReturn(this.HitCollisionRect.center - entity_by.HitCollisionRect.center);
-            this.force = towardsMe * 50000;
+            // Vector2f towardsMe = AppMath.Vec2NormalizeReturn(this.HitCollisionRect.center - entity_by.HitCollisionRect.center);
+            // this.force = towardsMe * 50000;
             
         }
 

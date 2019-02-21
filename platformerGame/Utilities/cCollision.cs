@@ -31,6 +31,31 @@ namespace platformerGame.Utilities
             return (AppMath.Vec2DistanceSqrt(centreA, centreB) <= R * R);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="A">First gameObject</param>
+        /// <param name="B">Second gameObject</param>
+        /// <param name="onlyFirst">only seperate the first object</param>
+        public static void SeparateEntites(cGameObject A, cGameObject B, bool onlyFirst = false)
+        {
+            Vector2f to = A.GetCenterPos() - B.GetCenterPos();
+            float dist = (float)AppMath.Vec2Length(to);
+            float amountOfOverlap = (dist - A.BoundingRadius - B.BoundingRadius); // *0.5f
+            Vector2f offset = amountOfOverlap * (to / dist);
+
+            if(onlyFirst)
+            {
+                A.Position -= offset;
+                return;
+            }
+
+            offset *= 0.5f;
+            A.Position -= offset;
+            B.Position += offset;
+
+        }
+
         public static bool CircleAABBOverlap(Vector2f centre, float radius, AABB rect)
         {
             return (IsPointInsideBox(centre, rect) ||

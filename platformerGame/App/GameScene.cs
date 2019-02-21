@@ -247,7 +247,7 @@ namespace platformerGame.App
 
             */
 
-            this.lightMap.Render(destination, cameraBounds);
+            this.lightMap.Render(destination, this.camera);
 
             this.entityPool.RenderPickups(destination);
 

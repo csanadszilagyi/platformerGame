@@ -169,6 +169,7 @@ namespace platformerGame.GameObjects
             // bullet collision checks
             checkBulletVsEntityCollisions(step_time);
 
+          
             // update all entites
             Vector2i newGridPos = new Vector2i(0, 0);
 
@@ -205,14 +206,23 @@ namespace platformerGame.GameObjects
             // check if can interact / use / pickup
             this.checkNearbyObjectsForPlayer();
 
+
+            this.separateMonsters();
+
+
             // melee attack handling
             var meleeEntities = this.getPossiblePlayerMeleeAttackers();
 
             foreach (var monster in meleeEntities)
             {
                 monster.Marked = true;
+                this.checkForOneToOneSeparation(player, monster); // true
                 monster.attemptMeleeAttack(player);
+                
             }
+            
+
+            // this.checkForSeparation(player, meleeEntities);
 
             // cleanup grid
             cleanupTimer += step_time;
@@ -249,7 +259,7 @@ namespace platformerGame.GameObjects
                
 
             #if DEBUG
-            System.Diagnostics.Debug.WriteLine(
+                System.Diagnostics.Debug.WriteLine(
                     string.Format("Remove - FALSE"));
             #endif
             return false;
@@ -308,8 +318,33 @@ namespace platformerGame.GameObjects
                 m.Render(target);
             }
         }
+        
 
+        private void checkForOneToOneSeparation(cGameObject A, cGameObject B, bool onlyFirst = false)
+        {
+            if (A.ID != B.ID &&
+                   cCollision.testCircleVsCirlceOverlap(A.GetCenterPos(), A.BoundingRadius, B.GetCenterPos(), B.BoundingRadius))
+            {
+                cCollision.SeparateEntites(A, B, onlyFirst);
+            }
+        }
 
+        private void checkForOneAndGroupSeparation(cGameObject someBody, IEnumerable<cGameObject> others)
+        {
+            foreach (var o in others)
+            {
+                this.checkForOneToOneSeparation(someBody, o);
+            }
+        }
+
+        private void separateMonsters()
+        {
+            foreach (var m in this.visibleEntites.OfType<cMonster>())
+            {
+                var others = this.getEntitiesInArea(m.Bounds).OfType<cMonster>();
+                this.checkForOneAndGroupSeparation(m, others);
+            }
+        }
 
         private cMonster getclosestMonsterColliding(IEnumerable<cMonster> possibleColliders, cBullet bul, Vector2f pos_by, float time)
         {

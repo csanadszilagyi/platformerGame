@@ -205,21 +205,17 @@ namespace platformerGame
 
         }
         */
-        public void Render(RenderTarget destination, AABB viewRect)
+        public void Render(RenderTarget destination, Camera camera)
         {
 
             //destination.Draw(this.lightMapDarkShape, new RenderStates(BlendMode.Multiply));
 
-            renderStaticLightsToTexture(viewRect);
-
-
-
-
+            renderStaticLightsToTexture(camera.Bounds);
 
             //cRenderFunctions.DrawTextureSimple(destination, new Vector2f(), m_LightTexture.Texture, new IntRect(0,0, (int)m_LightTexture.Size.X, (int)m_LightTexture.Size.Y),Color.White, BlendMode.Multiply);
 
             DrawingBase.DrawTextureSimple( destination, 
-                                                viewRect.topLeft, 
+                                                camera.ViewBounds.topLeft, // viewRect.topLeft, 
                                                 staticLightTexture.Texture, 
                                                 new MyIntRect(0, 0, (int)this.staticLightTexture.Size.X, (int)this.staticLightTexture.Size.Y),
                                                //new IntRect((int)view_rect.topLeft.X, (int)view_rect.topLeft.Y,

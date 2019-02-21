@@ -57,6 +57,7 @@ namespace platformerGame.GameObjects
             this.attacking = false;
             this.attackCharger = new cRegulator();
             this.attackCharger.resetByFrequency(2);
+            this.boundingRadius = 12.0f;
         }
 
         protected override void initSprites()

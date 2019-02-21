@@ -37,8 +37,8 @@ namespace platformerGame.GameObjects
             // p_followLight.TurnOff();
             this.Scene.LightMap.AddStaticLight(p_followLight);
 
-            this.weapon = new cMachineGun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY);
-                // new cShotgun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY); // 9
+            this.weapon = // new cMachineGun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY);
+                 new cShotgun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY); // 9
 
             this.health = 50;
             healthText = new Text("", AssetManager.GetFont("pf_tempesta_seven"));
@@ -46,6 +46,8 @@ namespace platformerGame.GameObjects
             healthText.CharacterSize = 28; // in pixels, not points!
             healthText.FillColor = Color.White;
             healthText.Style = Text.Styles.Bold;
+
+            this.boundingRadius = 12.0f;
         }
 
         protected override void initSprites()

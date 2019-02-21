@@ -37,9 +37,10 @@ namespace platformerGame
         /// </summary>
         public bool RoundPosition = false;
 
-        internal View View;
-        internal Vector2f PreviousPosition;
-        internal Vector2f ActualPosition;
+        public View View;
+        public Vector2f PreviousPosition;
+        public Vector2f ActualPosition;
+        public Vector2f ViewPosition;
         private Vector2f originalSize;
 
         /// <summary>
@@ -64,6 +65,11 @@ namespace platformerGame
 
         }
 
+        public AABB ViewBounds
+        {
+            get { return new AABB(ViewPosition - (View.Size / 2.0f), View.Size); }
+        }
+
         public Camera(FloatRect rect) : this(new View(rect)) { }
 
         public Camera(View view)
@@ -72,7 +78,8 @@ namespace platformerGame
             Target = View.Size / 2.0f;
             originalSize = View.Size;
             ActualPosition = Target;
-            PreviousPosition = Target;
+            PreviousPosition = ActualPosition;
+            ViewPosition = ActualPosition;
         }
 
         public void SetOffset(Vector2f offset)
@@ -137,6 +144,12 @@ namespace platformerGame
         }
         */
 
+        public void LocateActualPosition(Vector2f newPos)
+        {
+            ActualPosition = newPos;
+            PreviousPosition = ActualPosition;
+        }
+
         public void checkBounds(AABB region_bounds)
         {
             var cameraBounds = this.Bounds;
@@ -177,7 +190,8 @@ namespace platformerGame
             */
             //Target = center;
             //ActualPosition = center;
-            this.View.Center = AppMath.Interpolate(ActualPosition, PreviousPosition, alpha);
+            this.ViewPosition = AppMath.Interpolate(ActualPosition, PreviousPosition, alpha);
+            this.View.Center = this.ViewPosition;
             target.SetView(this.View);
         }
     }
