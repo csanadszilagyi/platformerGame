@@ -29,7 +29,7 @@ namespace platformerGame.GameObjects
         {
 
             p_followLight = new cLight();
-            p_followLight.Pos = this.bounds.center;
+            p_followLight.Pos = this.Bounds.center;
             p_followLight.Radius = 100.0f;
             p_followLight.LinearizeFactor = 0.4f;
             p_followLight.Bleed = 2.0f;
@@ -49,7 +49,7 @@ namespace platformerGame.GameObjects
 
             this.sleep();
 
-            bloom = new Sprite(AssetManager.GetTexture("bloom"));
+            bloom = new Sprite(Scene.Assets.GetTexture("bloom"));
             bloom.Scale = new Vector2f(0.2f, 0.2f);
             bloom.Origin = new Vector2f(bloom.Texture.Size.X / 2.0f, bloom.Texture.Size.Y / 2.0f);
             bloom.Color = Color.Red;
@@ -67,7 +67,7 @@ namespace platformerGame.GameObjects
             MyIntRect viewRect = Constants.CHAR_VIEW_RECT;
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.STAND, HorizontalFacing.FACING_LEFT),
-                                            AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                            Scene.Assets.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                             Constants.CHAR_FRAME_WIDTH,
                                             Constants.CHAR_FRAME_HEIGHT,
                                             0,
@@ -78,7 +78,7 @@ namespace platformerGame.GameObjects
                                             viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.STAND, HorizontalFacing.FACING_RIGHT),
-                                            AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                            Scene.Assets.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                             Constants.CHAR_FRAME_WIDTH,
                                             Constants.CHAR_FRAME_HEIGHT,
                                             0,
@@ -89,7 +89,7 @@ namespace platformerGame.GameObjects
                                             viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.WALK, HorizontalFacing.FACING_LEFT),
-                                            AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                            Scene.Assets.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                             Constants.CHAR_FRAME_WIDTH,
                                             Constants.CHAR_FRAME_HEIGHT,
                                             0,
@@ -100,7 +100,7 @@ namespace platformerGame.GameObjects
                                             viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.WALK, HorizontalFacing.FACING_RIGHT),
-                                            AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                            Scene.Assets.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                             Constants.CHAR_FRAME_WIDTH,
                                             Constants.CHAR_FRAME_HEIGHT,
                                             0,
@@ -111,7 +111,7 @@ namespace platformerGame.GameObjects
                                             viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.JUMP, HorizontalFacing.FACING_LEFT),
-                                            AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                            Scene.Assets.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                             Constants.CHAR_FRAME_WIDTH,
                                             Constants.CHAR_FRAME_HEIGHT,
                                             1,
@@ -122,7 +122,7 @@ namespace platformerGame.GameObjects
                                             viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.JUMP, HorizontalFacing.FACING_RIGHT),
-                                            AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                            Scene.Assets.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                             Constants.CHAR_FRAME_WIDTH,
                                             Constants.CHAR_FRAME_HEIGHT,
                                             1,
@@ -134,7 +134,7 @@ namespace platformerGame.GameObjects
 
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.FALL, HorizontalFacing.FACING_LEFT),
-                                            AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                            Scene.Assets.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                             Constants.CHAR_FRAME_WIDTH,
                                             Constants.CHAR_FRAME_HEIGHT,
                                             6,
@@ -145,7 +145,7 @@ namespace platformerGame.GameObjects
                                             viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.FALL, HorizontalFacing.FACING_RIGHT),
-                                            AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                            Scene.Assets.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                             Constants.CHAR_FRAME_WIDTH,
                                             Constants.CHAR_FRAME_HEIGHT,
                                             6,
@@ -156,7 +156,7 @@ namespace platformerGame.GameObjects
                                             viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.LIE, HorizontalFacing.FACING_LEFT),
-                                AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                Scene.Assets.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                 Constants.CHAR_FRAME_WIDTH,
                                 Constants.CHAR_FRAME_HEIGHT,
                                 9,
@@ -167,7 +167,7 @@ namespace platformerGame.GameObjects
                                 viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.LIE, HorizontalFacing.FACING_RIGHT),
-                                AssetManager.GetTexture(Constants.MONSTER_TEXTURE_NAME),
+                                Scene.Assets.GetTexture(Constants.MONSTER_TEXTURE_NAME),
                                 Constants.CHAR_FRAME_WIDTH,
                                 Constants.CHAR_FRAME_HEIGHT,
                                 9,
@@ -203,21 +203,39 @@ namespace platformerGame.GameObjects
 
             // int y = AppRandom.Choose<int>(new[] { 1,-1});
 
-            Vector2f emitDirection = AppMath.Vec2NormalizeReturn(by.Velocity); //  new Vector2f(0.0f, y); 
+            this.Scene.QueueAction(() =>
+            {
+                Vector2f emitDirection = AppMath.Vec2NormalizeReturn(by.Velocity); //  new Vector2f(0.0f, y); 
+
+            float len = (float)AppMath.Vec2Length(this.Velocity);
+            float speed = len > 1.0f ? len : 0.0f;
+
 
             ShakeScreen.Init(this.pscene.Camera.ActualPosition);
             ShakeScreen.StartShake();
 
-            this.Scene.QueueAction(() =>
-                {
-                    AssetManager.playSound("blood_hit2", 25, this.position);
+            
+                    Scene.Assets.PlaySound("blood_hit2", 25, this.position);
                     //pscene.ParticleManager.Fireworks.NormalExplosion(new Particles.cEmissionInfo(this.Bounds.center, emitDirection));
                     var e = pscene.ParticleManager["explosions"] as cExplosionController;
-                    e.NormalBlood(new EmissionInfo(this.Bounds.center, emitDirection));
+                    e.NormalBlood(new EmissionInfo(this.Bounds.center, emitDirection, speed));
+
+                    e.Line(new EmissionInfo(this.Bounds.center, emitDirection));
 
                     this.Scene.QueueAction(() =>
                     {
-                        this.Scene.Effects.Place(this.Bounds.center, "simple-explosion3");
+                        /*
+                        if (this.IsOnGround)
+                        {
+                            this.Scene.Effects.PlaceGround(this.Bounds.center.X, this.Bounds.rightBottom.Y, "side-explosion1");
+                        }
+                        else
+                        */
+                        {
+                            this.Scene.Effects.Place(this.Bounds.center, "simple-explosion3"); // flash-black
+                        }
+
+                        
 
                         // this.Scene.Effects.Place(intersection, "fire1");
                     });
@@ -238,7 +256,7 @@ namespace platformerGame.GameObjects
             this.Scene.QueueAction(() =>
             {
 
-                AssetManager.playSound("coin_drop1", 20);
+                Scene.Assets.PlaySound("coin_drop1", 20);
 
                 ProbabilityRoll<int> numPickables = new ProbabilityRoll<int>();
                 numPickables.add(70, 2);
@@ -385,9 +403,17 @@ namespace platformerGame.GameObjects
             this.Scene.QueueAction(
                 () =>
                 {
-                    AssetManager.playSound("body_hit1", 8);
+                    Scene.Assets.PlaySound("body_hit1", 8);
                     var e = pscene.ParticleManager["explosions"] as cExplosionController;
-                    e.LittleBlood(new Particles.EmissionInfo(this.Bounds.center));
+                    // e.LittleBlood(new Particles.EmissionInfo(this.Bounds.center));
+                    var dir = AppMath.Vec2NormalizeReturn(entity_by.Velocity);
+
+                    float maxLen = (float)AppMath.GetRandomDoubleInRange(10.0, this.Bounds.diagonalLength() );
+                    Vector2f end = AppMath.ScaleVector(entity_by.Position, AppMath.Vec2NormalizeReturn(dir), maxLen);
+
+                    // approximately:
+                    Vector2f point = AppMath.GetRandomPointOnLine(entity_by.Position, end);
+                    e.LittleLine(new Particles.EmissionInfo(point, dir));
                 });
         }
 

@@ -12,36 +12,22 @@ using platformerGame.Utilities;
 using platformerGame.Map;
 using tileLoader;
 using platformerGame.App;
+using platformerGame.GameObjects.PickupInfo;
 
 namespace platformerGame.GameObjects
 {
-    class EntityPool
+    class GameObjectGrid : EntityGrid<cGameObject>
     {
-        const int ENTITY_GRID_SIZE = 64;
-        const int ENTITY_OVERSCAN = 64;
-
-        GameScene pScene;
-
-        List<cGameObject> allEntities;
-        List<cGameObject> visibleEntites; // on screen
-
-        Dictionary<Vector2i, List<cGameObject>> entityGrid;
-
-        Vector2f worldSize;
+        GameScene refScene;
         cPlayer player;
 
-        private float cleanupTimer = 0.0f;
+        List<cGameObject> visibleEntities;
 
-        public EntityPool(GameScene scene, Vector2f world_size, cPlayer player)
+        public GameObjectGrid(GameScene scene, Vector2f world_size, cPlayer player) : base(world_size)
         {
-            this.pScene = scene;
-            this.worldSize = world_size;
+            this.refScene = scene;
             this.player = player;
-            this.allEntities = new List<cGameObject>();
-            this.visibleEntites = new List<cGameObject>();
-            this.entityGrid = new Dictionary<Vector2i, List<cGameObject>>();
-
-            BulletBreed.Init();
+            visibleEntities = new List<cGameObject>();
         }
 
         public void InitLevelEntites(cMapData level)
@@ -53,7 +39,7 @@ namespace platformerGame.GameObjects
             TmxList<TmxObject> entityList = map.ObjectGroups["Entities"].Objects;
             foreach (var tmxEntity in entityList)
             {
-                cMonster monster = new cMonster(this.pScene, new Vector2f((float)tmxEntity.X, (float)tmxEntity.Y));
+                cMonster monster = new cMonster(this.refScene, new Vector2f((float)tmxEntity.X, (float)tmxEntity.Y));
                 this.AddMonster(monster);
             }
         }
@@ -89,40 +75,6 @@ namespace platformerGame.GameObjects
             return returner;
         }
 
-        public List<cGameObject> getEntitiesInRadius(Vector2f centre, float radius)
-        {
-            float sideLen = 2.0f * radius;
-            AABB circleBoundRect = new AABB();
-            circleBoundRect.SetDims(new Vector2f(sideLen, sideLen));
-            circleBoundRect.SetPosByCenter(centre);
-
-            return getEntitiesInArea(circleBoundRect);
-        }
-
-        public List<cGameObject> getEntitiesNearby(Vector2f pos)
-        {
-            Vector2i gridPos = calcGridPos(pos);
-            return this.getInGridRect(gridPos.X - 1, gridPos.Y - 1, gridPos.X + 1, gridPos.Y + 1);
-        }
-
-        public List<cGameObject> getEntitiesInArea(AABB area)
-        {
-            FloatRect areaRect = area.AsSfmlFloatRect();
-
-            var overscan = ENTITY_OVERSCAN;
-            var gridSize = ENTITY_GRID_SIZE;
-
-            FloatRect rect = new FloatRect(areaRect.Left - overscan, areaRect.Top - overscan,
-                                 areaRect.Width + (overscan * 2), areaRect.Height + (overscan * 2));
-
-            var startX = (int)rect.Left / gridSize;
-            var startY = (int)rect.Top / gridSize;
-            var width = (int)rect.Width / gridSize + 1;
-            var height = (int)rect.Height / gridSize + 1;
-
-            return this.getInGridRect(startX, startY, startX + width, startY + height);
-        }
-
         public void AddPickup(cPickupAble p)
         {
             this.AddEntity(p);
@@ -138,30 +90,6 @@ namespace platformerGame.GameObjects
             this.AddEntity(b);
         }
 
-        public void AddEntity(cGameObject e)
-        {
-            e.Create();
-            this.allEntities.Add(e);
-            this.GridAdd(e);
-
-            /*
-             if (e.InputInstance != null)
-                inputEntities.Add(e);
-            */
-        }
-
-        public void RemoveEntity(cGameObject e)
-        {
-            // e.Destroy();
-
-            GridRemove(e);
-            this.allEntities.Remove(e);
-
-            /*
-             if (e.InputInstance != null)
-                inputEntities.Remove(e);
-            */
-        }
 
         public void Update(float step_time)
         {
@@ -169,45 +97,15 @@ namespace platformerGame.GameObjects
             // bullet collision checks
             checkBulletVsEntityCollisions(step_time);
 
-          
+
             // update all entites
-            Vector2i newGridPos = new Vector2i(0, 0);
-
-            int eCount = allEntities.Count;
-            for (int i = 0; i < eCount; ++i)
-            {
-                cGameObject e = allEntities[i];
-
-                if (e.isActive())
-                {
-                    e.Update(step_time);
-
-                    var bounds = e.Bounds;
-                    newGridPos = calcGridPos(bounds.center);
-
-                    if (!e.GridCoordinate.Equals(newGridPos))
-                    {
-                        GridRemove(e);
-                        e.GridCoordinate = newGridPos;
-                        GridAdd(e);
-                    }
-
-                    continue;
-                }
-
-                GridRemove(e);
-                allEntities.RemoveAt(i);
-                i--;
-                eCount = allEntities.Count;
-                
-
-            }
+            this.gridHandleUpdate(step_time);
 
             // check if can interact / use / pickup
-            this.checkNearbyObjectsForPlayer();
+            checkNearbyObjectsForPlayer();
 
 
-            this.separateMonsters();
+            separateMonsters();
 
 
             // melee attack handling
@@ -220,51 +118,16 @@ namespace platformerGame.GameObjects
                 monster.attemptMeleeAttack(player);
                 
             }
-            
+
 
             // this.checkForSeparation(player, meleeEntities);
 
             // cleanup grid
-            cleanupTimer += step_time;
-            if (cleanupTimer >= 60.0f)
-            {
-                entityGrid.RemoveAll(kv => kv.Value.Count == 0);
-                cleanupTimer = 0;
-            }
+            this.checkForCleanup(step_time);
         }
 
-        public void GridAdd(cGameObject e)
-        {
-            List<cGameObject> list;
 
-            if (false == entityGrid.TryGetValue(e.GridCoordinate, out list))
-            {
-                list = new List<cGameObject>();
-                list.Add(e);
-                entityGrid.Add(e.GridCoordinate, list);
-                return;
-            }
-
-            list.Add(e);
-        }
-
-        public bool GridRemove(cGameObject e)
-        {
-            List<cGameObject> list;
-
-            if (entityGrid.TryGetValue(e.GridCoordinate, out list))
-            {
-                return list.Remove(e);
-            }
-               
-
-            #if DEBUG
-                System.Diagnostics.Debug.WriteLine(
-                    string.Format("Remove - FALSE"));
-            #endif
-            return false;
-        }
-
+        /*
         /// <summary>
         /// Filters visible entites and performs view position calculation for the visible ones.
         /// </summary>
@@ -281,15 +144,25 @@ namespace platformerGame.GameObjects
 
             }
         }
+        */
 
         public void PreRender(float alpha, AABB view_region)
         {
-            this.visibleEntites = this.filterVisibles(alpha, view_region).ToList<cGameObject>();
+            // todo: make it work without using "ToList()"
+
+            this.visibleEntities = this.filterVisibles(
+                view_region,
+                e =>
+                    {
+                        var o = e as cGameObject;
+                        o.CalculateViewPos(alpha);
+                    }
+            ).ToList();
         }
 
         public void RenderBullets(RenderTarget target)
         {
-            foreach (var b in this.visibleEntites.OfType<cBullet>())
+            foreach (var b in this.visibleEntities.OfType<cBullet>())
             {
                 b.Render(target);
             }
@@ -297,7 +170,7 @@ namespace platformerGame.GameObjects
 
         public void RenderPickups(RenderTarget target)
         {
-            foreach (var p in this.visibleEntites.OfType<cPickupAble>())
+            foreach (var p in this.visibleEntities.OfType<cPickupAble>())
             {
                 p.Render(target);
             }
@@ -305,7 +178,7 @@ namespace platformerGame.GameObjects
 
         public void RenderMonsters(RenderTarget target)
         {
-            foreach (var m in this.visibleEntites.OfType<cMonster>())
+            foreach (var m in this.visibleEntities.OfType<cMonster>())
             {
                 m.Render(target);
             }
@@ -313,12 +186,32 @@ namespace platformerGame.GameObjects
 
         public void RenderTurrets(RenderTarget target)
         {
-            foreach (var m in this.visibleEntites.OfType<cTurret>())
+            foreach (var m in this.visibleEntities.OfType<cTurret>())
             {
                 m.Render(target);
             }
         }
         
+        /// <summary>
+        /// For debug purposes
+        /// </summary>
+        /// <param name="target"></param>
+        public void RenderGrid(RenderTarget target)
+        {
+
+            RectangleShape shape = new RectangleShape(new Vector2f(ENTITY_GRID_SIZE, ENTITY_GRID_SIZE));
+            shape.OutlineColor = Color.Red;
+            shape.OutlineThickness = 1.0f;
+            shape.FillColor = new Color(255, 255, 255, 50);
+            shape.Scale = new Vector2f { X = 1.0f, Y = 1.0f};
+            
+            foreach (var item in this.entityGrid)
+            {
+                Vector2i topLeft = item.Key;
+                shape.Position = new Vector2f(topLeft.X*ENTITY_GRID_SIZE, topLeft.Y*ENTITY_GRID_SIZE);
+                target.Draw(shape, new RenderStates(BlendMode.Add));
+            }
+        }
 
         private void checkForOneToOneSeparation(cGameObject A, cGameObject B, bool onlyFirst = false)
         {
@@ -339,7 +232,7 @@ namespace platformerGame.GameObjects
 
         private void separateMonsters()
         {
-            foreach (var m in this.visibleEntites.OfType<cMonster>())
+            foreach (var m in this.visibleEntities.OfType<cMonster>())
             {
                 var others = this.getEntitiesInArea(m.Bounds).OfType<cMonster>();
                 this.checkForOneAndGroupSeparation(m, others);

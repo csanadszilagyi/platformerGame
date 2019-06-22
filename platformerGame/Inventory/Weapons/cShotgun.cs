@@ -13,7 +13,7 @@ namespace platformerGame.Inventory.Weapons
         public cShotgun(cGameObject owner, int firing_frequency, string bullet_breed_id = "simple-bullet") 
             : base(owner, firing_frequency, bullet_breed_id)
         { 
-            this.spread = (float)AppMath.DegressToRadian(2);
+            this.spread = (float)AppMath.DegressToRadian(3);
             this.bulletsPerShot = 4;
         }
 
@@ -34,7 +34,7 @@ namespace platformerGame.Inventory.Weapons
                     this.Shot(toSpreadTarget);
                 }
                 
-                AssetManager.playSound("shotgun", 3);
+                owner.Scene.Assets.PlaySound("shotgun", 3);
 
                 return true;
 

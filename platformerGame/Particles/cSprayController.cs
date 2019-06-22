@@ -9,12 +9,14 @@ using SFML.Graphics;
 
 using platformerGame.Utilities;
 
+using System.Threading;
+
 namespace platformerGame.Particles
 {
     class cSprayController : cBaseParticleController
     {
-        double minScale = 0.3;
-        double maxScale = 0.6;
+        double minScale = 0.1;
+        double maxScale = 0.3;
 
         bool emiting;
         const int INC_PER_EMIT = 40;
@@ -22,7 +24,7 @@ namespace platformerGame.Particles
         cRegulator emitTimer;
         int remaining;
 
-        public cSprayController(cParticleManager manager, uint max_particles = 300) : base(manager, max_particles)
+        public cSprayController(cParticleManager manager, int max_particles = 300) : base(manager, max_particles)
         {
             this.renderStates.Texture = manager.SmokeTexture; // smoke
             this.emiting = false;
@@ -67,8 +69,9 @@ namespace platformerGame.Particles
 
             particle.Color = Utils.GetRandomColor(250, 250, 1, 160, 0, 0); // GetRandomRedColor();
             particle.Opacity = 255.0f;
-            particle.Life = 15.0f;
             particle.Fade = AppRandom.GetRandomNumber(10, 40);
+
+            particle.Life = 15.0f;
 
             particle.Intersects = false;
         }
@@ -88,20 +91,35 @@ namespace platformerGame.Particles
             this.empower(particle);
         }
 
-        protected void ip()
+        protected void initParticle(Particle p, Vector2f start_pos)
         {
-            Particle particle = pool.getNew();
+            p.StartPos = start_pos;
+            this.empower(p);
+        }
 
+        protected void setupInitial(Vector2f pos)
+        {
+            var staticParticle = pool.getNew();
+            initParticle(staticParticle, pos);
+
+            staticParticle.Vel = new Vector2f(0.0f, 0.0f);
+            staticParticle.Color = Color.Yellow;
+            staticParticle.Fade = 0.0f;
+            staticParticle.ScaleSpeed = 0.0f;
+            staticParticle.Dims = new Vector2f(this.renderStates.Texture.Size.X, this.renderStates.Texture.Size.Y);
         }
 
         public void Emit(EmissionInfo emission)
         {
-            minScale = 0.1;
-            maxScale = 0.35;
+           // minScale = 0.1;
+            //maxScale = 0.35;
 
             this.remaining += INC_PER_EMIT;
 
             loopAddition(emission, 40);
+
+            // this.setupInitial(emission.StartPosition);
+
             /*
             this.emiting = true;
             emission.Particle = pool.getNew();

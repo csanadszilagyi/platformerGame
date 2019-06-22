@@ -3,26 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SFML.System;
 
 namespace platformerGame.Containers
 {
-    class GridOccupant
+    abstract class GridOccupant
     {
-        protected AABB bounds;
+        public AABB Bounds { get; set; } = new AABB(0, 0, 1, 1);
+        public Vector2i GridPosition { get; set; } = new Vector2i(0, 0);
+ 
         public GridOccupant()
         {
-            bounds = new AABB(0, 0, 1, 1);
         }
 
         public GridOccupant(AABB _bounds)
         {
-            bounds = _bounds.ShallowCopy();
+            Bounds = _bounds.ShallowCopy();
         }
 
-        public AABB Bounds
+        public virtual void Update(float step_time)
+        { }
+
+        public virtual bool isActive()
         {
-            get { return bounds; }
-            set { bounds = value; }
+            return true;
         }
     }
 }

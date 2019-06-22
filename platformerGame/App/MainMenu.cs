@@ -8,29 +8,42 @@ using SFML.Window;
 using SFML.System;
 using platformerGame.Utilities;
 
+using platformerGame.GameObjects;
+using platformerGame.Containers;
+
 namespace platformerGame.App
 {
-    abstract class BaseGuiItem
+    abstract class BaseGuiItem : GridOccupant
     {
         public delegate void clickCallBack(MouseButtonEventArgs e);
 
-        public clickCallBack OnClick;
+        public clickCallBack OnClickFunc;
 
         protected GameState parent = null;
 
-        public AABB Bounds { get; set; }
         public bool Active { get; set; }
-        public bool MouseHover { get; set; }
-        protected RenderStates rstates;
+        public bool MouseMoved { get; set; }
+        public bool MouseClicked { get; set; }
 
-        public BaseGuiItem(GameState parent, AABB bounds)
+        protected RenderStates renderStates;
+
+        public BaseGuiItem(GameState parent, AABB bounds) : base()
         {
             this.parent = parent;
             this.Bounds = bounds;
-            this.OnClick = null;
-            this.Active = false;
-            this.MouseHover = false;
-            this.rstates = new RenderStates(BlendMode.Alpha);
+            this.OnClickFunc = null;
+            this.Active = true;
+            this.renderStates = new RenderStates(BlendMode.Alpha);
+
+            this.GridPosition = EntityGrid<BaseGuiItem>.calcGridPos(this.Bounds.center);
+
+            this.Reset();
+        }
+
+        public virtual void Reset()
+        {
+            this.MouseMoved = false;
+            this.MouseClicked = false;
         }
 
         public GameState Parent
@@ -38,113 +51,261 @@ namespace platformerGame.App
             get { return this.parent; }
         }
 
-        public void Click(MouseButtonEventArgs e)
+        public virtual void StartClick(MouseButtonEventArgs e)
         {
-            this.OnClick?.Invoke(e);
+            this.MouseClicked = true;
         }
 
-        abstract public void Update(float step_time);
+        // The real "Click" function only occurs when released the button, but effect starts when button was pressed.
+        public virtual void OnClick(MouseButtonEventArgs e)
+        {
+            this.OnClickFunc?.Invoke(e);
+            this.MouseClicked = false;
+        }
+
+        public abstract void OnMouseMove(MouseMoveEventArgs e);
+        public abstract void OnMouseLeave(MouseMoveEventArgs e);
+
+        public override bool isActive()
+        {
+            return this.Active;
+        }
+
         abstract public void Render(RenderTarget destination);
+
+        public virtual bool IsReady()
+        {
+            return this.MouseClicked == false;
+        }
+    }
+
+    class CheckBox : BaseGuiItem
+    {
+        public bool Checked { get; set; }
+
+        public CheckBox(GameState parent, AABB bounds, string title) : base(parent, bounds)
+        {
+            Checked = false;
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+ 
+
+        }
+
+
+        public override void StartClick(MouseButtonEventArgs e)
+        {
+            base.StartClick(e);
+            
+        }
+
+        public override void OnClick(MouseButtonEventArgs e)
+        {
+            base.OnClick(e);
+        }
+
+        public override void OnMouseMove(MouseMoveEventArgs e)
+        {
+            this.MouseMoved = true;
+        }
+
+        public override void OnMouseLeave(MouseMoveEventArgs e)
+        {
+            if (this.MouseMoved)
+            {
+                if (this.MouseClicked)
+                {
+
+                    this.MouseClicked = false;
+                }
+
+                this.MouseMoved = false;
+            }
+        }
+
+        public override void Render(RenderTarget destination)
+        {
+            /*
+            this.rectShape.FillColor = currentFillColor;
+            this.label.FillColor = currentTextColor;
+
+            destination.Draw(this.rectShape, this.renderStates);
+            destination.Draw(this.label);
+            */
+        }
+
+        public override void Update(float step_time)
+        {
+
+        }
+
     }
 
     class Button : BaseGuiItem
     {
-        
+        const int TEXT_OFFSET = 2;
+
         public string Title { get; set; }
 
         RectangleShape rectShape;
-        Text label;
+        protected Text label;
         Vector2f labelOrigPos = new Vector2f();
 
         const uint FONT_SIZE = 16;
 
-        Color fillColor = Color.Transparent;
-        Color textColor = Color.White;
+        readonly Color FILL_COLOR = Utils.BLUE;
+        readonly Color TEXT_COLOR = Color.White;
+
+        Color currentFillColor;
+        Color currentTextColor;
+
+        float alpha = 255.0f;
 
         public Button(GameState parent, AABB bounds, string title) : base(parent, bounds)
         {
-            this.Title = title;
-            this.rectShape = new RectangleShape();
+            currentFillColor = Color.Transparent;
+            currentTextColor = TEXT_COLOR;
+
+            Title = title;
+            rectShape = new RectangleShape();
             rectShape.Position = Bounds.topLeft;
             rectShape.Size = Bounds.dims;
-            rectShape.OutlineColor = Color.White;
+            rectShape.OutlineColor = FILL_COLOR;
             rectShape.OutlineThickness = 2.0f;
-            rectShape.FillColor = fillColor;
+            rectShape.FillColor = currentFillColor;
 
-            label = new Text(this.Title, AssetManager.GetFont("pf_tempesta_seven"), FONT_SIZE);
+            label = new Text(this.Title, parent.Assets.GetFont("pf_tempesta_seven"), FONT_SIZE);
             labelOrigPos.X = Bounds.center.X - (float)(label.GetGlobalBounds().Width / 2.0f);
             labelOrigPos.Y = Bounds.center.Y - (float)(FONT_SIZE / 2.0f);
-            label.FillColor = textColor;
+            label.FillColor = currentTextColor;
 
+            this.resetTextposition();
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+            this.currentFillColor = Color.Transparent;
+
+        }
+        private void resetTextposition()
+        {
             label.Position = new Vector2f(labelOrigPos.X, labelOrigPos.Y);
         }
 
+        public override void StartClick(MouseButtonEventArgs e)
+        {
+            base.StartClick(e);
+            this.label.Position = new Vector2f(label.Position.X, label.Position.Y + TEXT_OFFSET);
+        }
 
+        public override void OnClick(MouseButtonEventArgs e)
+        {
+            base.OnClick(e);
+            this.resetTextposition();
+        }
+
+        public override void OnMouseMove(MouseMoveEventArgs e)
+        {
+            this.MouseMoved = true;
+            this.currentFillColor = FILL_COLOR;
+        }
+
+        public override void OnMouseLeave(MouseMoveEventArgs e)
+        {
+            if(this.MouseMoved)
+            {
+                this.currentFillColor = Color.Transparent;
+
+                if(this.MouseClicked)
+                {
+                    this.resetTextposition();
+                    this.MouseClicked = false;
+                }
+                
+                this.MouseMoved = false;
+            }
+        }
 
         public override void Render(RenderTarget destination)
         {
-            this.rectShape.FillColor = this.fillColor;
-            this.label.FillColor = textColor;
+            this.rectShape.FillColor = currentFillColor;
+            this.label.FillColor = currentTextColor;
 
-            destination.Draw(this.rectShape, this.rstates);
+            destination.Draw(this.rectShape, this.renderStates);
             destination.Draw(this.label);
         }
 
         public override void Update(float step_time)
         {
             
-            this.MouseHover = cCollision.IsPointInsideBox(parent.GetMousePos(), Bounds);
-            if(MouseHover)
-            {
-                this.fillColor = Color.White;
-                this.textColor = Color.Black;
-            }
-            else
-            {
-                this.fillColor = Color.Black;
-                this.textColor = Color.White;
-            }
         }
+
+
     }
 
     class MenuScreen
     {
-        protected List<BaseGuiItem> guiItems;
+        // protected List<BaseGuiItem> guiItems;
+        AABB ViewBounds { get; set; }
+        protected EntityGrid<BaseGuiItem> guiItemsGrid;
 
-        public MenuScreen()
+        public MenuScreen(AABB view_bounds)
         {
-            this.guiItems = new List<BaseGuiItem>();
+            ViewBounds = view_bounds;
+            
+            this.guiItemsGrid = new EntityGrid<BaseGuiItem>(ViewBounds);
+            // System.Diagnostics.Debug.WriteLine(ViewBounds.dims.X);
+        }
+
+        public void Add(BaseGuiItem item)
+        {
+            this.guiItemsGrid.AddEntity(item);
         }
 
         public void Add(BaseGuiItem[] items)
         {
-            this.guiItems.AddRange(items);
+            this.guiItemsGrid.AddEntities(items);
         }
 
         public void Remove(BaseGuiItem item)
         {
-            this.guiItems.Remove(item);
+            this.guiItemsGrid.RemoveEntity(item);
         }
 
         public void Update(float step_time)
         {
-            foreach(var item in this.guiItems)
-            {
-                item.Update(step_time);
-            }
+            this.guiItemsGrid.Update(step_time);
+        }
+
+        public void ClearItems()
+        {
+            this.guiItemsGrid.RemoveAll();
         }
 
         public void Render(RenderTarget destination)
         {
-            foreach (var item in this.guiItems)
+            var visibles = this.guiItemsGrid.filterVisibles(this.ViewBounds).ToList();
+            foreach (var item in visibles)
             {
                 item.Render(destination);
             }
         }
 
-        public List<BaseGuiItem> Items
+        public void ResetItems()
         {
-            get { return this.guiItems; }
+            this.guiItemsGrid.GetAllEntities().ForEach(item =>
+            {
+                item.Reset();
+            });
+        }
+        
+        public EntityGrid<BaseGuiItem> ItemGrid
+        {
+            get { return this.guiItemsGrid; }
         }
     }
 
@@ -152,101 +313,122 @@ namespace platformerGame.App
     {
         Dictionary<string, MenuScreen> menus;
         MenuScreen currentMenu = null;
-
+  
         public MainMenu(SfmlApp app_ref) : base(app_ref)
         {
-            this.menus = new Dictionary<string, MenuScreen>()
-            {
-                {"home", new MenuScreen() }
-            };
-
-            // this.menus.Add("home", new MenuScreen());
+            menus = new Dictionary<string, MenuScreen>();
         }
 
-        
-        public void connectItems(string menu, BaseGuiItem[] items)
+        public void connectItems(string menu_name, BaseGuiItem[] items)
         {
 
             MenuScreen ms;
 
-            System.Diagnostics.Debug.WriteLine(string.Format("if előtt"));
+            System.Diagnostics.Debug.WriteLine("CONNECT-ITEMS entered");
 
-            if (menus.TryGetValue(menu, out ms))
+            
+
+            
+            if (menus.TryGetValue(menu_name, out ms))
             {
-                System.Diagnostics.Debug.WriteLine(string.Format("if-ben"));
-                ms.Add(items);
+                System.Diagnostics.Debug.WriteLine(string.Format("IN IF - menuscreen: {0}", ms));
+                ms?.Add(items);
+
+                // if(ms == null) while (true) { }
+
                 return;
             }
-
-            System.Diagnostics.Debug.WriteLine(string.Format("if után - no menu found"));
             
-            ms = new MenuScreen();
+
+            /*
+            catch (Exception ex)
+            {
+#if DEBUG
+                    System.Diagnostics.Debug.WriteLine(string.Format("has home (in exception): {0}", menus.ContainsKey("home")));
+                    System.Diagnostics.Debug.WriteLine(ex.Message + ex.Source + ex.StackTrace);
+
+#endif
+                //throw ex;
+                while (true) { }
+                //Exit();
+                //appControllerRef.CloseApp();
+            }
+*/
+            System.Diagnostics.Debug.WriteLine("if után - no menu found");
+            
+            ms = new MenuScreen(this.appControllerRef.WindowArea);
             ms.Add(items);
-            menus.Add(menu, ms);
+            menus.Add(menu_name, ms);
         }
 
         public void SwitchMenu(string name)
         {
-            /*
-            if(name == "back")
-            {
-                return;
-            }
-            */
 
-            MenuScreen s;
+            MenuScreen s = null;
             if(menus.TryGetValue(name, out s))
             {
+                this.currentMenu?.ResetItems();
                 this.currentMenu = s;
             }
         }
 
         public void Create()
         {
-            var b = this.camera.Bounds;
+            // menus = new Dictionary<string, MenuScreen>();
+            System.Diagnostics.Debug.WriteLine("ADD előtt");
+            this.menus.Add("home", new MenuScreen(this.appControllerRef.WindowArea));
+            this.menus.Add("options", new MenuScreen(this.appControllerRef.WindowArea));
+            System.Diagnostics.Debug.WriteLine("ADD után");
+
+            var screenBounds = this.camera.Bounds;
             int buttonWidth = 180;
             int buttonHeight = 40;
 
             // centering the button
-            float left = b.halfDims.X - buttonWidth / 2.0f;
+            float left = screenBounds.halfDims.X - buttonWidth / 2.0f;
 
+            // System.Diagnostics.Debug.WriteLine(string.Format("has-home (before try): {0}", menus.ContainsKey("home")));
+            // valami nem ok itt, amikor visszalépünk főmenübe lefagy a játék...
 
-            var thisState = this;
+            System.Diagnostics.Debug.WriteLine("CONNECT - options előtt");
+            this.connectItems("options", new Button[1] {
+                new Button(this, new AABB(left, 400, buttonWidth, buttonHeight), "Back") {
 
-            System.Diagnostics.Debug.WriteLine(string.Format("has-home (before try): {0}", menus.ContainsKey("home")));
-            // valami nem ok itt, amikor visszalépünk főmenübe lefegy a játék...
-            try
-            {
-                this.connectItems("home", new Button[2] {
-                new Button(thisState, new AABB(left, 400, buttonWidth, buttonHeight), "Play") {
-
-                               OnClick = (MouseButtonEventArgs e) =>
-                               {
-                                   // this.SwitchMenu("options");
-                                   appControllerRef.StartGame();
-                               }
-                },
-                new Button(thisState, new AABB(left, 480, buttonWidth, buttonHeight), "Exit") {
-
-                               OnClick = (MouseButtonEventArgs e) =>
-                               {
-                                   Exit();
-                                   appControllerRef.CloseApp();
-                               }
-                }
-
+                                    OnClickFunc = (MouseButtonEventArgs e) =>
+                                    {
+                                        this.SwitchMenu("home");
+                                    }
+                 }
             });
-            }
-            catch(Exception e)
-            {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(string.Format("has home (in exception): {0}", menus.ContainsKey("home")));
-                System.Diagnostics.Debug.WriteLine(e.Message + e.Source + e.StackTrace);
 
-#endif
-                Exit();
-                appControllerRef.CloseApp();
-            }
+            System.Diagnostics.Debug.WriteLine("CONNECT - home előtt");
+
+            this.connectItems("home", new Button[3] {
+                    new Button(this, new AABB(left, 400, buttonWidth, buttonHeight), "Play") {
+
+                                    OnClickFunc = (MouseButtonEventArgs e) =>
+                                    {
+                                        appControllerRef.StartGame();
+                                    }
+                    },
+                    new Button(this, new AABB(left, 460, buttonWidth, buttonHeight), "Options") {
+
+                                    OnClickFunc = (MouseButtonEventArgs e) =>
+                                    {
+                                        this.SwitchMenu("options");
+                                    }
+                    },
+                    new Button(this, new AABB(left, 520, buttonWidth, buttonHeight), "Exit") {
+
+                                    OnClickFunc = (MouseButtonEventArgs e) =>
+                                    {
+                                        Exit();
+                                        appControllerRef.CloseApp();
+                                    }
+                    }
+                }
+            );
+            System.Diagnostics.Debug.WriteLine("CONNECT után");
 
             /*
             this.connectItems("options", new[] {
@@ -265,6 +447,7 @@ namespace platformerGame.App
 
         public override void Enter()
         {
+            resourceAssets.LoadResources(Constants.FONT_NAMES);
             camera = new Camera(new View(new Vector2f(appControllerRef.WindowSize.X / 2.0f, appControllerRef.WindowSize.Y / 2.0f), appControllerRef.WindowSize));
             camera.Zoom = 1.0f;
             this.Create();
@@ -273,26 +456,110 @@ namespace platformerGame.App
 
         public override void Exit()
         {
+            this.currentMenu = null;
+            foreach (var item in menus)
+            {
+                item.Value.ClearItems();
+            }
             this.menus.Clear();
+            this.resourceAssets.ClearResources();
         }
 
-        public override void HandleKeyPress(KeyEventArgs e)
+        public override void HandleKeyPressed(KeyEventArgs e)
         {
             
         }
 
-        public override void HandleSingleMouseClick(MouseButtonEventArgs e)
+        public override void HandleKeyReleased(KeyEventArgs e)
         {
-            var buttons = currentMenu.Items.OfType<Button>();
+
+        }
+
+        public override void HandleTextEntered(TextEventArgs e)
+        {
+
+        }
+
+        public override void HandleMouseButtonPressed(MouseButtonEventArgs e)
+        {
             Vector2f mousePos = new Vector2f(e.X, e.Y);
-            foreach (var button in buttons)
+
+            var grid = currentMenu.ItemGrid;
+            var possibleHandlers = grid.getEntitiesInRadius(mousePos, 10.0f);
+
+            foreach (var guiItem in possibleHandlers)
             {
-                if (cCollision.IsPointInsideBox(mousePos, button.Bounds))
+                if (cCollision.IsPointInsideBox(mousePos, guiItem.Bounds))
                 {
-                    button.Click(e);
-                    return;
+                    guiItem.StartClick(e);
+                    break;
                 }
             }
+        }
+
+        // only occurs if fully clicked
+        public override void HandleMouseButtonReleased(MouseButtonEventArgs e)
+        {
+            Vector2f mousePos = new Vector2f(e.X, e.Y);
+
+            var grid = currentMenu.ItemGrid;
+            var possibleHandlers = grid.getEntitiesInRadius(mousePos, 10.0f);
+
+            foreach (var guiItem in possibleHandlers)
+            {
+                if (cCollision.IsPointInsideBox(mousePos, guiItem.Bounds))
+                {
+                    guiItem.OnClick(e);
+                    break;
+                }
+            }
+        }
+
+        public override void HandleMouseMoved(MouseMoveEventArgs e)
+        {
+            Vector2f mousePos = new Vector2f(e.X, e.Y);
+            EntityGrid<BaseGuiItem> grid = null;
+            List<BaseGuiItem> possibleHandlers = null;
+            try
+            {
+                grid = currentMenu.ItemGrid;
+                possibleHandlers = grid.getEntitiesInRadius(mousePos, 10.0f);
+
+                foreach (var guiItem in possibleHandlers)
+                {
+                    if (cCollision.IsPointInsideBox(mousePos, guiItem.Bounds))
+                    {
+                        guiItem.OnMouseMove(e);
+                        break;
+                    }
+                    else
+                    {
+                        guiItem.OnMouseLeave(e);
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+
+            #if DEBUG
+                System.Diagnostics.Debug.WriteLine(this.menus != null ? "menus OK" : "menus NULL");
+                System.Diagnostics.Debug.WriteLine(currentMenu != null ? "currentMenu OK" : "currentMenu NULL");
+                System.Diagnostics.Debug.WriteLine(grid != null ? "grid OK" : "grid NULL");
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            #endif
+                
+                while (true)
+                {
+
+                }
+                
+
+                // throw ex;
+            }
+
+                // grid?.getEntitiesNearby(mousePos);
+
+            
         }
 
         public override void UpdateFixed(float step_time)

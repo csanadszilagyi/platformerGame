@@ -45,16 +45,16 @@ namespace platformerGame.GameObjects
 
         protected virtual void init()
         {
-            bounds = new AABB(0,0,1,1);
-            bounds.SetDims(new Vector2f(Constants.CHAR_COLLISON_RECT.Width, Constants.CHAR_COLLISON_RECT.Height));
-            bounds.SetPosByTopLeft(position);
+            Bounds = new AABB(0,0,1,1);
+            Bounds.SetDims(new Vector2f(Constants.CHAR_COLLISON_RECT.Width, Constants.CHAR_COLLISON_RECT.Height));
+            Bounds.SetPosByTopLeft(position);
 
             this.hitCollisionRect.SetDims(new Vector2f(32.0f, 32.0f));
             this.hitCollisionRect.SetPosByTopLeft(position);
 
             shape = new RectangleShape();
             shape.FillColor = Color.Green;
-            shape.Size = new Vector2f(bounds.dims.X, bounds.dims.Y);
+            shape.Size = new Vector2f(Bounds.dims.X, Bounds.dims.Y);
 
             isJumpActive = false;
             isOnGround = false;
@@ -130,7 +130,7 @@ namespace platformerGame.GameObjects
                 float wallLeftX;
                 if (hasRightWall2(world, delta, out wallLeftX))
                 {
-                    position.X = wallLeftX - bounds.dims.X;
+                    position.X = wallLeftX - Bounds.dims.X;
                     velocity.X = 0.0f;
                 }
                 else
@@ -159,9 +159,9 @@ namespace platformerGame.GameObjects
 
             if (delta >= 0.0f)
             {
-                if (hasGround(world, delta, out groundY))
+                if (hasGround2(world, delta, out groundY))
                 {
-                    position.Y = groundY - bounds.dims.Y;
+                    position.Y = groundY - Bounds.dims.Y;
                     isOnGround = true;
                     velocity.Y = 0.0f;
 
@@ -179,7 +179,7 @@ namespace platformerGame.GameObjects
                 float bottomY;
                 if (hasCeiling(world, delta, out bottomY))
                 {
-                    position.Y = bottomY + 1.0f; //- bounds.dims.Y;
+                    position.Y = bottomY + 1.0f; //- Bounds.dims.Y;
 
                     velocity.Y = 0.0f;
                 }
@@ -203,7 +203,7 @@ namespace platformerGame.GameObjects
             updateX(step_time, world);
             updateY(step_time, world);
 
-            bounds.SetPosByTopLeft(position);
+            Bounds.SetPosByTopLeft(position);
             this.hitCollisionRect.SetPosByTopLeft(position);
 
             this.force.X = 0.0f;
@@ -282,7 +282,7 @@ namespace platformerGame.GameObjects
 
             Vector2f oldTopLeft = new Vector2f(position.X, position.Y);
             Vector2f newTopLeft = new Vector2f(position.X, predictedPosY);
-            Vector2f newTopRight = new Vector2f(newTopLeft.X + bounds.dims.X - 2.0f, newTopLeft.Y);
+            Vector2f newTopRight = new Vector2f(newTopLeft.X + Bounds.dims.X - 2.0f, newTopLeft.Y);
 
             int endY = world.ToMapPos(oldTopLeft).Y; //mMap.GetMapTileYAtPoint(newBottomLeft.y);
             int begY = Math.Min(world.ToMapPos(newTopLeft).Y, endY);
@@ -295,7 +295,7 @@ namespace platformerGame.GameObjects
             for (int tileIndexY = begY; tileIndexY <= endY; ++tileIndexY)
             {
                 var topLeft = AppMath.Interpolate(newTopLeft, oldTopLeft, (float)Math.Abs(endY - tileIndexY) / dist);
-                var topRight = new Vector2f(topLeft.X + bounds.dims.X - 1, topLeft.Y);
+                var topRight = new Vector2f(topLeft.X + Bounds.dims.X - 1, topLeft.Y);
 
                 for (var checkedTile = topLeft; ; checkedTile.X += Constants.TILE_SIZE)
                 {
@@ -325,15 +325,15 @@ namespace platformerGame.GameObjects
             groundY = 0.0f;
 
             float predictedPosY = position.Y + delta;
-
+            /*
             Vector2f up = new Vector2f(0, -1);
             Vector2f bottom = new Vector2f(0, 1);
             Vector2f left = new Vector2f(-1, 0);
-            Vector2f right = new Vector2f(1, 0);
+            Vector2f right = new Vector2f(1, 0);*/
 
-            Vector2f oldBottomLeft = new Vector2f(position.X, position.Y + bounds.dims.Y);
-            Vector2f newBottomLeft = new Vector2f(position.X, predictedPosY + bounds.dims.Y);
-            Vector2f newBottomRight = new Vector2f(newBottomLeft.X + bounds.dims.X , newBottomLeft.Y);
+            Vector2f oldBottomLeft = new Vector2f(position.X, position.Y + Bounds.dims.Y);
+            Vector2f newBottomLeft = new Vector2f(position.X, predictedPosY + Bounds.dims.Y);
+            Vector2f newBottomRight = new Vector2f(newBottomLeft.X + Bounds.dims.X , newBottomLeft.Y);
 
             int endY = world.ToMapPos(newBottomLeft).Y; //mMap.GetMapTileYAtPoint(newBottomLeft.y);
             int begY = Math.Max(world.ToMapPos(oldBottomLeft).Y - 1, endY);
@@ -345,7 +345,7 @@ namespace platformerGame.GameObjects
             for (int tileIndexY = begY; tileIndexY <= endY; ++tileIndexY)
             {
                 var bottomLeft = AppMath.Interpolate(newBottomLeft, oldBottomLeft, (float)Math.Abs(endY - tileIndexY) / dist);
-                var bottomRight = new Vector2f(bottomLeft.X + bounds.dims.X - 1.0f, bottomLeft.Y); // -2.0f
+                var bottomRight = new Vector2f(bottomLeft.X + Bounds.dims.X - 1.0f, bottomLeft.Y); // -1, -2.0f
 
                 for (var checkedTile = bottomLeft; ; checkedTile.X += Constants.TILE_SIZE)
                 {
@@ -363,7 +363,7 @@ namespace platformerGame.GameObjects
                         isOnOnewWayPlatform = false;
                         return true;
                     }
-                    else if (tile == TileType.ONEWAY_PLATFORM && position.Y <= groundY - bounds.dims.Y)
+                    else if (tile == TileType.ONEWAY_PLATFORM && position.Y <= groundY - Bounds.dims.Y)
                     {
                         isOnOnewWayPlatform = true;
                         return true;
@@ -381,6 +381,26 @@ namespace platformerGame.GameObjects
             return false;
         }
 
+        // local function for check
+        protected bool tileCollision(int tileX, int tileY, out float grY)
+        {
+            var world = this.Scene.World;
+
+            TileType tile = world.CurrentLevel.GetTileAtXY(tileX, tileY).Type;
+            grY = (int)(tileY * Constants.TILE_SIZE + world.WorldBounds.topLeft.Y);
+            if (tile == TileType.WALL)
+            {
+                isOnOnewWayPlatform = false;
+                return true;
+            }
+            else if (tile == TileType.ONEWAY_PLATFORM && position.Y <= grY - Bounds.dims.Y)
+            {
+                isOnOnewWayPlatform = true;
+                return true;
+            }
+            return false;
+
+        }
 
         protected bool hasGround2(cWorld world, float delta, out float groundY)
         {
@@ -388,26 +408,55 @@ namespace platformerGame.GameObjects
 
             float predictedPosY = position.Y + delta;
 
-            Vector2f oldBottomRight = new Vector2f(position.X + bounds.halfDims.X, position.Y + bounds.dims.Y);
+            Vector2f oldBottomRight = new Vector2f(position.X + Bounds.halfDims.X, position.Y + Bounds.dims.Y);
 
-            Vector2f oldBottomLeft = new Vector2f(position.X, position.Y + bounds.dims.Y);
-            Vector2f newBottomLeft = new Vector2f(oldBottomLeft.X, predictedPosY + bounds.dims.Y);
-            Vector2f newBottomRight = new Vector2f(newBottomLeft.X + bounds.halfDims.X, newBottomLeft.Y);
+            Vector2f oldBottomLeft = new Vector2f(position.X, position.Y + Bounds.dims.Y);
+            Vector2f newBottomLeft = new Vector2f(oldBottomLeft.X, predictedPosY + Bounds.dims.Y);
+            Vector2f newBottomRight = new Vector2f(newBottomLeft.X + Bounds.halfDims.X, newBottomLeft.Y);
 
-            int tileEndX = world.ToMapPos(oldBottomLeft).X+1;
-            int tileBeginX = Math.Min(world.ToMapPos(oldBottomLeft).X, tileEndX);
+            // int tileBeginX = Math.Min(world.ToMapPos(oldBottomLeft).X, tileEndX);
+           
+            int tileBeginX = world.ToMapPos(oldBottomLeft).X-1;
+            int tileEndX = world.ToMapPos(newBottomRight).X+1;
 
-            int tileBeginY = world.ToMapPos(oldBottomLeft).Y;
-            int tileEndY = world.ToMapPos(newBottomLeft).Y;
 
-            for (int tileIndexY = tileBeginY; tileIndexY <= tileEndY; ++tileIndexY)
-            {
-                for (int tileIndexX = tileBeginX; tileIndexX <= tileEndX; ++tileIndexX)
+            int tileBeginY = world.ToMapPos(oldBottomLeft).Y-1;
+            int tileEndY = world.ToMapPos(newBottomLeft).Y+1;
+
+            
+
+           
+                if (this.velocity.X < 0.0f)
                 {
+                    for (int tileIndexY = tileBeginY; tileIndexY <= tileEndY; ++tileIndexY)
+                    {
+                        for (int tileIndexX = tileBeginX; tileIndexX < tileEndX; ++tileIndexX)
+                        {
+                            if (tileCollision(tileIndexX, tileIndexY, out groundY))
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (int tileIndexY = tileBeginY; tileIndexY <= tileEndY; ++tileIndexY)
+                    {
+                        for (int tileIndexX = tileEndX; tileIndexX > tileBeginX; --tileIndexX)
+                        {
+                            if (tileCollision(tileIndexX, tileIndexY, out groundY))
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
 
-                    
-                    if (world.CurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).Type == TileType.WALL)
+                
+                    //if (world.CurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).Type == TileType.WALL)
                     /*world.isRectOnWall()*/
+                    /*
                     {
                         //world.GetCurrentLevel.GetTileAtXY(tileIndexX, tileIndexY).PlayerCollidable = true;
 
@@ -415,8 +464,9 @@ namespace platformerGame.GameObjects
                         groundY = (int)(tileIndexY * Constants.TILE_SIZE + world.WorldBounds.topLeft.Y);
                         return true;
                     }
-                }
-            }
+                    */
+                
+            
 
             return false;
         }
@@ -436,7 +486,7 @@ namespace platformerGame.GameObjects
 
             Vector2f oldTopLeft = new Vector2f(position.X, position.Y);
             Vector2f newTopLeft = new Vector2f(predictedPosX, position.Y);
-            Vector2f newBottomLeft = new Vector2f(newTopLeft.X, newTopLeft.Y + bounds.dims.Y-2.0f);
+            Vector2f newBottomLeft = new Vector2f(newTopLeft.X, newTopLeft.Y + Bounds.dims.Y-2.0f);
 
             int tileEndX = world.ToMapPos(newTopLeft).X-1;
             int tileBeginX = Math.Max(world.ToMapPos(oldTopLeft).X, tileEndX);
@@ -467,11 +517,11 @@ namespace platformerGame.GameObjects
         {
             wallLeftX = 0.0f;
 
-            float predictedPosX = position.X + bounds.dims.X + delta;
+            float predictedPosX = position.X + Bounds.dims.X + delta;
 
-            Vector2f oldTopRight = new Vector2f(position.X + bounds.dims.X, position.Y);
+            Vector2f oldTopRight = new Vector2f(position.X + Bounds.dims.X, position.Y);
             Vector2f newTopRight = new Vector2f(predictedPosX, position.Y);
-            Vector2f newBottomRight = new Vector2f(newTopRight.X, newTopRight.Y + bounds.dims.Y-2.0f);
+            Vector2f newBottomRight = new Vector2f(newTopRight.X, newTopRight.Y + Bounds.dims.Y-2.0f);
 
             int tileEndX = world.ToMapPos(newTopRight).X + 1;
             int tileBeginX = Math.Min(world.ToMapPos(oldTopRight).X, tileEndX);

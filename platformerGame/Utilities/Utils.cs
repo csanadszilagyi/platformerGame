@@ -10,6 +10,9 @@ namespace platformerGame.Utilities
 {
     public static class Utils
     {
+        public static readonly Color RED = new Color(255, 82, 82);
+        public static readonly Color BLUE = new Color(99, 196, 236);
+
         //==========================================================================================================
         public static Color GetRandomRedColor()
         {
@@ -31,7 +34,7 @@ namespace platformerGame.Utilities
         //==========================================================================================================
         public static Color GetRandomBlueColor()
         {
-            Color c = GetRandomColor(20, 100, 20, 100, 160, 255);
+            Color c = GetRandomColor(37, 99, 150, 196, 220, 236);
             return c;
         }
         //==========================================================================================================

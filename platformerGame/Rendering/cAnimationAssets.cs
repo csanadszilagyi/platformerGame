@@ -15,14 +15,15 @@ namespace platformerGame.Rendering
         public MyIntRect ViewOffsetRect { get; set; }
         public bool Repeat { get; set; }
 
-        public AnimationInfo(string texture_name, IEnumerable<MyIntRect> frames, MyIntRect view_offset, bool repeat = false)
+        public AnimationInfo(Texture texture, IEnumerable<MyIntRect> frames, MyIntRect view_offset, bool repeat = false)
         {
-            this.refTexture = AssetManager.GetTexture(texture_name);
+            this.refTexture = texture; //  assets.GetTexture(texture_name);
             this.Frames = new List<MyIntRect>(frames);
             this.ViewOffsetRect = view_offset;
             this.Repeat = repeat;
         }
 
+        /*
         public AnimationInfo(Texture texture, IEnumerable<MyIntRect> frames, MyIntRect view_offset, bool repeat = false)
         {
             this.refTexture = texture;
@@ -30,6 +31,7 @@ namespace platformerGame.Rendering
             this.ViewOffsetRect = view_offset;
             this.Repeat = repeat;
         }
+        */
 
         public AnimationInfo(AnimationInfo other)
         {
@@ -78,15 +80,17 @@ namespace platformerGame.Rendering
             }
         }
 
-        public static void LoadAnimations()
+        public static void LoadAnimations(AssetContext assets)
         {
-            framesContainer.Add("coins-gold", new AnimationInfo("coins", getLoopedRow(0, 0, 8, 16, 16), new MyIntRect(0,0,16,16)));
-            framesContainer.Add("coins-silver", new AnimationInfo("coins", getLoopedRow(1, 0, 8, 16, 16), new MyIntRect(0, 0, 16, 16)));
-            framesContainer.Add("coins-copper", new AnimationInfo("coins", getLoopedRow(2, 0, 8, 16, 16), new MyIntRect(0, 0, 16, 16)));
-            framesContainer.Add("side-explosion1", new AnimationInfo("side_explosion1", getLoopedFull(3, 5, 96, 96), new MyIntRect(0, 0, 96, 96)));
-            framesContainer.Add("simple-explosion1", new AnimationInfo("explosion32_B", getLoopedFull(4, 4, 32, 32), new MyIntRect(0, 0, 32, 32)));
-            framesContainer.Add("simple-explosion2", new AnimationInfo("explosion32", getLoopedFull(4, 4, 32, 32), new MyIntRect(0, 0, 32, 32)));
-            framesContainer.Add("simple-explosion3", new AnimationInfo("explosion196_C", getLoopedFull(4, 4, 49, 49), new MyIntRect(0, 0, 49, 49)));
+            framesContainer.Add("coins-gold", new AnimationInfo(assets.GetTexture("coins"), getLoopedRow(0, 0, 8, 16, 16), new MyIntRect(0,0,16,16)));
+            framesContainer.Add("coins-silver", new AnimationInfo(assets.GetTexture("coins"), getLoopedRow(1, 0, 8, 16, 16), new MyIntRect(0, 0, 16, 16)));
+            framesContainer.Add("coins-copper", new AnimationInfo(assets.GetTexture("coins"), getLoopedRow(2, 0, 8, 16, 16), new MyIntRect(0, 0, 16, 16)));
+            framesContainer.Add("side-explosion1", new AnimationInfo(assets.GetTexture("side_explosion1"), getLoopedFull(3, 5, 96, 96), new MyIntRect(0, 0, 96, 96)));
+            framesContainer.Add("side-explosion2", new AnimationInfo(assets.GetTexture("explosion512"), getLoopedFull(3,5,104,100), new MyIntRect(0, 0, 104, 100)));
+            framesContainer.Add("simple-explosion1", new AnimationInfo(assets.GetTexture("explosion32_B"), getLoopedFull(4, 4, 32, 32), new MyIntRect(0, 0, 32, 32)));
+            framesContainer.Add("simple-explosion2", new AnimationInfo(assets.GetTexture("explosion32"), getLoopedFull(4, 4, 32, 32), new MyIntRect(0, 0, 32, 32)));
+            framesContainer.Add("simple-explosion3", new AnimationInfo(assets.GetTexture("explosion196_C"), getLoopedFull(4, 4, 49, 49), new MyIntRect(0, 0, 49, 49)));
+            framesContainer.Add("flash-black", new AnimationInfo(assets.GetTexture("flash_black_128"), getLoopedFull(4,4,128,128), new MyIntRect(0, 0, 128, 128)));
         }
 
         public static void ClearAll()

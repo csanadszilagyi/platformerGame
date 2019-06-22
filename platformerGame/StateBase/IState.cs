@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SFML.Graphics;
+﻿using SFML.Graphics;
 
 namespace platformerGame.StateBase
 {
-    interface IState<T>
+    interface IState
     {
         void Create();
-        void Enter(T prev);
+        void Enter(IState prev_state = null);
         void UpdateFixed(float step_time);
         void UpdateVariable();
         void Exit();
@@ -18,6 +13,7 @@ namespace platformerGame.StateBase
 
     interface IVisualStateComponent
     {
+        // rendering calculations, ordering (eg. view position calculation...etc)
         void PreRender(float alpha);
         void Render(RenderTarget destination);
     }

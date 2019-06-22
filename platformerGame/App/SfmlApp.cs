@@ -41,9 +41,13 @@ namespace platformerGame.App
 
         bool vsync = false;
 
+        AssetContext appAssets;
+
         public SfmlApp()
         {
             Constants.Load();
+            appAssets = new AssetContext();
+            
         }
 
         private void _setUpSFML()
@@ -59,20 +63,29 @@ namespace platformerGame.App
 
             mainWindow.Closed += new EventHandler(OnClosed);
             mainWindow.KeyPressed += new EventHandler<KeyEventArgs>(OnKeyPressed);
+            mainWindow.KeyReleased += new EventHandler<KeyEventArgs>(OnKeyReleased);
+            mainWindow.TextEntered += new EventHandler<TextEventArgs>(OnTextEntered);
+
             mainWindow.Resized += new EventHandler<SizeEventArgs>(OnResized);
+
+            mainWindow.MouseButtonReleased += new EventHandler<MouseButtonEventArgs>(OnMouseButtonReleased);
             mainWindow.MouseButtonPressed += new EventHandler<MouseButtonEventArgs>(OnMouseButtonPressed);
+
+            mainWindow.MouseMoved += new EventHandler<MouseMoveEventArgs>(OnMouseMoved);
             
             
             clearColor = new Color(0, 0, 0, 255);
 
             this.defaultView = mainWindow.DefaultView;
-            //resource-ok betöltése (font-ok és textúrák, képek a játékhoz)
-            AssetManager.LoadResources();
+            
         }
 
         private void _init()
         {
             _setUpSFML();
+
+            //resource-ok betöltése (font-ok és textúrák, képek a játékhoz)
+            appAssets.LoadResources(Constants.FONT_NAMES);
 
             m_DeltaTime = 0.0;
             m_StepTime = 1.0 / 60.0;
@@ -89,7 +102,7 @@ namespace platformerGame.App
 
 
             //Idő szöveg
-            timeText = new Text("", AssetManager.GetFont("pf_tempesta_seven"));
+            timeText = new Text("", appAssets.GetFont("pf_tempesta_seven"));
             timeText.Position = new Vector2f(this.defaultView.Size.X-500, 30);
             timeText.CharacterSize = 28; // in pixels, not points!
             timeText.FillColor = Color.White;
@@ -351,7 +364,6 @@ namespace platformerGame.App
 
         public void _destroy()
         {
-            AssetManager.ClearAll();
             currentState.Exit();
             mainWindow.Close();
         }
@@ -379,6 +391,7 @@ namespace platformerGame.App
 
         private void SetGameState(GameState new_state)
         {
+            // ? is neccessary
             currentState?.Exit();
             currentState = new_state;
             currentState.Enter();
@@ -386,10 +399,10 @@ namespace platformerGame.App
 
         public void ChangeGameState(string state_id)
         {
-            Action desired;
-            if(definiedStates.TryGetValue(state_id, out desired))
+            Action desiredAction = null;
+            if(definiedStates.TryGetValue(state_id, out desiredAction))
             {
-                desired.Invoke();
+                desiredAction?.Invoke();
             }
 
         }
@@ -416,15 +429,34 @@ namespace platformerGame.App
             if (e.Code == Keyboard.Key.V)
                 toggleVSYNC();
 
-            currentState.HandleKeyPress(e);
+            currentState.HandleKeyPressed(e);
 
+        }
+
+        private void OnKeyReleased(object sender, KeyEventArgs e)
+        {
+            currentState.HandleKeyReleased(e);
+        }
+
+        private void OnTextEntered(object sender, TextEventArgs e)
+        {
+            currentState.HandleTextEntered(e);
+        }
+
+        private void OnMouseMoved(object sender, MouseMoveEventArgs e)
+        {
+            currentState.HandleMouseMoved(e);
         }
 
         private void OnMouseButtonPressed(object sender, MouseButtonEventArgs e)
         {
-            currentState.HandleSingleMouseClick(e);
+            currentState.HandleMouseButtonPressed(e);
         }
-        
+
+        private void OnMouseButtonReleased(object sender, MouseButtonEventArgs e)
+        {
+            currentState.HandleMouseButtonReleased(e);
+        }
 
         public RenderWindow MainWindow
         {
@@ -434,6 +466,11 @@ namespace platformerGame.App
         public Vector2f WindowSize
         {
             get { return windowSize; }
+        }
+
+        public AABB WindowArea
+        {
+            get { return new AABB(0.0f, 0.0f, windowSize.X, windowSize.Y); }
         }
 
         public void StartGame()

@@ -24,13 +24,13 @@ namespace platformerGame.GameObjects
         { }
 
         // must call somewhere
-        public static void Init()
+        public static void Init(AssetContext assets)
         {
             breeds = new Dictionary<string, BulletBreed>();
 
             BulletBreed b = new BulletBreed()
             {
-                sprite = new Sprite(AssetManager.GetTexture("bullet_light_green")),
+                sprite = new Sprite( assets.GetTexture("bullet_light_green")),
                 startSpeed = Constants.BULLET_START_SPEED,
                 textureIntersectionOffset = 30,
                 slugLength = 5
@@ -42,7 +42,7 @@ namespace platformerGame.GameObjects
 
             BulletBreed b2 = new BulletBreed()
             {
-                sprite = new Sprite(AssetManager.GetTexture("bullet3")),
+                sprite = new Sprite( assets.GetTexture("bullet3")),
                 startSpeed = 250,
                 textureIntersectionOffset = 1,
                 slugLength = 1
@@ -63,6 +63,11 @@ namespace platformerGame.GameObjects
             }
 
             return null;
+        }
+
+        public static void Cleanup()
+        {
+            breeds.Clear();
         }
     }
 
@@ -99,13 +104,13 @@ namespace platformerGame.GameObjects
 
             this.alive = true;
             this.alpha = 255.0f;
-            
+            // proci határozza meg, hogy milyen alaplap foglalat és milyen RAM!!
             this.heading = direction;
-            this.bounds = new AABB();
-            this.bounds.SetDims(new Vector2f(1.0f, 1.0f));
+            this.Bounds = new AABB();
+            this.Bounds.SetDims(new Vector2f(1.0f, 1.0f));
             this.oppositeDir = new Vector2f(-this.heading.X * breed.slugLength, -this.heading.Y * breed.slugLength);
             this.intersection = new Vector2f(0.0f, 0.0f);
-            this.bounds.SetPosByTopLeft(pos);
+            this.Bounds.SetPosByTopLeft(pos);
             this.velocity.X = this.heading.X * breed.startSpeed;
             this.velocity.Y = this.heading.Y * breed.startSpeed;
             orientation = AppMath.GetAngleOfVector(heading);
@@ -155,8 +160,8 @@ namespace platformerGame.GameObjects
 
           
 
-            this.bounds.SetPosByTopLeft(position);
-            this.hitCollisionRect = bounds;
+            this.Bounds.SetPosByTopLeft(position);
+            this.hitCollisionRect = Bounds;
 
             var world = Scene.World;
 
@@ -215,7 +220,7 @@ namespace platformerGame.GameObjects
 
         public override void Render(RenderTarget destination)
         {
-            //this.bounds.SetPosByTopLeft(this.viewPosition);
+            //this.Bounds.SetPosByTopLeft(this.viewPosition);
             this.sprite.Position = this.viewPosition;
             Color c = this.sprite.Color;
             c.A = (byte)this.alpha;

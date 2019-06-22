@@ -33,21 +33,21 @@ namespace platformerGame.GameObjects
 
         public cTurret(GameScene scene, Vector2f pos) : base(scene, pos)
         {
-            this.bounds.SetDims(new Vector2f(16, 16));
-            this.bounds.SetPosByCenter(pos);
+            this.Bounds.SetDims(new Vector2f(16, 16));
+            this.Bounds.SetPosByCenter(pos);
 
-            gun = new cMachineGun(this, 2, "turret-bullet");
+            gun = new cMachineGun(this, 6, "turret-bullet");
 
             gunFacingDirection = new Vector2f(0.0f, -1.0f);
 
-            shape = new RectangleShape(new Vector2f(bounds.dims.X, bounds.dims.Y));
-            shape.Origin = new Vector2f(bounds.halfDims.X, bounds.halfDims.Y);
+            shape = new RectangleShape(new Vector2f(Bounds.dims.X, Bounds.dims.Y));
+            shape.Origin = new Vector2f(Bounds.halfDims.X, Bounds.halfDims.Y);
             shape.FillColor = Color.Green;
             shape.Position = new Vector2f(pos.X, pos.Y);
             shape.Scale = new Vector2f(1.0f, 1.0f);
 
             light = new cLight();
-            light.Pos = this.bounds.center;
+            light.Pos = this.Bounds.center;
             light.Radius = 100.0f;
             light.LinearizeFactor = 0.8f;
             light.Bleed = 8.0f;
@@ -60,10 +60,15 @@ namespace platformerGame.GameObjects
             double dist = AppMath.Vec2Distance(Scene.Player.Bounds.center, this.Bounds.center);
             if(dist <= SPOT_DISTANCE)
             {
-                Vector2f target = AppMath.Vec2NormalizeReturn(Scene.Player.Bounds.center - this.Bounds.center);
-                float ang = AppMath.GetAngleBetwenVecs(target, gunFacingDirection);
+                Vector2f toTarget = AppMath.Vec2NormalizeReturn((Scene.Player.Bounds.center + Scene.Player.Velocity) - this.Bounds.center);
+
                 
-                gunFacingDirection = target;
+                float ang = AppMath.GetAngleBetwenVecs(toTarget, gunFacingDirection);
+                Quaternion q = Quaternion.CreateFromAxisAngle(new Vector3f(toTarget.X, toTarget.Y, 0.0f), ang);
+                Quaternion q2 = Quaternion.CreateFromAxisAngle(new Vector3f(gunFacingDirection.X, gunFacingDirection.Y, 0.0f), ang);
+                q = Quaternion.Slerp(q, q2, ang);
+                
+                gunFacingDirection = new Vector2f(q.X, q.Y); //  toTarget;
                 gun.Fire(Scene.Player.Bounds.center /*+ Scene.Player.Velocity * step_time*/);
             }
         }

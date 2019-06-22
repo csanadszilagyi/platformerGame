@@ -18,7 +18,7 @@ namespace platformerGame.GameObjects
         public cPlayer(GameScene scene, Vector2f pos) : base(scene, pos)
         {
             fireLight = new cLight();
-            fireLight.Pos = this.bounds.center;
+            fireLight.Pos = this.Bounds.center;
             fireLight.Bleed = 10.0f;
             fireLight.Radius = 120.0f;
             fireLight.LinearizeFactor = 0.96f;
@@ -29,7 +29,7 @@ namespace platformerGame.GameObjects
 
 
             p_followLight = new cLight();
-            p_followLight.Pos = this.bounds.center;
+            p_followLight.Pos = this.Bounds.center;
             p_followLight.Radius = 160.0f;
             p_followLight.LinearizeFactor = 0.9f;
             p_followLight.OriginalColor = new Color(240, 219, 164);
@@ -38,10 +38,10 @@ namespace platformerGame.GameObjects
             this.Scene.LightMap.AddStaticLight(p_followLight);
 
             this.weapon = // new cMachineGun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY);
-                 new cShotgun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY); // 9
+               new cShotgun(this, Constants.DEFAULT_WEAPON_FIRING_FREQUENCY); // 9
 
             this.health = 50;
-            healthText = new Text("", AssetManager.GetFont("pf_tempesta_seven"));
+            healthText = new Text("", Scene.Assets.GetFont("pf_tempesta_seven"));
             healthText.Position = new Vector2f(pscene.AppController.MainWindow.DefaultView.Size.X - 500, 30);
             healthText.CharacterSize = 28; // in pixels, not points!
             healthText.FillColor = Color.White;
@@ -57,7 +57,7 @@ namespace platformerGame.GameObjects
             MyIntRect viewRect = Constants.CHAR_VIEW_RECT;
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.STAND, HorizontalFacing.FACING_LEFT),
-                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         Scene.Assets.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
@@ -68,7 +68,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.STAND, HorizontalFacing.FACING_RIGHT),
-                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         Scene.Assets.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
@@ -79,7 +79,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.WALK, HorizontalFacing.FACING_LEFT),
-                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         Scene.Assets.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
@@ -90,7 +90,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.WALK, HorizontalFacing.FACING_RIGHT),
-                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         Scene.Assets.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          0,
@@ -101,7 +101,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.JUMP, HorizontalFacing.FACING_LEFT),
-                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         Scene.Assets.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          1,
@@ -112,7 +112,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.JUMP, HorizontalFacing.FACING_RIGHT),
-                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         Scene.Assets.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          1,
@@ -124,7 +124,7 @@ namespace platformerGame.GameObjects
 
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.FALL, HorizontalFacing.FACING_LEFT),
-                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         Scene.Assets.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          6,
@@ -135,7 +135,7 @@ namespace platformerGame.GameObjects
                                          viewRect);
 
             spriteControl.AddAnimState(new cSpriteState(MotionType.FALL, HorizontalFacing.FACING_RIGHT),
-                                         AssetManager.GetTexture(Constants.PLAYER_TEXTURE_NAME),
+                                         Scene.Assets.GetTexture(Constants.PLAYER_TEXTURE_NAME),
                                          Constants.CHAR_FRAME_WIDTH,
                                          Constants.CHAR_FRAME_HEIGHT,
                                          6,

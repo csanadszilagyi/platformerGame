@@ -13,6 +13,7 @@ namespace platformerGame.Particles
         Particle particleRef;
         Vector2f startPosition;
         Vector2f emitDirection;
+        float speed; // should be normalized
 
         public Particle Particle
         {
@@ -32,18 +33,25 @@ namespace platformerGame.Particles
             set { emitDirection = value; }
         }
 
+        public float Speed
+        {
+            get { return this.speed; }
+        }
+
         public EmissionInfo(Vector2f start_position)
         {
             this.particleRef = null;
             this.startPosition = start_position;
             this.emitDirection = new Vector2f(0.0f, 0.0f);
+            this.speed = 0.0f;
         }
 
-        public EmissionInfo(Vector2f start_position, Vector2f emit_direction)
+        public EmissionInfo(Vector2f start_position, Vector2f emit_direction, float speed = 0.0f)
         {
             this.particleRef = null;
             this.startPosition = start_position;
             this.emitDirection = emit_direction;
+            this.speed = speed;
         }
 
         public EmissionInfo(Particle particle, Vector2f start_position)
@@ -51,13 +59,20 @@ namespace platformerGame.Particles
             this.particleRef = particle;
             this.startPosition = start_position;
             this.emitDirection = new Vector2f(0.0f, 0.0f);
+            this.speed = 0.0f;
         }
 
-        public EmissionInfo(Particle particle, Vector2f start_position, Vector2f emit_direction)
+        public EmissionInfo(Particle particle, Vector2f start_position, Vector2f emit_direction, float speed = 0.0f)
         {
             this.particleRef = particle;
             this.startPosition = start_position;
             this.emitDirection = emit_direction;
+            this.speed = speed;
+        }
+
+        public bool hasSpeed()
+        {
+            return speed > 0.0f;
         }
     }
 }

@@ -14,9 +14,9 @@ namespace platformerGame.Rendering
     {
         Sprite sprite;
 
-        public cSpriteRenderer(string texture_name, MyIntRect texture_rect) : base()
+        public cSpriteRenderer(string texture_name, MyIntRect texture_rect, AssetContext assets) : base()
         {
-            this.sprite = new Sprite(AssetManager.GetTexture(texture_name));
+            this.sprite = new Sprite(assets.GetTexture(texture_name));
 
             this.sprite.TextureRect = texture_rect.AsSfmlIntRect();
             //this.sprite.Scale = new Vector2f(0.5f, 0.5f);

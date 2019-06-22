@@ -17,7 +17,7 @@ namespace platformerGame.Particles
         double minScale = 0.3;
         double maxScale = 0.6;
 
-        public cFireworksController(cParticleManager manager, uint max_particles = 300) : base(manager, max_particles)
+        public cFireworksController(cParticleManager manager, int max_particles = 300) : base(manager, max_particles)
         {
             this.renderStates.Texture = manager.FireworksTexture;
         }

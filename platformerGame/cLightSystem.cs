@@ -33,8 +33,11 @@ namespace platformerGame
 
         private RectangleShape lightMapDarkShape;
 
-        public cLightSystem(uint width, uint height, Color clear_color)
+        private AssetContext assets;
+
+        public cLightSystem(uint width, uint height, Color clear_color, AssetContext assets)
         {
+            this.assets = assets;
             staticLights = new List<cLight>();
             dynamicLights = new List<cLight>();
             m_ClearColor = clear_color;
@@ -45,8 +48,9 @@ namespace platformerGame
             loadShader();
         }
 
-        public cLightSystem(Color clear_color)
+        public cLightSystem(Color clear_color, AssetContext assets)
         {
+            this.assets = assets;
             lightMapDarkShape = new RectangleShape();
             lightMapDarkShape.Position = new Vector2f(0.0f, 0.0f);
 
@@ -54,7 +58,7 @@ namespace platformerGame
             dynamicLights = new List<cLight>();
             m_ClearColor = clear_color;
 
-            lightTexture = new Texture(AssetManager.GetTexture("light1"));
+            lightTexture = new Texture(assets.GetTexture("light1"));
             lightTexture.Smooth = true;
             lightSprite = new Sprite(this.lightTexture);
             lightSprite.Origin = new Vector2f(lightTexture.Size.X / 2.0f, lightTexture.Size.Y / 2.0f);
@@ -97,8 +101,10 @@ namespace platformerGame
 
         public void AddStaticLight(cLight light)
         {
+            /*
             System.Diagnostics.Debug.WriteLine(
                    string.Format("light pos: {0}, {1}", light.Pos.X, light.Pos.Y));
+            */
             staticLights.Add(light);
         }
 
@@ -179,6 +185,7 @@ namespace platformerGame
                 }
             }
         }
+
         public void renderStaticLightsToTexture(AABB viewRect)
         {
            staticLightTexture.Clear(m_ClearColor);
@@ -210,7 +217,7 @@ namespace platformerGame
 
             //destination.Draw(this.lightMapDarkShape, new RenderStates(BlendMode.Multiply));
 
-            renderStaticLightsToTexture(camera.Bounds);
+            renderStaticLightsToTexture(camera.ViewBounds);
 
             //cRenderFunctions.DrawTextureSimple(destination, new Vector2f(), m_LightTexture.Texture, new IntRect(0,0, (int)m_LightTexture.Size.X, (int)m_LightTexture.Size.Y),Color.White, BlendMode.Multiply);
 

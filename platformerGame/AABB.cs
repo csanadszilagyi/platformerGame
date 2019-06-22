@@ -165,5 +165,10 @@ namespace platformerGame
             return new Vector2f(topLeft.X, topLeft.Y + dims.Y);
         }
 
+        public float diagonalLength()
+        {
+            return AppMath.getDiagonal(this.dims);
+        }
+
     }
 }

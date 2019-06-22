@@ -1,6 +1,7 @@
 ﻿using SFML.System;
 using platformerGame.GameObjects;
 using platformerGame.Utilities;
+using platformerGame.Particles;
 
 namespace platformerGame.Inventory.Weapons
 {
@@ -24,12 +25,22 @@ namespace platformerGame.Inventory.Weapons
             {
                 Vector2f dir = AppMath.Vec2NormalizeReturn(target - owner.Bounds.center);
                 Vector2f toSpreadTarget = AppMath.GetRandomVecBySpread(dir, spread);
+                
+                
                 this.Shot(toSpreadTarget);
-
                 decreaseAmmo();
+                
 
-                AssetManager.playSound("cg1", 2);
-                return true;
+                owner.Scene.Assets.PlaySound("cg1", 2);
+
+                /*
+                this.owner.Scene.QueueAction(() =>
+                {
+                    var e = this.owner.Scene.ParticleManager["explosions"] as cExplosionController;
+                    e.Line(new EmissionInfo(this.owner.Bounds.center, toSpreadTarget));
+                
+                });
+                */
             }
 
             return false;

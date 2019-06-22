@@ -36,9 +36,10 @@ namespace platformerGame.Map
 
 
         TmxMap map;
-
-        public cMapData()
+        AssetContext refAssets;
+        public cMapData(AssetContext assets)
         {
+            refAssets = assets;
             layers = new Dictionary<int, List<cTile>>();
             tilesetTexture = null;
             levelStartRegion = new AABB();
@@ -150,7 +151,7 @@ namespace platformerGame.Map
 
                 return null; // new cTile();
                 
-                //throw new IndexOutOfRangeException();
+                throw new IndexOutOfRangeException();
             }
         }
 
@@ -291,11 +292,12 @@ namespace platformerGame.Map
 
                         gameTile.PosOnTexture = getTextureRect(frameTile, tiles_in_row);
                        
-
+                        /*
                         #if DEBUG
                             System.Diagnostics.Debug.WriteLine(
                                     string.Format("{0} : {1}", gameTile.PosOnTexture.topLeft.X, gameTile.PosOnTexture.topLeft.Y));
                         #endif
+                        */
                     }
 
                     layers[into_layer].Add(gameTile);
@@ -328,9 +330,12 @@ namespace platformerGame.Map
             numOfTiles = width * height;
 
             // works also
-            string fileName = AssetManager.TEX_RESOURCE_PATH + AssetManager.TILESET_PATH + tileSet.Image.Source.Split('\\').Last();
+            string fileName = AssetLoader.TEX_RESOURCE_PATH + AssetLoader.TILESET_PATH + tileSet.Image.Source.Split('\\').Last();
             
-            this.tilesetTexture = AssetManager.GetTexture(tileSet.Image.Source); // fileName);
+            // this.tilesetTexture = refAssets.TryAddTexture(tileSet.Image.Source); // fileName);
+
+            this.tilesetTexture = AssetLoader.LoadAndReturnTexture(tileSet.Image.Source);
+
 
 #if DEBUG
 

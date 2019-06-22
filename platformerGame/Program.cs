@@ -13,23 +13,30 @@ namespace platformerGame
     {
         static void Main(string[] args)
         {
-            SfmlApp gameApp;
+            SfmlApp gameApp = null;
             
             try
             {
                 gameApp = new SfmlApp();
                 gameApp.Run();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 StreamWriter sw = new StreamWriter("ErrorLog_" + DateTime.Now.ToString("yyyy-MM-dd") + ".txt");
                 sw.WriteLine("Error created at " + DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss tt")); //yyyy/MM/dd HH:mm:ss:
-                sw.WriteLine(e.Message);
-                sw.WriteLine(e.Data.ToString());
+                sw.WriteLine(ex.Message);
+                sw.WriteLine(ex.Data.ToString());
 
-                sw.WriteLine(e.StackTrace);
+                sw.WriteLine(ex.StackTrace);
                 sw.Close();
+
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+                System.Diagnostics.Debug.WriteLine(ex.Data.ToString());
+                System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+                while (true) { }
+
             }
+            
         }
     }
 }

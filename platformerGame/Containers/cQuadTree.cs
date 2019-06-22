@@ -8,6 +8,7 @@ using SFML.Graphics;
 using SFML.System;
 
 using platformerGame.Utilities;
+using platformerGame.App;
 
 namespace platformerGame.Containers
 {
@@ -33,10 +34,11 @@ namespace platformerGame.Containers
 
         //sfml text
         //Text m_Text;
+        GameState refState;
 
-        public cQuadTree(int _level, AABB _bounds)
+        public cQuadTree(int _level, AABB _bounds, GameState state)
         {
-            
+            this.refState = state;
             this.level = _level;
             this.bounds = _bounds;
 
@@ -53,7 +55,8 @@ namespace platformerGame.Containers
             float xPos = bounds.rightBottom.X - level * 50;
             label.Position = new Vector2f(xPos, bounds.rightBottom.Y - 30);
 
-            label.Font = AssetManager.GetFont("BGOTHL");
+
+            label.Font = state.Assets.GetFont("BGOTHL");
             label.CharacterSize = 24;
             label.Color = Color.White;
             label.Style = Text.Styles.Bold;
@@ -81,10 +84,10 @@ namespace platformerGame.Containers
             float x = bounds.topLeft.X;
             float y = bounds.topLeft.Y;
 
-            pNW = new cQuadTree<T>(level + 1, new AABB(new Vector2f(x, y), new Vector2f(subWidth, subHeight)));
-            pNE = new cQuadTree<T>(level + 1, new AABB(new Vector2f(x + subWidth, y), new Vector2f(subWidth, subHeight)));
-            pSW = new cQuadTree<T>(level + 1, new AABB(new Vector2f(x, y + subHeight), new Vector2f(subWidth, subHeight)));
-            pSE = new cQuadTree<T>(level + 1, new AABB(new Vector2f(x + subWidth, y + subHeight), new Vector2f(subWidth, subHeight)));
+            pNW = new cQuadTree<T>(level + 1, new AABB(new Vector2f(x, y), new Vector2f(subWidth, subHeight)), refState);
+            pNE = new cQuadTree<T>(level + 1, new AABB(new Vector2f(x + subWidth, y), new Vector2f(subWidth, subHeight)), refState);
+            pSW = new cQuadTree<T>(level + 1, new AABB(new Vector2f(x, y + subHeight), new Vector2f(subWidth, subHeight)), refState);
+            pSE = new cQuadTree<T>(level + 1, new AABB(new Vector2f(x + subWidth, y + subHeight), new Vector2f(subWidth, subHeight)), refState);
 
         }
 

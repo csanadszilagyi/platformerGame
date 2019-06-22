@@ -33,9 +33,9 @@ namespace platformerGame.Particles
             this.systems = new Dictionary<string, cBaseParticleController>();
 
             // must be called before controller additions
-            explosionTexture = AssetManager.GetTexture("simple_particle");
-            fireworksTexture = AssetManager.GetTexture("bullet3");
-            smokeTexture = AssetManager.GetTexture("smoke_particle");
+            explosionTexture = scene.Assets.GetTexture("simple_particle"); //simple_particle
+            fireworksTexture = scene.Assets.GetTexture("bullet3");
+            smokeTexture = scene.Assets.GetTexture("smoke_particle");
 
             this.systems.Add("explosions", new cExplosionController(this));
             this.systems.Add("fireworks", new cFireworksController(this));
@@ -44,7 +44,7 @@ namespace platformerGame.Particles
             label = new Text();
             label.Position = new Vector2f(20, 45);
 
-            label.Font = AssetManager.GetFont("BGOTHL");
+            label.Font = scene.Assets.GetFont("BGOTHL");
             label.CharacterSize = 24;
             label.FillColor = Color.White;
             label.Style = Text.Styles.Bold;

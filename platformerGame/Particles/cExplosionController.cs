@@ -20,7 +20,10 @@ namespace platformerGame.Particles
         int minSpeed = 200;
         int maxSpeed = 400;
 
-        public cExplosionController(cParticleManager manager, uint max_particles = 300) : base(manager, max_particles)
+        float slowDown = 0.98f;
+        double maxSpread = AppMath.HALF_PI;
+
+        public cExplosionController(cParticleManager manager, int max_particles = 5000) : base(manager, max_particles)
         {
             this.renderStates.Texture = manager.ExplosionTexture;
         }
@@ -37,7 +40,7 @@ namespace platformerGame.Particles
 
             if( !AppMath.Vec2IsZero(emission.EmitDirection))
             {
-                Vector2f particleDirection = AppMath.GetRandomVecBySpread(emission.EmitDirection, AppMath.HALF_PI);
+                Vector2f particleDirection = AppMath.GetRandomVecBySpread(emission.EmitDirection, this.maxSpread);
                 particle.Vel = new Vector2f(particleDirection.X * particle.MaxSpeed, particleDirection.Y * particle.MaxSpeed);
             }
             else
@@ -53,7 +56,7 @@ namespace platformerGame.Particles
 
 
             //particle.m_Vel = sf::Vector2f(Math->GetRandomClamped() * particle.m_MaxSpeed, Math->GetRandomClamped() *particle.m_MaxSpeed);
-            particle.SlowDown = 0.98f; //0.92f;
+            particle.SlowDown = slowDown; //0.92f;
                                        //particle.m_SlowDown = (float)Math->GetRandomDoubleInRange(0.55, 0.7); //0.6f;
                                        //phs->AddForce( sf::Vector2f(Math->GetRandomClamped() * phs->MaxSpeed, Math->GetRandomClamped() * phs->MaxSpeed) );
 
@@ -62,8 +65,8 @@ namespace platformerGame.Particles
             particle.Scale = (float)AppMath.GetRandomDoubleInRange(this.minScale, this.maxScale);
             particle.Dims = new Vector2f(uSize.X * particle.Scale, uSize.Y * particle.Scale);
 
-            particle.ScaleSpeed = -AppMath.GetRandomNumber(10, 50);
-            particle.Color = Utils.GetRandomGreenColor();
+            particle.ScaleSpeed = -AppMath.GetRandomNumber(5, 20); //10.50
+            particle.Color = Utils.GetRandomBlueColor();
             particle.Opacity = 255.0f;
             particle.Life = 1.0f;
             particle.Fade = 80; // 90; //Math->GetRandomNumber(100, 240);
@@ -82,6 +85,7 @@ namespace platformerGame.Particles
             maxScale = 0.4;
             minSpeed = 200;
             maxSpeed = 400;
+            maxSpread = AppMath.HALF_PI;
             loopAddition(emission, 3);
         }
 
@@ -91,7 +95,9 @@ namespace platformerGame.Particles
             maxScale = 0.8; // 0.8
             minSpeed = 200;
             maxSpeed = 400;
-            loopAddition(emission, 25);
+            slowDown = 0.98f;
+            maxSpread = AppMath.HALF_PI;
+            loopAddition(emission, 30);
         }
 
         public void FastBlood(EmissionInfo emission)
@@ -100,7 +106,123 @@ namespace platformerGame.Particles
             maxScale = 0.7;
             minSpeed = 400;
             maxSpeed = 600;
+            slowDown = 0.98f;
+            maxSpread = AppMath.HALF_PI;
             loopAddition(emission, 20);
+        }
+
+        public void ExplodeBlood(EmissionInfo emission)
+        {
+            minScale = 0.4;
+            maxScale = 0.7;
+            minSpeed = 10000;
+            maxSpeed = 10200;
+            slowDown = 0.3f;
+            maxSpread = AppMath.TWO_PI;
+            loopAddition(emission, 80);
+        }
+
+        readonly double LINE_SPREAD = AppMath.DegressToRadian(10);
+
+        public void LittleLine(EmissionInfo emission)
+        {
+            minScale = 0.3;
+            maxScale = 0.6;
+            minSpeed = 20;
+            maxSpeed = 600;
+            slowDown = 0.95f; // 0.96f;
+            maxSpread = LINE_SPREAD;
+            loopAddition(emission, 20);
+        }
+
+        public void Line(EmissionInfo emission)
+        {
+            minScale = 0.3;
+            maxScale = 0.6;
+            minSpeed = 10;
+            maxSpeed = 1000;
+            slowDown = 0.95f; // 0.96f;
+            maxSpread = LINE_SPREAD;
+            loopAddition(emission, 40);
+        }
+
+        /// <summary>
+        /// Main update protocol.
+        /// </summary>
+        /// <param name="step_time"></param>
+        /// <param name="p"></param>
+        /// <param name="world"></param>
+        private void updateParticle1(float step_time, Particle p, cWorld world)
+        {
+            // Particle's update code comes here.
+
+            
+            p.Dims.X += p.ScaleSpeed * step_time; //+=
+            p.Dims.Y += p.ScaleSpeed * step_time; //+=
+            
+            if(AppMath.Vec2Length(p.Dims) < 0.5f)
+            {
+                p.Dims.X = 0.0f;
+                p.Dims.Y = 0.0f;
+            }
+            
+            p.Vel.Y += (Constants.GRAVITY * 40.0f * (step_time * step_time));
+
+            p.Vel.X *= p.SlowDown;
+            p.Vel.Y *= p.SlowDown;
+
+            AppMath.Vec2Truncate(ref p.Vel, p.MaxSpeed * 1.5f);
+
+            // world.collideParticleSAT(p, step_time, false);
+
+            //p.Heading = cAppMath.Vec2NormalizeReturn(p.Vel);
+            p.LastPos = p.Pos;
+            p.Pos.X += p.Vel.X * step_time;
+            p.Pos.Y += p.Vel.Y * step_time;
+
+            if (!AppMath.Vec2IsZero(p.Vel))
+            {
+                p.Heading = AppMath.Vec2NormalizeReturn(p.Vel);
+                p.Rotation = (float)AppMath.GetAngleOfVector(p.Heading);
+            }
+
+            world.collideParticleRayTrace(p, step_time);
+
+
+            p.Opacity -= p.Fade * step_time;
+
+
+        }
+
+
+        private void updateParticle2(float step_time, Particle p, cWorld world)
+        {
+
+            p.Vel.Y += (Constants.GRAVITY * 40.0f * (step_time * step_time));
+
+            // p.Vel.X *= p.SlowDown;
+            // p.Vel.Y *= p.SlowDown;
+
+            AppMath.Vec2Truncate(ref p.Vel, p.MaxSpeed);
+
+            //world.collideParticleSAT(p, step_time, false);
+
+            //p.Heading = cAppMath.Vec2NormalizeReturn(p.Vel);
+            p.LastPos = p.Pos;
+            p.Pos.X += p.Vel.X * step_time;
+            p.Pos.Y += p.Vel.Y * step_time;
+
+            if (!AppMath.Vec2IsZero(p.Vel))
+            {
+                p.Heading = AppMath.Vec2NormalizeReturn(p.Vel);
+                p.Rotation = (float)AppMath.GetAngleOfVector(p.Heading);
+            }
+
+            world.collideParticleRayTrace(p, step_time);
+
+
+            p.Opacity -= p.Fade * step_time;
+
         }
 
         public override void Update(float step_time)
@@ -110,47 +232,10 @@ namespace platformerGame.Particles
             for (int i = 0; i < pool.CountActive; ++i)
             {
                 Particle p = pool.get(i);
-                // Particle's update code comes here.
 
-                    /*
-                            p.Dims.Y += p.ScaleSpeed * step_time; //+=
-                            p.Dims.y += p.ScaleSpeed * step_time; //+=
-                    */
-                    
+                this.updateParticle1(step_time, p, world);
 
-
-                    p.Vel.Y += (Constants.GRAVITY * 40.0f * (step_time * step_time));
-
-                    p.Vel.X *= p.SlowDown;
-                    p.Vel.Y *= p.SlowDown;
-
-                    AppMath.Vec2Truncate(ref p.Vel, p.MaxSpeed * 1.5f);
-
-                    // world.collideParticleSAT(p, step_time, false);
-
-                    //p.Heading = cAppMath.Vec2NormalizeReturn(p.Vel);
-                    p.LastPos = p.Pos;
-                    p.Pos.X += p.Vel.X * step_time;
-                    p.Pos.Y += p.Vel.Y * step_time;
-
-
-
-                    if (!AppMath.Vec2IsZero(p.Vel))
-                    {
-                        p.Heading = AppMath.Vec2NormalizeReturn(p.Vel);
-                        p.Rotation = (float)AppMath.GetAngleOfVector(p.Heading);
-                    }
-
-                   
-
-                    world.collideParticleRayTrace(p, step_time);
-                    
-
-               
-                
-                p.Opacity -= p.Fade * step_time;
-
-                if (p.Opacity <= 0.0f)
+                if (p.Opacity <= 0.0f || p.Dims.X <= 0.0f || p.Dims.Y <= 0.0f)
                 {
                     p.Opacity = 0.0f;
 
@@ -158,7 +243,7 @@ namespace platformerGame.Particles
 
                 }
 
-                p.Color.A = (byte)p.Opacity;
+                 p.Color.A = (byte)p.Opacity;
             }
         }
 

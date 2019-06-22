@@ -31,7 +31,7 @@ namespace platformerGame.GameObjects
         { }
 
         /// <summary>
-        /// If no pickup type is unknown (not specified), generate one by weights
+        /// If pickup type is unknown (not specified), generate one by weights
         /// </summary>
         /// <param name="scene"></param>
         /// <param name="grid"></param>
@@ -50,10 +50,10 @@ namespace platformerGame.GameObjects
 
             this.renderer = pickup.Renderer.DeepCopy();
 
-            this.bounds = new AABB();
-            this.bounds.SetDims(this.pickup.HitRectSize);
-            this.bounds.SetPosByCenter(pos);
-            this.HitCollisionRect = bounds.ShallowCopy();
+            this.Bounds = new AABB();
+            this.Bounds.SetDims(this.pickup.HitRectSize);
+            this.Bounds.SetPosByCenter(pos);
+            this.HitCollisionRect = Bounds.ShallowCopy();
 
             this.MaxSpeed = EMIT_SPEED * 2; //*2
             this.mass = 100.0f;
@@ -159,7 +159,7 @@ namespace platformerGame.GameObjects
             position.Y += velocity.Y * step_time;
 
             Bounds.SetPosByCenter(position);
-            this.hitCollisionRect = bounds;
+            this.hitCollisionRect = Bounds;
 
             if (!AppMath.Vec2IsZero(velocity))
             {

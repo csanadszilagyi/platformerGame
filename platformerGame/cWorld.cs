@@ -109,9 +109,9 @@ namespace platformerGame
             sceneRef = p_scene;
             windowSize = window_size;
 
-            currentLevel = new cMapData();
+            currentLevel = new cMapData(p_scene.Assets);
 
-            m_BGtexture = AssetManager.GetTexture(Constants.BG_TEXTURE);
+            m_BGtexture = sceneRef.Assets.GetTexture(Constants.BG_TEXTURE);
             m_BGtexture.Repeated = true;
             m_BGtexture.Smooth = true;
 

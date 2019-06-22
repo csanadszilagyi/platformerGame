@@ -18,8 +18,6 @@ namespace platformerGame.GameObjects
         protected Vector2f lastPosition;
         protected Vector2f viewPosition; // interpolációhoz
 
-        protected Vector2i gridCoordinate;
-
         protected Vector2f velocity;
         protected Vector2f acceleration;
         protected Vector2f force;
@@ -55,8 +53,6 @@ namespace platformerGame.GameObjects
             lastPosition = new Vector2f(0.0f, 0.0f);
             viewPosition = new Vector2f(0.0f, 0.0f);
 
-            gridCoordinate = new Vector2i(0, 0);
-
             velocity = new Vector2f(0.0f, 0.0f);
             acceleration = new Vector2f(0.0f, 0.0f);
             force = new Vector2f(0.0f, 0.0f);
@@ -78,7 +74,7 @@ namespace platformerGame.GameObjects
             lastPosition = pos;
             viewPosition = pos;
 
-            gridCoordinate = new Vector2i(0, 0);
+            this.GridPosition = new Vector2i(0, 0);
 
             velocity = new Vector2f(0.0f, 0.0f);
             acceleration = new Vector2f(0.0f, 0.0f);
@@ -93,7 +89,7 @@ namespace platformerGame.GameObjects
 
         public void Create()
         {
-            this.gridCoordinate = EntityPool.calcGridPos(this.Bounds.center);
+            this.GridPosition = EntityGrid<cGameObject>.calcGridPos(this.Bounds.center);
         }
 
         protected static int GetNextValidID()
@@ -159,12 +155,6 @@ namespace platformerGame.GameObjects
             {
                 viewPosition = value;
             }
-        }
-        
-        public Vector2i GridCoordinate
-        {
-            get { return this.gridCoordinate; }
-            set { this.gridCoordinate = value; }
         }
 
         public Vector2f Velocity
@@ -291,25 +281,17 @@ namespace platformerGame.GameObjects
             viewPosition = AppMath.Interpolate(position, lastPosition, alpha);
         }
 
-        public virtual void Update(float step_time)
-        { }
-
         public virtual void Render(RenderTarget destination)
         { }
 
-        public virtual bool isActive()
-        {
-            return true;
-        }
-
         public Vector2f GetCenterViewPos()
         {
-            return viewPosition + bounds.halfDims;
+            return viewPosition + Bounds.halfDims;
         }
 
         public Vector2f GetCenterPos()
         {
-            return position + bounds.halfDims;
+            return position + Bounds.halfDims;
         }
 
         public void MoveBy(Vector2f offset)

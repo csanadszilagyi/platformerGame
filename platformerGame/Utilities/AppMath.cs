@@ -53,6 +53,22 @@ namespace platformerGame.Utilities
         {
             return x + GetRandomDouble() * (y - x);
         }
+
+        public static Vector2f GetRandomPointInBox(AABB box)
+        {
+            Vector2f ret = new Vector2f(
+                (float)GetRandomDoubleInRange(box.topLeft.X, box.rightBottom.X),
+                (float)GetRandomDoubleInRange(box.topLeft.Y, box.rightBottom.Y)
+            );
+            return ret;
+        }
+
+        public static Vector2f GetRandomPointOnLine(Vector2f lineStart, Vector2f lineEnd)
+        {
+            float u = (float)GetRandomDouble();
+            Vector2f ret = (1.0f - u) * lineStart + u * lineEnd; 
+            return ret;
+        }
         //==============================================================================================
 
         public static T Max<T>(T val1, T val2) where T : IComparable<T>
@@ -295,6 +311,39 @@ namespace platformerGame.Utilities
             ip.X = current_pos.X * alpha + last_pos.X * (1.0f - alpha);
             ip.Y = current_pos.Y * alpha + last_pos.Y * (1.0f - alpha);
             return ip;
+        }
+
+        /// <summary>
+        /// Moves a vector towards a nomrlaized direction by an amount.
+        /// </summary>
+        /// <param name="v">Vector</param>
+        /// <param name="dir">Normalized direction</param>
+        /// <param name="amount">Amount of scale by</param>
+        /// <returns></returns>
+        public static Vector2f ScaleVector(Vector2f v, Vector2f dir, float amount)
+        {
+            return v + ( dir * amount );
+        }
+
+        /// <summary>
+        /// Returns the length of diagonal.
+        /// </summary>
+        /// <param name="width">Width of size</param>
+        /// <param name="height">Height of size</param>
+        /// <returns></returns>
+        public static float getDiagonal(float width, float height)
+        {
+            return (float)Math.Sqrt(width * width + height * height);
+        }
+
+        /// <summary>
+        /// Returns the length of diagonal.
+        /// </summary>
+        /// <param name="size">size.X = width && size.Y = height</param>
+        /// <returns></returns>
+        public static float getDiagonal(Vector2f size)
+        {
+            return (float)Math.Sqrt(size.X * size.X + size.Y * size.Y);
         }
     }
 }

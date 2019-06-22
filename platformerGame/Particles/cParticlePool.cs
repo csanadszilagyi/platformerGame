@@ -14,9 +14,9 @@ namespace platformerGame.Particles
     /// </summary>
     class cParticlePool
     {
-        uint capacity;
+        int capacity;
         Particle[] particles;
-        uint countActive;
+        int countActive;
 
         public cParticlePool()
         {
@@ -25,7 +25,7 @@ namespace platformerGame.Particles
             countActive = 0;
         }
 
-        public cParticlePool(uint capacity)
+        public cParticlePool(int capacity)
         {
             this.capacity = capacity;
             initParticles();
@@ -41,7 +41,7 @@ namespace platformerGame.Particles
             }
         }
 
-        void swap(uint indexA, uint indexB)
+        void swap(int indexA, int indexB)
         {
             Particle temp = particles[indexA];
             particles[indexA] = particles[indexB];
@@ -61,7 +61,7 @@ namespace platformerGame.Particles
         /// <returns>A tuple: Item1 is the index of the particle, Item2 is the particle.</returns>
         public Particle getNew()
         {     
-            uint current = countActive++;
+            int current = countActive++;
 
             if (countActive > capacity)
             {
@@ -79,19 +79,19 @@ namespace platformerGame.Particles
         }
         
 
-        public Particle get(uint index)
+        public Particle get(int index)
         {
             //return  checkIndex(index) ? particles[index] : null;
             return particles[index];
         }
 
-        public void activate(uint index)
+        public void activate(int index)
         {
             swap(index, countActive);
             countActive++;
         }
 
-        public void deactivate(uint index)
+        public void deactivate(int index)
         {
             //if (checkIndex(index))
             {
@@ -100,7 +100,7 @@ namespace platformerGame.Particles
             }
         }
 
-        public uint CountActive
+        public int CountActive
         {
             get { return countActive; }
         }

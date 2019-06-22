@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Threading;
+using System.Threading.Tasks;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 using SFML.Audio;
 
 using platformerGame.GameObjects;
+using platformerGame.GameObjects.PickupInfo;
 using platformerGame.Particles;
 using platformerGame.Utilities;
 using platformerGame.Rendering;
@@ -29,8 +31,8 @@ namespace platformerGame.App
         cLightSystem lightMap;
 
         AppTimer levelTimer;
-
-        EntityPool entityPool;
+        
+        GameObjectGrid entityPool;
 
         cParticleManager particleManager;
 
@@ -48,10 +50,14 @@ namespace platformerGame.App
        
         public override void Enter()
         {
-            // AssetManager.LoadResources();
-            cAnimationAssets.LoadAnimations();
+            this.resourceAssets.LoadResources(Constants.FONT_NAMES, Constants.TEXTURES_NAMES, Constants.SOUND_NAMES);
+            cAnimationAssets.LoadAnimations(this.resourceAssets);
+
+            BulletBreed.Init(this.resourceAssets);
+            PickupEffects.InitPickupEffects(this.resourceAssets);
+
             camera = new Camera(new View(new Vector2f(appControllerRef.WindowSize.X / 2.0f, appControllerRef.WindowSize.Y / 2.0f), appControllerRef.WindowSize));
-            camera.Zoom = 0.6f;
+            camera.Zoom = 0.6f; //  0.6f;
 
             appControllerRef.MainWindow.SetView(camera.View);
 
@@ -70,7 +76,7 @@ namespace platformerGame.App
             worldEnvironment = new cEnvironment();
 
             // Constants.LIGHTMAP_COLOR
-            lightMap = new cLightSystem(Constants.LIGHTMAP_COLOR); //((uint)m_World.WorldBounds.dims.X, (uint)m_World.WorldBounds.dims.Y, Constants.LIGHTMAP_COLOR);
+            lightMap = new cLightSystem(Constants.LIGHTMAP_COLOR, this.resourceAssets); //((uint)m_World.WorldBounds.dims.X, (uint)m_World.WorldBounds.dims.Y, Constants.LIGHTMAP_COLOR);
             gameWorld = new cWorld(this, appControllerRef.MainWindow.Size);
 
             gameWorld.InitLevel();
@@ -92,7 +98,7 @@ namespace platformerGame.App
 
             player = new cPlayer(this, playerStart);
 
-            entityPool = new EntityPool(this, gameWorld.WorldBounds.dims, player);
+            entityPool = new GameObjectGrid(this, gameWorld.WorldBounds.dims, player);
             entityPool.InitLevelEntites(World.CurrentLevel);
 
             //vizekhez adunk fényt
@@ -143,10 +149,16 @@ namespace platformerGame.App
 
             UpdatePlayerInput();
 
-            while (gameActions.Count > 0)
-            {
-                gameActions.Dequeue().Invoke();
-            }
+
+            
+                // old: gameActions.Dequeue().Invoke()
+                Task.Factory.StartNew( () => {
+                    while (gameActions.Count > 0)
+                    {
+                        gameActions.Dequeue().Invoke();
+                    }
+                });
+            
 
            
             ShakeScreen.Update();
@@ -204,7 +216,7 @@ namespace platformerGame.App
 
             this.gameWorld.PreRender(cameraBounds);
 
-            this.lightMap.separateVisibleLights(cameraBounds);
+            this.lightMap.separateVisibleLights(camera.ViewBounds);
 
             this.particleManager.PreRender(alpha);
 
@@ -257,11 +269,11 @@ namespace platformerGame.App
 
             this.effectSystem.Render(destination);
 
-            /*
-#if DEBUG
-            this.entityPool.RenderQuadtree(destination);
-#endif
-*/
+
+            #if DEBUG
+                this.entityPool.RenderGrid(destination);
+            #endif
+
 
             // cRenderFunctions.DrawLine(destination, new Vector2f(0, 400), new Vector2f(720, 400), Color.White, BlendMode.None);
         }
@@ -273,11 +285,7 @@ namespace platformerGame.App
 
         public override void Exit()
         {
-            cAnimationAssets.ClearAll();
-            gameWorld.ClearAll();
-            lightMap.RemoveAll();
-            // TODO: seperate asset loading
-            AssetManager.ClearAll();
+            this.CleanUp();
         }
 
         private void UpdatePlayerInput()
@@ -330,22 +338,63 @@ namespace platformerGame.App
                 player.StopMoving();//stop m_Player moving
         }
 
-        public override void HandleSingleMouseClick(MouseButtonEventArgs e)
+        public override void HandleMouseButtonPressed(MouseButtonEventArgs e)
+        {
+            
+        }
+
+
+        // only occurs if fully clicked
+        public override void HandleMouseButtonReleased(MouseButtonEventArgs e)
         {
             Vector2f mousePos = this.GetMousePos();
             if (e.Button == Mouse.Button.Right)
             {
-                 this.entityPool.AddMonster(new cMonster(this, mousePos));
-               // this.particleManager.AddExplosion(this.GetMousePos());
+                this.entityPool.AddMonster(new cMonster(this, mousePos));
+                // this.particleManager.AddExplosion(this.GetMousePos());
             }
         }
 
-        public override void HandleKeyPress(KeyEventArgs e)
+        public override void HandleMouseMoved(MouseMoveEventArgs e)
+        {
+            /*
+            Vector2f mousePos = new Vector2f(e.X, e.Y);
+            var grid = currentMenu.ItemGrid;
+            var possibleHandlers = grid.getEntitiesNearby(mousePos);
+
+            foreach (var guiItem in possibleHandlers)
+            {
+                if (cCollision.IsPointInsideBox(mousePos, guiItem.Bounds))
+                {
+                    guiItem.MouseHover = cCollision.IsPointInsideBox(mousePos, guiItem.Bounds);
+                    return;
+                }
+            }
+            */
+        }
+
+        public override void HandleKeyReleased(KeyEventArgs e)
         {
             if (e.Code == Keyboard.Key.Escape)
             {
                 this.appControllerRef.ChangeGameState("main-menu");
+                return;
             }
+
+            if (e.Code == Keyboard.Key.M)
+            {
+                gameWorld.InitLevel();
+            }
+        }
+
+        public override void HandleTextEntered(TextEventArgs e)
+        {
+
+        }
+
+        public override void HandleKeyPressed(KeyEventArgs e)
+        {
+            
 
             if (e.Code == Keyboard.Key.P)
             {
@@ -363,17 +412,25 @@ namespace platformerGame.App
 
             }
 
-            if (e.Code == Keyboard.Key.M)
-            {
-                gameWorld.InitLevel();
 
-            }
         }
 
-        public EntityPool EntityPool
+        private void CleanUp()
+        {
+            cAnimationAssets.ClearAll();
+            gameWorld.ClearAll();
+            lightMap.RemoveAll();
+            this.entityPool.RemoveAll();
+            BulletBreed.Cleanup();
+            PickupEffects.Cleanup();
+            resourceAssets.ClearResources();
+        }
+
+        public GameObjectGrid EntityPool
         {
             get { return entityPool; }
         }
+
         public cWorld World
         {
             get { return gameWorld; }
